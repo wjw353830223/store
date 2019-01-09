@@ -16,6 +16,7 @@ export default {
 
 <style>
 	@import "assets/css/font-awesome.min.css";
+	@import 'assets/css/iconfont.css';
 	.bounce-enter-active {
 		animation: bounce-in .5s;
 	}

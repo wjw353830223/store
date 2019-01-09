@@ -242,6 +242,8 @@
     },
     watch: {
       '$route' (to, from) {
+        console.log(this.topMenu)
+        console.log(to)
         _(this.topMenu).forEach((res) => {
           if (res.module == to.meta.module) {
             res.selected = true
