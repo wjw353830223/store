@@ -11,7 +11,7 @@ class Menus extends ApiCommon
 {
     
     public function index()
-    {   
+    {
         $menuModel = model('Menu');
         $param = $this->param;
         $data = $menuModel->getDataList();
@@ -19,7 +19,7 @@ class Menus extends ApiCommon
     }
 
     public function read()
-    {   
+    {
         $menuModel = model('Menu');
         $param = $this->param;
         $data = $menuModel->getDataById($param['id']);

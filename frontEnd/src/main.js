@@ -7,7 +7,7 @@ import Cookies from 'js-cookie'
 import _ from 'lodash'
 import moment from 'moment'
 import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-default/index.css'
+import 'element-ui/lib/theme-chalk/index.css'
 import routes from './routes'
 import VueRouter from 'vue-router'
 import store from './vuex/store'
@@ -17,11 +17,13 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import 'assets/css/global.css'
 import 'assets/css/base.css'
+import 'assets/fonts/iconfont.css'
 
 axios.defaults.baseURL = HOST
 axios.defaults.timeout = 1000 * 15
 axios.defaults.headers.authKey = Lockr.get('authKey')
 axios.defaults.headers.sessionId = Lockr.get('sessionId')
+axios.defaults.withCredentials = true
 axios.defaults.headers['Content-Type'] = 'application/json'
 
 const router = new VueRouter({

@@ -17,10 +17,10 @@ class Common extends Controller
     {
         parent::_initialize();
         /*防止跨域*/      
-        header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");
+        header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);//允许的请求域
+        header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
+        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头
         $param =  Request::instance()->param();            
         $this->param = $param;
     }
