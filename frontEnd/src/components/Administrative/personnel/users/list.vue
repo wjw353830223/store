@@ -137,7 +137,6 @@
           this.handelResponse(res, (data) => {
             this.tableData = data.list
             this.dataCount = data.dataCount
-            console.log(this.tableData)
           })
         })
       },
