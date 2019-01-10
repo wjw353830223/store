@@ -40,7 +40,7 @@ export default {
   },
   computed: {
     defaultActive() {
-      let active = '0-0'
+      let active = ''
       let currentPath = this.$route.path
       this.$props.menuData.map(function(item, index) {
           item.child.map(function(item1, index1){
