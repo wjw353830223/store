@@ -23,8 +23,7 @@ class Upload extends Controller
         if (!$file) {
         	return resultArray(['error' => '请上传文件']);
         }
-        
-        $info = $file->validate(['ext'=>'jpg,png,gif'])->move(ROOT_PATH . DS . 'uploads');
+        $info = $file->validate(['ext'=>'jpg,png,gif'])->move(ROOT_PATH . DS . 'public' . DS . 'uploads');
         if ($info) {
             return resultArray(['data' =>  'uploads'. DS .$info->getSaveName()]);
         }

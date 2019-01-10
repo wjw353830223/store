@@ -49,7 +49,7 @@
         <template scope="scope">
           <div>
             <span>
-              <router-link :to="{ name: 'usersEdit', params: { id: scope.row.id }}" class="btn-link edit-btn">
+              <router-link :to="{ name: 'usersEdit', params: { id: scope.row.id }}" class="el-button el-button--primary el-button--small">
             编辑
               </router-link>
             </span>

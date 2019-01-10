@@ -67,8 +67,18 @@
 		line-height: 60px;
 		background: #1F2D3D;
 		color: #c0ccda;
+    overflow: hidden;
 	}
-	
+  .panel-top .el-col{
+    height:100%;
+    display:flex;
+    align-items: center;
+    justify-content:flex-start;
+    overflow: hidden;
+  }
+	.panel-top .el-col img{
+    width:30%;
+  }
 	.panel-center {
 		background: #324057;
 		position: absolute;
@@ -242,8 +252,6 @@
     },
     watch: {
       '$route' (to, from) {
-        console.log(this.topMenu)
-        console.log(to)
         _(this.topMenu).forEach((res) => {
           if (res.module == to.meta.module) {
             res.selected = true

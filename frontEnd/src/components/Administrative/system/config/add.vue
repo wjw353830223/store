@@ -35,7 +35,7 @@
 				</el-radio-group>
 			</el-form-item>
 			<el-form-item label="登录会话有效期" prop="LOGIN_SESSION_VALID">
-				<el-input v-model.number="form.LOGIN_SESSION_VALID" class="h-40 w-200"></el-input>
+				<el-input v-model="form.LOGIN_SESSION_VALID" class="h-40 w-200" @change='parseNumber'></el-input>
 			</el-form-item>
 			<el-form-item>
 				<el-button type="primary" @click="add()" :loading="isLoading">提交</el-button>
@@ -58,7 +58,7 @@
           SYSTEM_NAME: '',
           IDENTIFYING_CODE: '0',
           LOGO_TYPE: '1',
-          LOGIN_SESSION_VALID: null,
+          LOGIN_SESSION_VALID: 0,
           SYSTEM_LOGO: ''
         },
         withCredentials:true,
@@ -75,6 +75,9 @@
       }
     },
     methods: {
+      parseNumber() {
+        this.form.LOGIN_SESSION_VALID=parseInt(this.form.LOGIN_SESSION_VALID);
+      },
       add() {
         this.$refs.form.validate((pass) => {
           if (pass) {
@@ -90,16 +93,6 @@
           }
         })
       },
-      // uploadFile(file){
-      //   console.log(file)
-      //   let param = new FormData(); //创建form对象
-      //   param.append('file',file);//通过append向form对象添加数据
-      //   this.apiFile('admin/upload/index',param).then((res) => {
-      //     this.handelResponse(res, (data) => {
-      //       console.log(res,data)
-      //     })
-      //   })
-      // },
       uploadSuccess(res, file, fileList) {
         this.form.SYSTEM_LOGO = res.data
         let data = {
@@ -131,7 +124,7 @@
         this.handelResponse(res, (data) => {
           this.form.SYSTEM_NAME = data.SYSTEM_NAME
           this.form.IDENTIFYING_CODE = data.IDENTIFYING_CODE
-          this.form.LOGIN_SESSION_VALID = data.LOGIN_SESSION_VALID
+          this.form.LOGIN_SESSION_VALID =  parseInt(data.LOGIN_SESSION_VALID)
           this.form.LOGO_TYPE = data.LOGO_TYPE
           if (data.SYSTEM_LOGO) {
             let img = window.HOST + data.SYSTEM_LOGO
