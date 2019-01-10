@@ -20,14 +20,18 @@
 			type="selection"
 			width="50">
 			</el-table-column>
-			<el-table-column
-			prop="s_name"
-			label="所属组织架构">
-			</el-table-column>
-			<el-table-column
+      <el-table-column
 			label="用户名"
 			prop="username"
 			width="200">
+			</el-table-column>
+			<el-table-column
+			prop="s_name"
+			label="部门">
+			</el-table-column>
+      <el-table-column
+			prop="p_name"
+			label="岗位">
 			</el-table-column>
 			<el-table-column
 			label="备注"
@@ -130,7 +134,6 @@
           }
         }
         this.apiGet('admin/users', data).then((res) => {
-          console.log('res = ', _g.j2s(res))
           this.handelResponse(res, (data) => {
             this.tableData = data.list
             this.dataCount = data.dataCount

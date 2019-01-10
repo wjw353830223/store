@@ -10,9 +10,20 @@
 			<el-form-item label="真实姓名" prop="realname">
 				<el-input v-model.trim="form.realname" class="h-40 w-200"></el-input>
 			</el-form-item>
-			<el-form-item label="所属组织架构" prop="structure_id">
-				<el-select v-model="form.structure_id" placeholder="请选择组织架构" class="w-200">
-					<el-option v-for="item in orgsOptions" :label="item.title" :value="item.id"></el-option>
+      <el-form-item label="电话" prop="mobile">
+				<el-input v-model="form.mobile" class="h-40 w-200"></el-input>
+			</el-form-item>
+      <el-form-item label="邮箱" prop="email">
+				<el-input v-model.trim="form.email" class="h-40 w-200"></el-input>
+			</el-form-item>
+			<el-form-item label="所属部门" prop="structure_id">
+				<el-select v-model="form.structure_id" placeholder="请选择部门" class="w-200">
+					<el-option v-for="(item,index) in orgsOptions" :label="item.title" :value="item.id" :key='index'></el-option>
+				</el-select>
+			</el-form-item>
+      <el-form-item label="所属岗位" prop="post_id">
+				<el-select v-model="form.post_id" placeholder="请选择岗位" class="w-200">
+					<el-option v-for="(item,index) in positionsOptions" :label="item.name" :value="item.id" :key='index'></el-option>
 				</el-select>
 			</el-form-item>
 			<el-form-item label="备注">
@@ -20,7 +31,7 @@
 			</el-form-item>
 			<el-form-item label="用户组">
 				<el-checkbox-group v-model="selectedGroups">
-					<el-checkbox v-for="item in groupOptions" :label="item.else" class="form-checkbox"></el-checkbox>
+					<el-checkbox v-for="(item,index) in groupOptions" :label="item.else" class="form-checkbox" :key='index'></el-checkbox>
 				</el-checkbox-group>
 			</el-form-item>
 			<el-form-item>
@@ -47,12 +58,16 @@
         form: {
           username: '',
           realname: '',
+          mobile:0,
+          email:'',
           structure_id: null,
+          post_id:null,
           remark: '',
           groups: []
         },
         password: '',
         orgsOptions: [],
+        positionsOptions:[],
         groupOptions: [],
         selectedGroups: [],
         selectedIds: [],
@@ -65,6 +80,12 @@
           ],
           structure_id: [
             { required: true, message: '请选择用户所属组织架构' }
+          ],
+          mobile: [
+            { required: true, message: '请输入电话' }
+          ],
+          structure_id: [
+            { required: true, message: '请选择用户部门' }
           ]
         }
       }
@@ -85,21 +106,10 @@
         return temp
       },
       add() {
-        // _(this.groupOptions).forEach((res) => {
-        //   console.log(this.selectedGroups.toString().indexOf(res.else))
-        //   if (this.selectedGroups.toString().indexOf(res.else) > -1) {
-        //     this.selectedIds.push(res.id)
-        //   }
-        // })
-        // console.log('groupOptions = ', _g.j2s(this.groupOptions))
-        // console.log('selectedGroups = ', _g.j2s(this.selectedGroups))
-        // console.log('selectedIds = ', _g.j2s(this.selectedIds))
-
         if (!this.selectCheckbox()) {
           _g.toastMsg('warning', '请选择用户组')
           return
         }
-        console.log('selectedIds = ', _g.j2s(this.selectedIds))
         this.$refs.form.validate((pass) => {
           if (pass) {
             this.isLoading = !this.isLoading
@@ -127,7 +137,6 @@
             resolve(data)
           } else {
             this.apiGet('admin/groups').then((res) => {
-              console.log('groups = ', _g.j2s(res))
               this.handelResponse(res, (data) => {
                 resolve(data)
               })
@@ -142,15 +151,25 @@
           })
         })
       },
+      getAllPositions() {
+        this.apiGet('admin/posts').then((res) => {
+          this.handelResponse(res, (data) => {
+            this.positionsOptions = data
+          })
+        })
+      },
       async getCompleteData() {
         this.getAllOrgs()
+        this.getAllPositions()
         this.groupOptions = await this.getAllGroups()
         this.apiGet('admin/users/' + this.id).then((res) => {
-          console.log('res = ', _g.j2s(res))
           this.handelResponse(res, (data) => {
             this.form.username = data.username
             this.form.realname = data.realname
+            this.form.mobile = data.mobile
+            this.form.email = data.email
             this.form.structure_id = data.structure_id
+            this.form.post_id = data.post_id
             this.form.remark = data.remark
             _(data.groups).forEach((res1) => {
               _(this.groupOptions).forEach((res2) => {
