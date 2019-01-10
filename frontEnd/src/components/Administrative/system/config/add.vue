@@ -7,13 +7,16 @@
 			<el-form-item label="LOGO">
 				<el-upload
 				:action="uploadUrl"
+        name='file'
 				type="drag"
 				:thumbnail-mode="true"
 				:on-preview="viewPic"
 				:on-remove="handleRemove"
 				:on-success="uploadSuccess"
 				:on-error="uploadFail"
-				:default-file-list="fileList">
+				:default-file-list="fileList"
+        :with-credentials='withCredentials'
+        >
 					<i class="el-icon-upload"></i>
 					<div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
 					<div class="el-upload__tip" slot="tip">只能上传jpg/png文件</div>
@@ -58,6 +61,7 @@
           LOGIN_SESSION_VALID: null,
           SYSTEM_LOGO: ''
         },
+        withCredentials:true,
         uploadUrl: '',
         rules: {
           SYSTEM_NAME: [
@@ -86,6 +90,16 @@
           }
         })
       },
+      // uploadFile(file){
+      //   console.log(file)
+      //   let param = new FormData(); //创建form对象
+      //   param.append('file',file);//通过append向form对象添加数据
+      //   this.apiFile('admin/upload/index',param).then((res) => {
+      //     this.handelResponse(res, (data) => {
+      //       console.log(res,data)
+      //     })
+      //   })
+      // },
       uploadSuccess(res, file, fileList) {
         this.form.SYSTEM_LOGO = res.data
         let data = {
@@ -112,7 +126,7 @@
       }
     },
     created() {
-      this.uploadUrl = window.HOST + '/Upload'
+      this.uploadUrl = window.HOST + 'admin/upload/index'
       this.apiPost('admin/base/getConfigs').then((res) => {
         this.handelResponse(res, (data) => {
           this.form.SYSTEM_NAME = data.SYSTEM_NAME

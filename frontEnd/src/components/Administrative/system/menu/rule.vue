@@ -1,10 +1,5 @@
 <template>
-	<el-dialog ref="dialog" custom-class="w-900 h-480 ovf-auto" title="节点列表">
-		<div class="pos-rel h-60">
-			<el-input placeholder="请输入内容" v-model="keyword" class="search-btn w-300">
-				<el-button slot="append" icon="search" @click="searchMsg()"></el-button>
-			</el-input>
-		</div>
+	<el-dialog ref="dialog" custom-class="w-900 h-480 ovf-auto" title="节点列表" :visible.sync="centerDialogVisible">
 		<div>
 			<el-table
 			:data="tableData"
@@ -14,6 +9,9 @@
 				prop="type"
 				label="类型"
 				width="100">
+          <template slot-scope="scope">
+            <span>{{ scope.row.type }}</span>
+          </template>
 				</el-table-column>
 				<el-table-column
 				prop="title"
@@ -25,12 +23,11 @@
 				width="180">
 				</el-table-column>
 				<el-table-column
-				inline-template
 				label="操作"
 				width="100">
-					<div>
-						<el-button size="small" @click="selectRule(row)">选择</el-button>
-					</div>
+          <template slot-scope="scope">
+            <el-button size="small" @click="selectRule(scope.row)">选择</el-button>
+          </template>
 				</el-table-column>
 			</el-table>
 		</div>
@@ -50,14 +47,17 @@
     data() {
       return {
         keyword: '',
-        tableData: []
+        tableData: [],
+        centerDialogVisible:false
       }
     },
     methods: {
       open() {
+        this.centerDialogVisible=true
         this.$refs.dialog.open()
       },
       closeDialog() {
+        this.centerDialogVisible=false
         this.$refs.dialog.close()
       },
       selectRule(item) {

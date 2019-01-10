@@ -28,6 +28,21 @@ const apiMethods = {
         })
       })
     },
+    apiFile(url, data) {
+      axios.defaults.headers['Content-Type'] = 'multipart/form-data'
+      return new Promise((resolve, reject) => {
+        axios.post(url, data).then((response) => {
+          resolve(response.data)
+        }).catch((response) => {
+          console.log('f', response)
+          resolve(response)
+          bus.$message({
+            message: '请求超时，请检查网络',
+            type: 'warning'
+          })
+        })
+      })
+    },
     apiDelete(url, id) {
       return new Promise((resolve, reject) => {
         axios.delete(url + id).then((response) => {

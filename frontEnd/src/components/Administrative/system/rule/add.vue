@@ -9,8 +9,8 @@
       </el-form-item>
       <el-form-item label="节点类型" prop="level">
         <el-radio-group v-model="form.level">
-          <el-radio label="1">项目</el-radio>
-          <el-radio label="2">模块</el-radio>
+          <el-radio label="1">模块</el-radio>
+          <el-radio label="2">控制器</el-radio>
           <el-radio label="3">操作</el-radio>
         </el-radio-group>
       </el-form-item>

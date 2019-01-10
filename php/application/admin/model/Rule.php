@@ -28,6 +28,21 @@ class Rule extends Common
 	{
 		$cat = new \com\Category('admin_rule', array('id', 'pid', 'title', 'title'));
 		$data = $cat->getList('', 0, 'id');
+		if(!empty($data)){
+            foreach($data as $key=>&$value){
+                switch($value['level']){
+                    case 1:
+                        $value['type']='模块';
+                        break;
+                    case 2:
+                        $value['type']='控制器';
+                        break;
+                    case 3:
+                        $value['type']='操作';
+                        break;
+                }
+            }
+        }
 		// 若type为tree，则返回树状结构
 		if ($type == 'tree') {
 			foreach ($data as $k => $v) {

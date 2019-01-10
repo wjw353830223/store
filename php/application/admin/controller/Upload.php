@@ -12,12 +12,14 @@ use think\Controller;
 class Upload extends Controller
 {   
     public function index()
-    {	
+    {
+        /*防止跨域*/
+        header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);//允许的请求域
+        header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
+        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头
 
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: POST');
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        $file = request()->file('file');
+        $file = Request::instance()->file('file');
         if (!$file) {
         	return resultArray(['error' => '请上传文件']);
         }
