@@ -5,9 +5,8 @@
 // | Author: linchuangbin <linchuangbin@honraytech.com>
 // +----------------------------------------------------------------------
 
-namespace app\admin\model;
+namespace app\common\model;
 
-use app\admin\model\Common;
 
 class Rule extends Common 
 {

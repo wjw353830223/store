@@ -5,9 +5,7 @@
 // | Author: linchuangbin <linchuangbin@honraytech.com>
 // +----------------------------------------------------------------------
 
-namespace app\admin\model;
-
-use app\admin\model\Common;
+namespace app\common\model;
 
 class Post extends Common 
 {
