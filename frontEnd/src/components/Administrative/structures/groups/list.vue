@@ -54,7 +54,7 @@
 			</el-table-column>
 		</el-table>
 		<div class="pos-rel p-t-20">
-			<btnGroup :selectedData="multipleSelection" :type="'groups'"></btnGroup>
+			<btnGroup :selectedData="multipleSelection" :type="'admin/groups'"></btnGroup>
 		</div>
 	</div>
 </template>
@@ -104,6 +104,8 @@
     },
     created() {
       this.getgroups()
+      console.log(Lockr.get('menus') )
+      console.log(this.$route)
     },
     computed: {
       addShow() {

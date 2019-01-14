@@ -13,7 +13,7 @@ return [
         'admin/users'		   =>'admin/users',
         'admin/menus'		   =>'admin/menus',
         'admin/structures'	   =>'admin/structures',
-        'admin/posts'          =>'admin/posts',
+        'admin/posts'          =>'admin/posts'
     ],
 
 	// 【基础】登录

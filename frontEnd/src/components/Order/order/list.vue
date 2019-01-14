@@ -52,7 +52,7 @@
 			</el-table-column>
 		</el-table>
 		<div class="pos-rel p-t-20">
-			<btnGroup :selectedData="multipleSelection" :type="'admin/menus'"></btnGroup>
+			<btnGroup :selectedData="multipleSelection" :type="'menus'"></btnGroup>
 		</div>
 	</div>
 </template>

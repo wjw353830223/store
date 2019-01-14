@@ -3,11 +3,11 @@
 		<div class="m-b-20 ovf-hd">
 			<div class="fl" v-show="addShow">
 				<router-link class="btn-link-large add-btn" to="add">
-					<i class="el-icon-plus"></i>&nbsp;&nbsp;添加用户
+					<i class="el-icon-plus"></i>&nbsp;&nbsp;添加餐桌
 				</router-link>
 			</div>
 			<div class="fl w-200 m-l-30">
-				<el-input placeholder="请输入用户名" v-model="keywords">
+				<el-input placeholder="请输入餐桌编号" v-model="keywords">
 					<el-button slot="append" icon="search" @click="search()"></el-button>
 				</el-input>
 			</div>
@@ -21,22 +21,13 @@
 			width="50">
 			</el-table-column>
       <el-table-column
-			label="用户名"
-			prop="username"
+			label="编号"
+			prop="name"
 			width="200">
 			</el-table-column>
 			<el-table-column
-			prop="s_name"
-			label="部门">
-			</el-table-column>
-      <el-table-column
-			prop="p_name"
-			label="岗位">
-			</el-table-column>
-			<el-table-column
-			label="备注"
-			prop="remark"
-			width="200">
+			prop="structure_name"
+			label="所属餐馆">
 			</el-table-column>
 			<el-table-column
 			label="状态"
@@ -53,7 +44,7 @@
         <template scope="scope">
           <div>
             <span>
-              <router-link :to="{ name: 'usersEdit', params: { id: scope.row.id }}" class="el-button el-button--primary el-button--small">
+              <router-link :to="{ name: 'tablesEdit', params: { id: scope.row.id }}" class="el-button el-button--primary el-button--small">
             编辑
               </router-link>
             </span>
@@ -65,7 +56,7 @@
 			</el-table-column>
 		</el-table>
 		<div class="pos-rel p-t-20">
-			<btnGroup :selectedData="multipleSelection" :type="'admin/users'"></btnGroup>
+			<btnGroup :selectedData="multipleSelection" :type="'order/tables'"></btnGroup>
 			<div class="block pages">
 				<el-pagination
 				@current-change="handleCurrentChange"
@@ -80,8 +71,8 @@
 </template>
 
 <script>
-  import btnGroup from '../../../Common/btn-group.vue'
-  import http from '../../../../assets/js/http'
+  import btnGroup from '../../Common/btn-group.vue'
+  import http from '../../../assets/js/http'
 
   export default {
     data() {
@@ -105,13 +96,13 @@
         router.push({ path: this.$route.path, query: { keywords: this.keywords, page: page }})
       },
       confirmDelete(item) {
-        this.$confirm('确认删除该用户?', '提示', {
+        this.$confirm('确认删除该餐桌?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           _g.openGlobalLoading()
-          this.apiDelete('admin/users/', item.id).then((res) => {
+          this.apiDelete('order/tables/', item.id).then((res) => {
             _g.closeGlobalLoading()
             this.handelResponse(res, (data) => {
               _g.toastMsg('success', '删除成功')
@@ -124,7 +115,7 @@
           // catch error
         })
       },
-      getAllUsers() {
+      getAllTables() {
         this.loading = true
         const data = {
           params: {
@@ -133,7 +124,7 @@
             limit: this.limit
           }
         }
-        this.apiGet('admin/users', data).then((res) => {
+        this.apiGet('order/tables', data).then((res) => {
           this.handelResponse(res, (data) => {
             this.tableData = data.list
             this.dataCount = data.dataCount
@@ -163,7 +154,7 @@
       init() {
         this.getKeywords()
         this.getCurrentPage()
-        this.getAllUsers()
+        this.getAllTables()
       }
     },
     created() {

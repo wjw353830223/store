@@ -14,12 +14,7 @@
 			:context="_self"
 			width="50">
 			</el-table-column>
-			<el-table-column
-			prop="p_title"
-			label="节点结构"
-			width="150">
-			</el-table-column>
-			<el-table-column
+      <el-table-column
 			prop="title"
 			label="显示名">
 			</el-table-column>
@@ -28,6 +23,16 @@
   		label="名称"
   		width="200">
   		</el-table-column>
+			<el-table-column
+			prop="p_title"
+			label="上级节点"
+			width="150">
+			</el-table-column>
+      <el-table-column
+			prop="type"
+			label="节点等级"
+			width="150">
+			</el-table-column>
 			<el-table-column
 			inline-template
 			label="状态"
@@ -59,7 +64,7 @@
 			</el-table-column>
 		</el-table>
 		<div class="pos-rel p-t-20">
-			<btnGroup :selectedData="multipleSelection" :type="'rules'"></btnGroup>
+			<btnGroup :selectedData="multipleSelection" :type="'admin/rules'"></btnGroup>
 		</div>
 	</div>
 </template>

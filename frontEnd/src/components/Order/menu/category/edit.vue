@@ -1,21 +1,11 @@
 <template>
-  <div class="m-l-50 m-t-30 w-500">
-    <el-form ref="form" :model="form" :rules="rules" label-width="110px">
-      <el-form-item label="显示名" prop="title">
-        <el-input v-model.trim="form.title" class="h-40 w-200"></el-input>
-      </el-form-item>
-      <el-form-item label="名称" prop="name">
+  <div class="m-l-50 m-t-30 w-900">
+    <el-form ref="form" :model="form" :rules="rules" label-width="130px">
+      <el-form-item label="部门名称" prop="name">
         <el-input v-model.trim="form.name" class="h-40 w-200"></el-input>
       </el-form-item>
-      <el-form-item label="节点类型" prop="level">
-        <el-radio-group v-model="form.level">
-          <el-radio label="1" >模块</el-radio>
-          <el-radio label="2" >控制器</el-radio>
-          <el-radio label="3" >操作</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="父节点" prop="pid">
-        <el-select v-model="form.pid" placeholder="父节点" class="w-200" disabled>
+      <el-form-item label="父级部门" prop="pid">
+        <el-select v-model="form.pid" placeholder="父级部门" class="w-200">
           <el-option v-for="item in options" :label="item.title" :value="item.id"></el-option>
         </el-select>
       </el-form-item>
@@ -26,7 +16,6 @@
     </el-form>
   </div>
 </template>
-
 <script>
   import http from '../../../../assets/js/http'
   import fomrMixin from '../../../../assets/js/form_com'
@@ -37,24 +26,13 @@
         isLoading: false,
         form: {
           id: null,
-          title: '',
           name: '',
-          pid: null,
-          level: null
+          pid: null
         },
-        options: [{ id: 0, name: '根节点' }],
+        options: [{ id: '0', title: '无' }],
         rules: {
-          title: [
-            { required: true, message: '请输入节点名称' }
-          ],
           name: [
-            { required: true, message: '请输入节点显示名' }
-          ],
-          level: [
-            { required: true, message: '请选择节点类型' }
-          ],
-          pid: [
-            { type: 'number', required: true, message: '请选择父级节点' }
+            { required: true, message: '请输入部门名称', trigger: 'blur' }
           ]
         }
       }
@@ -64,7 +42,7 @@
         this.$refs[form].validate((valid) => {
           if (valid) {
             this.isLoading = !this.isLoading
-            this.apiPut('admin/rules/', this.form.id, this.form).then((res) => {
+            this.apiPut('admin/structures/', this.form.id, this.form).then((res) => {
               this.handelResponse(res, (data) => {
                 _g.toastMsg('success', '编辑成功')
                 setTimeout(() => {
@@ -77,26 +55,31 @@
           }
         })
       },
-      getRules() {
-        this.apiGet('admin/rules').then((res) => {
+      getStructures() {
+        this.apiGet('admin/structures').then((res) => {
           this.handelResponse(res, (data) => {
+            _(data).forEach((ret) => {
+              ret.id = ret.id.toString()
+            })
             this.options = this.options.concat(data)
           })
         })
       },
-      getRuleInfo() {
+      getStructureInfo() {
         this.form.id = this.$route.params.id
-        this.apiGet('admin/rules/' + this.form.id).then((res) => {
+        this.apiGet('admin/structures/' + this.form.id).then((res) => {
           this.handelResponse(res, (data) => {
-            data.level = data.level.toString()
-            this.form = data
+            data.pid = data.pid.toString()
+            this.form.id = data.id
+            this.form.name = data.name
+            this.form.pid = data.pid
           })
         })
       }
     },
     created() {
-      this.getRules()
-      this.getRuleInfo()
+      this.getStructures()
+      this.getStructureInfo()
     },
     mixins: [http, fomrMixin]
   }

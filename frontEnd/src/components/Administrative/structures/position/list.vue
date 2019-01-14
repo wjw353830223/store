@@ -54,7 +54,7 @@
 			</el-table-column>
 		</el-table>
 		<div class="pos-rel p-t-20">
-			<btnGroup :selectedData="multipleSelection" :type="'posts'"></btnGroup>
+			<btnGroup :selectedData="multipleSelection" :type="'admin/posts'"></btnGroup>
 		</div>
 	</div>
 </template>

@@ -20,7 +20,10 @@ import groupsEdit from './components/Administrative/structures/groups/edit.vue'
 import usersList from './components/Administrative/personnel/users/list.vue'
 import usersAdd from './components/Administrative/personnel/users/add.vue'
 import usersEdit from './components/Administrative/personnel/users/edit.vue'
-
+import tablesList from './components/Order/table/list.vue'
+import tablesAdd from './components/Order/table/add.vue'
+import tablesEdit from './components/Order/table/edit.vue'
+import menusList from './components/Order/menu/menu/list.vue'
 /**
  * meta参数解析
  * hideLeft: 是否隐藏左侧菜单，单页菜单为true
@@ -97,6 +100,22 @@ const routes = [
       { path: 'users/list', component: usersList, name: 'usersList', meta: { hideLeft: false, module: 'Administrative', menu: 'users' }},
       { path: 'users/add', component: usersAdd, name: 'usersAdd', meta: { hideLeft: false, module: 'Administrative', menu: 'users' }},
       { path: 'users/edit/:id', component: usersEdit, name: 'usersEdit', meta: { hideLeft: false, module: 'Administrative', menu: 'users' }}
+    ]
+  },
+  {
+    path: '/order',
+    component: Home,
+    children: [
+      { path: 'tables/list', component: tablesList, name: 'tablesList', meta: { hideLeft: false, module: 'Order', menu: 'tables' }},
+      { path: 'tables/add', component: tablesAdd, name: 'tablesAdd', meta: { hideLeft: false, module: 'Order', menu: 'tables' }},
+      { path: 'table/edit/:id', component: tablesEdit, name: 'tablesEdit', meta: { hideLeft: false, module: 'Order', menu: 'tables' }}
+    ]
+  },
+  {
+    path: '/order',
+    component: Home,
+    children: [
+      { path: 'menu/list', component: menusList, name: 'menusList', meta: { hideLeft: false, module: 'Order', menu: 'menu' }}
     ]
   }
 ]

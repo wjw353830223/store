@@ -20,7 +20,7 @@
     },
     methods: {
       getUrl() {
-        return 'admin/' + this.type
+        return this.type
       },
       getSelectedIds() {
         let array = []

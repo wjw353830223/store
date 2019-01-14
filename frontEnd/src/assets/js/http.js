@@ -109,9 +109,10 @@ const apiMethods = {
               router.replace('/')
             }, 1500)
             break
-          // case 400:
-          //   this.goback()
-          //   break
+          case 102:
+            _g.toastMsg('error', res.error)
+            this.goback()
+            break
           default :
             _g.toastMsg('error', res.error)
         }
