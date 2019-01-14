@@ -7,11 +7,6 @@
 			<el-form-item label="座位数量"  prop="seats">
 				<el-input v-model="form.seats" class="h-40 w-200" :maxlength=11></el-input>
 			</el-form-item>
-			<el-form-item label="所属部门" prop="structure_id">
-				<el-select v-model="form.structure_id" placeholder="请选择部门" class="w-200">
-					<el-option v-for="(item,index) in orgsOptions" :label="item.title" :value="item.id" :key='index'></el-option>
-				</el-select>
-			</el-form-item>
 			<el-form-item>
 				<el-button type="primary" @click="add()" :loading="isLoading">提交</el-button>
 				<el-button @click="goback()">返回</el-button>
@@ -68,15 +63,7 @@
             })
         })
       },
-      getAllOrgs() {
-        this.apiGet('admin/structures').then((res) => {
-          this.handelResponse(res, (data) => {
-            this.orgsOptions = data
-          })
-        })
-      },
-      async getCompleteData() {
-        this.getAllOrgs()
+      getCompleteData() {
         this.apiGet('order/tables/' + this.id).then((res) => {
           this.handelResponse(res, (data) => {
             this.form.name = data.name

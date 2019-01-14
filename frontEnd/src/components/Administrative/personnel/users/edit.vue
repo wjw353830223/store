@@ -16,7 +16,7 @@
       <el-form-item label="邮箱" prop="email">
 				<el-input v-model.trim="form.email" class="h-40 w-200"></el-input>
 			</el-form-item>
-			<el-form-item label="所属部门" prop="structure_id">
+			<!-- <el-form-item label="所属部门" prop="structure_id">
 				<el-select v-model="form.structure_id" placeholder="请选择部门" class="w-200">
 					<el-option v-for="(item,index) in orgsOptions" :label="item.title" :value="item.id" :key='index'></el-option>
 				</el-select>
@@ -25,7 +25,7 @@
 				<el-select v-model="form.post_id" placeholder="请选择岗位" class="w-200">
 					<el-option v-for="(item,index) in positionsOptions" :label="item.name" :value="item.id" :key='index'></el-option>
 				</el-select>
-			</el-form-item>
+			</el-form-item> -->
 			<el-form-item label="备注">
 				<el-input v-model.trim="form.remark" class="h-40 w-200"></el-input>
 			</el-form-item>
@@ -159,8 +159,8 @@
         })
       },
       async getCompleteData() {
-        this.getAllOrgs()
-        this.getAllPositions()
+        // this.getAllOrgs()
+        // this.getAllPositions()
         this.groupOptions = await this.getAllGroups()
         this.apiGet('admin/users/' + this.id).then((res) => {
           this.handelResponse(res, (data) => {

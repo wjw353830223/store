@@ -18,20 +18,16 @@
 		@selection-change="selectItem">
 			<el-table-column
 			type="selection"
-			width="50">
+			width="100">
 			</el-table-column>
       <el-table-column
 			label="编号"
 			prop="name"
-			width="200">
-			</el-table-column>
-			<el-table-column
-			prop="structure_name"
-			label="所属餐馆">
+			width="400">
 			</el-table-column>
 			<el-table-column
 			label="状态"
-			width="100">
+			width="900">
         <template scope="scope">
           <div>
             {{ scope.row.status | status }}
@@ -40,7 +36,7 @@
 			</el-table-column>
 			<el-table-column
 			label="操作"
-			width="200">
+			width="250">
         <template scope="scope">
           <div>
             <span>

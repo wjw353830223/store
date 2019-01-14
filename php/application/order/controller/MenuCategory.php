@@ -55,7 +55,7 @@ class MenuCategory extends ApiCommon
     {
         $menuCategoryModel = model('OrderMenuCategory');
         $param = $this->param;
-        $data = $menuCategoryModel->delDataById($param['id']);
+        $data = $menuCategoryModel->delDataById($param['id'], true);
         if (!$data) {
             return resultArray(['error' => $menuCategoryModel->getError()]);
         } 

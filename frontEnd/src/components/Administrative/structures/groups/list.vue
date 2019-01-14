@@ -104,8 +104,6 @@
     },
     created() {
       this.getgroups()
-      console.log(Lockr.get('menus') )
-      console.log(this.$route)
     },
     computed: {
       addShow() {

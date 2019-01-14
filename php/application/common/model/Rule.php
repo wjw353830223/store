@@ -26,7 +26,7 @@ class Rule extends Common
 	public function getDataList($type = '')
 	{
 		$cat = new \com\Category('admin_rule', array('id', 'pid', 'title', 'title'));
-		$data = $cat->getList('', 0, 'id');
+		$data = $cat->getList(['status'=>1], 0, 'id');
 		if(!empty($data)){
             foreach($data as $key=>&$value){
                 switch($value['level']){

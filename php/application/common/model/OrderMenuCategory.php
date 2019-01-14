@@ -29,25 +29,8 @@ class OrderMenuCategory extends Common
      */
 	public function getDataList($keywords, $page, $limit)
 	{
-	    $map = [];
-        if ($keywords) {
-            $map['table.name'] = ['like', '%'.$keywords.'%'];
-        }
-        $dataCount = $this->alias('table')->where($map)->count('id');
-
-        $list = $this
-            ->where($map)
-            ->alias('table')
-            ->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'INNER')
-            ->field('table.*, structure.name as structure_name');
-        // 若有分页
-        if ($page && $limit) {
-            $list = $list->page($page, $limit);
-        }
-
-        $list = $list->select();
-        $data['list'] = $list;
-        $data['dataCount'] = $dataCount;
+        $cat = new \com\Category('order_menu_category', array('id', 'pid', 'name', 'name'));
+        $data = $cat->getList('', 0, 'id');
         return $data;
 	}
 
@@ -61,10 +44,7 @@ class OrderMenuCategory extends Common
 	public function getDataById($id = '')
 	{
 		$data = $this
-				->alias('table')
-				->where('table.id', $id)
-				->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'INNER')
-				->field('table.*, structure.name as structure_name')
+				->where('id', $id)
 				->find();
 		if (!$data) {
 			$this->error = '暂无此数据';

@@ -23,7 +23,9 @@ import usersEdit from './components/Administrative/personnel/users/edit.vue'
 import tablesList from './components/Order/table/list.vue'
 import tablesAdd from './components/Order/table/add.vue'
 import tablesEdit from './components/Order/table/edit.vue'
-import menusList from './components/Order/menu/menu/list.vue'
+import menuCategoriesList from './components/Order/menu/category/list.vue'
+import menuCategoriesAdd from './components/Order/menu/category/add.vue'
+import menuCategoriesEdit from './components/Order/menu/category/edit.vue'
 /**
  * meta参数解析
  * hideLeft: 是否隐藏左侧菜单，单页菜单为true
@@ -115,7 +117,9 @@ const routes = [
     path: '/order',
     component: Home,
     children: [
-      { path: 'menu/list', component: menusList, name: 'menusList', meta: { hideLeft: false, module: 'Order', menu: 'menu' }}
+      { path: 'menuCategory/list', component: menuCategoriesList, name: 'menuCategoriesList', meta: { hideLeft: false, module: 'Order', menu: 'menuCategories' }},
+      { path: 'menuCategory/add', component: menuCategoriesAdd, name: 'menuCategoriesAdd', meta: { hideLeft: false, module: 'Order', menu: 'menuCategories' }},
+      { path: 'menuCategory/edit/:id', component: menuCategoriesEdit, name: 'menuCategoriesEdit', meta: { hideLeft: false, module: 'Order', menu: 'menuCategories' }}
     ]
   }
 ]
