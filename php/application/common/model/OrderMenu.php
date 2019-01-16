@@ -31,20 +31,16 @@ class OrderMenu extends Common
 	{
 	    $map = [];
         if ($keywords) {
-            $map['table.name'] = ['like', '%'.$keywords.'%'];
+            $map['menu.name'] = ['like', '%'.$keywords.'%'];
         }
-        $dataCount = $this->alias('table')->where($map)->count('id');
-
-        $list = $this
-            ->where($map)
-            ->alias('table')
-            ->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'INNER')
-            ->field('table.*, structure.name as structure_name');
+        $dataCount = $this->alias('menu')->where($map)->count('id');
+        $list = $this->alias('menu')->where($map)
+            ->join('__ORDER_MENU_CATEGORY__ category', 'menu.category_id=category.id', 'LEFT')
+            ->field('menu.*, category.name as category_name');
         // 若有分页
         if ($page && $limit) {
             $list = $list->page($page, $limit);
         }
-
         $list = $list->select();
         $data['list'] = $list;
         $data['dataCount'] = $dataCount;
@@ -61,10 +57,7 @@ class OrderMenu extends Common
 	public function getDataById($id = '')
 	{
 		$data = $this
-				->alias('table')
-				->where('table.id', $id)
-				->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'INNER')
-				->field('table.*, structure.name as structure_name')
+				->alias('menu')
 				->find();
 		if (!$data) {
 			$this->error = '暂无此数据';

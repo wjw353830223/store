@@ -56,7 +56,9 @@ return [
 	'admin/posts/deletes' => ['admin/posts/deletes', ['method' => 'POST']],
 	// 【部门】批量启用/禁用
 	'admin/posts/enables' => ['admin/posts/enables', ['method' => 'POST']],
-	
-	// MISS路由
+    // 【uEditor】配置
+    'admin/ueditor/upload' => ['admin/ueditor/upload', ['method' => ['GET','POST']]],
+
+    // MISS路由
 	'__miss__'  => 'admin/base/miss',
 ];

@@ -21,10 +21,10 @@ class ApiCommon extends Common
         /*获取头部信息*/ 
         $header = Request::instance()->header();
         
-        $authKey = $header['authkey'];
-        $sessionId = $header['sessionid'];
+        $authKey = $header['authkey']?$header['authkey']:($this->param['authkey']?:null);
+        $sessionId = $header['sessionId']?$header['sessionId']:($this->param['sessionId']?:null);;
         $cache = cache('Auth_'.$authKey);
-        
+
         // 校验sessionid和authKey
         if (empty($sessionId)||empty($authKey)||empty($cache)) {
             header('Content-Type:application/json; charset=utf-8');

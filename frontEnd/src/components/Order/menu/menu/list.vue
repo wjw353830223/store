@@ -2,7 +2,7 @@
 	<div>
 		<div class="m-b-20">
 			<router-link class="btn-link-large add-btn" to="add">
-				<i class="el-icon-plus"></i>&nbsp;&nbsp;添加部门
+				<i class="el-icon-plus"></i>&nbsp;&nbsp;添加菜谱
 			</router-link>
 		</div>
 		<el-table
@@ -14,12 +14,16 @@
 			width="50">
 			</el-table-column>
 			<el-table-column
-			label="部门结构"
-			prop="title">
+			label="名称"
+			prop="name">
 			</el-table-column>
       <el-table-column
-      label="部门名称"
-      prop="name">
+      label="分类"
+      prop="category_name">
+      </el-table-column>
+      <el-table-column
+      label="销量"
+      prop="sale_nums">
       </el-table-column>
 			<el-table-column
 			label="状态"
@@ -37,7 +41,7 @@
         <template scope="scope">
   				<div>
   					<span>
-  						<router-link :to="{ name: 'structuresEdit', params: { id: scope.row.id }}" class="el-button el-button--primary el-button--small">
+  						<router-link :to="{ name: 'menusEdit', params: { id: scope.row.id }}" class="el-button el-button--primary el-button--small">
   						编辑
   						</router-link>
   					</span>
@@ -54,7 +58,7 @@
 			</el-table-column>
 		</el-table>
 		<div class="pos-rel p-t-20">
-			<btnGroup :selectedData="multipleSelection" :type="'structures'"></btnGroup>
+			<btnGroup :selectedData="multipleSelection" :type="'order/menus'"></btnGroup>
 		</div>
 	</div>
 </template>
@@ -75,13 +79,13 @@
         this.multipleSelection = val
       },
       confirmDelete(item) {
-        this.$confirm('确认删除该部门?', '提示', {
+        this.$confirm('确认删除该菜谱?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           _g.openGlobalLoading()
-          this.apiDelete('admin/structures/', item.id).then((res) => {
+          this.apiDelete('order/menus/', item.id).then((res) => {
             _g.closeGlobalLoading()
             this.handelResponse(res, (data) => {
               _g.toastMsg('success', '删除成功')
@@ -94,16 +98,16 @@
           // handle error
         })
       },
-      getStructures() {
-        this.apiGet('admin/structures').then((res) => {
+      getMenus() {
+        this.apiGet('order/menus').then((res) => {
           this.handelResponse(res, (data) => {
-            this.tableData = data
+            this.tableData = data.list
           })
         })
       }
     },
     created() {
-      this.getStructures()
+      this.getMenus()
     },
     computed: {
       addShow() {

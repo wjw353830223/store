@@ -26,6 +26,9 @@ import tablesEdit from './components/Order/table/edit.vue'
 import menuCategoriesList from './components/Order/menu/category/list.vue'
 import menuCategoriesAdd from './components/Order/menu/category/add.vue'
 import menuCategoriesEdit from './components/Order/menu/category/edit.vue'
+import menusList from './components/Order/menu/menu/list.vue'
+import menusAdd from './components/Order/menu/menu/add.vue'
+import menusEdit from './components/Order/menu/menu/edit.vue'
 /**
  * meta参数解析
  * hideLeft: 是否隐藏左侧菜单，单页菜单为true
@@ -120,6 +123,15 @@ const routes = [
       { path: 'menuCategory/list', component: menuCategoriesList, name: 'menuCategoriesList', meta: { hideLeft: false, module: 'Order', menu: 'menuCategories' }},
       { path: 'menuCategory/add', component: menuCategoriesAdd, name: 'menuCategoriesAdd', meta: { hideLeft: false, module: 'Order', menu: 'menuCategories' }},
       { path: 'menuCategory/edit/:id', component: menuCategoriesEdit, name: 'menuCategoriesEdit', meta: { hideLeft: false, module: 'Order', menu: 'menuCategories' }}
+    ]
+  },
+  {
+    path: '/order',
+    component: Home,
+    children: [
+      { path: 'menus/list', component: menusList, name: 'menusList', meta: { hideLeft: false, module: 'Order', menu: 'menus' }},
+      { path: 'menus/add', component: menusAdd, name: 'menusAdd', meta: { hideLeft: false, module: 'Order', menu: 'menus' }},
+      { path: 'menus/edit/:id', component: menusEdit, name: 'menusEdit', meta: { hideLeft: false, module: 'Order', menu: 'menus' }}
     ]
   }
 ]

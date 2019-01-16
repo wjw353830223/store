@@ -63,7 +63,7 @@ class Category {
      * @param   int     $cid    分类cid
      * @param   string  $space
      */
-    private function _searchList($cid = 0, $space = "",$level=1,$p_name='') {
+    private function _searchList($cid = 0, $space = " ",$level=1,$p_name='') {
         $childs = $this->getChild($cid);
         //下级分类的数组
         //如果没下级分类，结束递归
@@ -73,12 +73,11 @@ class Category {
         //循环所有的下级分类
         for ($i = 0; $i < $n; $i++) {
             $pre = "";
-            $pad = "";
+            $pad = $space ? $this->icon[0] : "";
             if ($n == $m) {
                 $pre = $this->icon[2];
             } else {
                 $pre = $this->icon[1];
-                $pad = $space ? $this->icon[0] : "";
             }
             $childs[$i]['p_title'] = $p_name;
             $childs[$i]['else'] = $childs[$i][$this->fields['name']];

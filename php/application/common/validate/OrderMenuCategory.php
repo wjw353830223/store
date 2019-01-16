@@ -8,10 +8,9 @@ use think\Validate;
 class OrderMenuCategory extends Validate{
 
 	protected $rule = array(
-		'name'  		=> 'require|length:2,12'
+		'name'  		=> 'require'
 	);
 	protected $message = array(
 		'name.require'    	=> '分类名必须填写',
-		'name.length'    	=> '分类名长度在6到12个字符'
 	);
 }
