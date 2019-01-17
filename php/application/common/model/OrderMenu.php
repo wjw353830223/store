@@ -46,7 +46,30 @@ class OrderMenu extends Common
         $data['dataCount'] = $dataCount;
         return $data;
 	}
+    /**
+     * [createData 新建]
+     * @linchuangbin
+     * @DateTime  2017-02-10T21:19:06+0800
+     * @param     array                    $param [description]
+     * @return    [array]                         [description]
+     */
+    public function createData($param)
+    {
 
+        // 验证
+        $validate = validate($this->name);
+        if (!$validate->check($param)) {
+            $this->error = $validate->getError();
+            return false;
+        }
+        try {
+            $this->data($param)->allowField(true)->save();
+            return true;
+        } catch(\Exception $e) {
+            $this->error = '添加失败';
+            return false;
+        }
+    }
 	/**
 	 * [getDataById 根据主键获取详情]
 	 * @linchuangbin
