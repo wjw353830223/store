@@ -18,6 +18,10 @@ class OrderMenu extends Common
      */
     protected $name = 'order_menu';
 
+
+    public function specs(){
+        return $this->hasMany('OrderMenuAttribution','menu_id','id');
+    }
     /**
      * @param $keywords
      * @param $page
@@ -55,7 +59,6 @@ class OrderMenu extends Common
      */
     public function createData($param)
     {
-
         // 验证
         $validate = validate($this->name);
         if (!$validate->check($param)) {
@@ -63,10 +66,66 @@ class OrderMenu extends Common
             return false;
         }
         try {
+            if(!empty($param['attributions'])){
+                $param['attributions'] = json_encode($param['attributions']);
+            }
             $this->data($param)->allowField(true)->save();
+            if(!empty($param['postSpec'])){
+                $specs = $param['postSpec'];
+                foreach($specs as $key=>&$value){
+                    $value['specName']=json_encode($value['specName']);
+                    $value['specValue']=json_encode($value['specValue']);
+                }
+                $this->specs()->saveAll($specs);
+            }
             return true;
         } catch(\Exception $e) {
             $this->error = '添加失败';
+            return false;
+        }
+    }
+    /**
+     * [updateDataById 编辑]
+     * @linchuangbin
+     * @DateTime  2017-02-10T21:24:49+0800
+     * @param     [type]                   $param [description]
+     * @param     [type]                   $id    [description]
+     * @return    [type]                          [description]
+     */
+    public function updateDataById($param, $id)
+    {
+        $checkData = $this->get($id);
+        if (!$checkData) {
+            $this->error = '暂无此数据';
+            return false;
+        }
+
+        // 验证
+        $validate = validate($this->name);
+        if (!$validate->check($param)) {
+            $this->error = $validate->getError();
+            return false;
+        }
+
+        try {
+            if(!empty($param['attributions'])){
+                $param['attributions'] = json_encode($param['attributions']);
+            }
+            $this->allowField(true)->save($param, [$this->getPk() => $id]);
+            if(!empty($param['postSpec'])){
+                OrderMenuAttribution::destroy(function($query) use ($id){
+                    $query->where(['menu_id'=>$id]);
+                });
+                $specs = $param['postSpec'];
+                foreach($specs as $key=>&$value){
+                    $value['specName']=json_encode($value['specName']);
+                    $value['specValue']=json_encode($value['specValue']);
+                }
+                $this->specs()->saveAll($specs);
+            }
+            return true;
+        } catch(\Exception $e) {
+            $this->error = '编辑失败';
             return false;
         }
     }
@@ -79,13 +138,18 @@ class OrderMenu extends Common
 	 */
 	public function getDataById($id = '')
 	{
-		$data = $this
-				->alias('menu')
-				->find();
-		if (!$data) {
+		$menu = $this->get($id);
+		if(!empty($menu->specs)){
+		    $specs = $menu->specs;
+		    foreach($specs as $key=>&$value){
+		        $value['specName']=json_decode($value['specName'],true);
+                $value['specValue']=json_decode($value['specValue'],true);
+            }
+        }
+		if (!$menu) {
 			$this->error = '暂无此数据';
 			return false;
 		}
-		return $data;
+		return $menu;
 	}
 }

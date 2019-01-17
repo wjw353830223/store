@@ -43,8 +43,53 @@
       <el-form-item label="菜品详情" prop="detail">
         <vue-ueditor-wrap ref="ueditor" v-model="form.detail" :destroy="false" :config="config" @ready="ready"></vue-ueditor-wrap>
       </el-form-item>
-      <el-form-item label="规格属性" prop="attributions">
-        <el-input v-model.trim="form.attributions" class="h-40 w-200"></el-input>
+      <el-form-item label="规格属性">
+        <el-input v-model.trim="specName" class="h-40 w-200" placeholder="输入规格名称"></el-input>
+        <el-button type="text" @click="addSpecName" style='margin-left:20px;'>新增</el-button>
+      </el-form-item>
+      <el-form-item 
+        v-for="(item, index) in attributions"
+        :label="item.specName"
+        :key="index"
+        :prop="item.specName"
+      >
+        <el-checkbox-group v-model="item.specValueChecked" @change="handleCheckedValueChange" class="h-40 w-800">
+          <el-checkbox v-for="(item1,index1) in item.specValue" :label="item1" :key="index1">{{item1}}</el-checkbox>
+          <el-button type="text" style='margin-left:100px;' v-if="item.specValue.length>0" @click="deleteSpec(index)">删除{{item.specName}}</el-button>
+          <el-button type="text" @click="addSpecValue(index)">添加{{item.specName}}</el-button>
+        </el-checkbox-group>
+      </el-form-item>
+      <el-form-item v-if="sku.length>0">
+        <el-table
+          :data="sku"
+          style="width: 100%">
+          <el-table-column v-for="(item,index) in sku[0].specName" :key='index'
+            :label="item"
+            width="80"
+          >
+            <template slot-scope="scope">
+              <span >{{ scope.row.specValue[index] }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="价格(分)">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.price" placeholder="输入价格"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column label="优惠价(分)">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.preferential_price" placeholder="输入优惠价"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="danger"
+                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="edit('form')" :loading="isLoading">提交</el-button>
@@ -62,6 +107,8 @@
       return {
         isLoading: false,
         withCredentials:true,
+        attributions:[],
+        specName:null,
         form: {
           id: null,
           name: '',
@@ -72,11 +119,12 @@
           attributions: '',
           category_id: null,
           sale_nums:0,
-          status:0,
+          status:1,
           recommend:0,
           preferential_price: 0,
+          postSpec:[]
         },
-        options: [{ id: '0', name: '无' }],
+        options: [{ pid: 0, name: '无' }],
         uploadUrl:null,
         uploadHeaders:{
           authKey:Lockr.get('authKey'),
@@ -120,13 +168,70 @@
       }
     },
     methods: {
+      handleDelete(index, row) {
+        this.sku.splice(index,1)
+      },
+      addSpecName(){
+        if(this.specName===null){
+          this.$message.error('规格名称不能为空！');
+          return false
+        }
+        this.attributions.push({
+          specName:this.specName,
+          specValue:[],
+          specValueChecked:[]
+        })
+        this.specName=null
+      },
+      addSpecValue(index){
+        let _self=this
+        let spec=this.attributions[index]
+        this.$prompt('请输入'+spec.specName, '', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+        }).then(({ value }) => {
+          _self.attributions[index].specValue.push(value)
+          _self.attributions[index].specValueChecked.push(value)
+        }).catch(() => {
+                 
+        });
+      },
+      deleteSpec(index){
+        let _self=this;
+        this.$confirm('确定删除该规格吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          _self.attributions.splice(index,1)
+        }).catch(() => {
+                  
+        });
+      },
+      handleCheckedValueChange(value){
+
+      },
       ready (editorInstance) {
        
+      },
+      parseSku(){
+        let postSpec=[]
+        if(this.sku.length>0){
+          let attributions =  this.sku.filter(function(item){
+            return item.price > 0
+          })
+          if(attributions.length > 0){
+            postSpec=attributions
+          }
+        }
+        return postSpec
       },
       edit(form) {
         this.$refs[form].validate((valid) => {
           if (valid) {
             this.isLoading = !this.isLoading
+            this.form.attributions=this.attributions
+            this.form.postSpec=this.parseSku()
             this.apiPut('order/menus/', this.form.id, this.form).then((res) => {
               this.handelResponse(res, (data) => {
                 _g.toastMsg('success', '编辑成功')
@@ -161,9 +266,37 @@
           this.handelResponse(res, (data) => {
             data.category_id = data.category_id.toString()
             data.recommend = parseInt(data.recommend )
-            this.form=data
+            this.attributions = JSON.parse(data.attributions)
+            this.form=data   
+            this.sku=data.specs
           })
         })
+      },
+      //对象数组笛卡尔积
+      multiCartesian(sku,newAttr) {
+        let ret=[];
+        sku=sku.concat([])
+        for(var m=0;m<sku.length;m++){
+          if(newAttr.specValueChecked.length>0){
+            let specName=sku[m].specName.concat([])
+            let tempSpecName = specName.concat([])
+            let specValue=sku[m].specValue.concat([])
+            let tempSpecValue = specValue.concat([])
+            for(var j=0;j<newAttr.specValueChecked.length;j++){
+              specName = tempSpecName.concat([])
+              specValue = tempSpecValue.concat([])
+              specName.push(newAttr.specName)
+              specValue.push(newAttr.specValueChecked[j])
+              ret.push({
+                specName:specName,
+                specValue:specValue,
+              })
+            }
+          }else{
+            ret = sku
+          }
+        }
+        return ret
       }
     },
     created() {
@@ -178,6 +311,35 @@
           return window.HOST + this.form.image
         }
         return null
+      },
+      sku: {
+        get: function(){
+          let attributions=JSON.parse(JSON.stringify(this.attributions))
+          let sku=[];
+          if(attributions.length >= 1){
+            for(var i=0;i<attributions[0].specValueChecked.length;i++){
+              sku.push({
+                specName:[attributions[0].specName],
+                specValue:[attributions[0].specValueChecked[i]],
+                price:attributions[0].price,
+                preferential_price:attributions[0].preferential_price
+              })
+            }
+            if(attributions.length > 1){
+              for(var i=1; i< attributions.length; i++){
+                sku = this.multiCartesian(sku, attributions[i])
+              }
+            } 
+          }
+          return sku;
+        },
+        set: function(newValue){
+          let _self=this
+          newValue.map(function(item,index){
+            _self.sku[index].price=item.price
+             _self.sku[index].preferential_price=item.preferential_price
+          })
+        }
       }
     },
     components: {

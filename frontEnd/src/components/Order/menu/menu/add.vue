@@ -2,7 +2,7 @@
 	<div class="m-l-50 m-t-30 w-900">
 		<el-form ref="form" :model="form" :rules="rules" label-width="130px">
       <el-form-item label="菜品名" prop="name" >
-        <el-input v-model.trim="form.name" class="h-40 w-200" disabled></el-input>
+        <el-input v-model.trim="form.name" class="h-40 w-200" ></el-input>
       </el-form-item>
       <el-form-item label="所属分类" prop="category_id">
         <el-select v-model="form.category_id" placeholder="所属分类" class="w-200">
@@ -91,8 +91,6 @@
           </el-table-column>
         </el-table>
       </el-form-item>
-
-
       <el-form-item>
         <el-button type="primary" @click="add('form')" :loading="isLoading">提交</el-button>
         <el-button @click="goback()">返回</el-button>
@@ -107,13 +105,7 @@
   export default {
     data() {
       return {
-        attributions:[
-          {
-            specName:'颜色',
-            specValue:['红色', '蓝色', '黄色'],
-            specValueChecked:['红色', '蓝色']
-          }
-        ],
+        attributions:[],
         specName:null,
         isLoading: false,
         withCredentials:true,
@@ -127,12 +119,12 @@
           attributions: '',
           category_id: null,
           sale_nums:0,
-          status:0,
+          status:1,
           recommend:0,
           preferential_price: 0,
           postSpec:[]
         },
-        options: [{ pid: 0, title: '无' }],
+        options: [{ pid: 0, name: '无' }],
         uploadUrl:null,
         uploadHeaders:{
           authKey:Lockr.get('authKey'),
@@ -222,43 +214,14 @@
       ready (editorInstance) {
        
       },
-      parseAttributions(){
-        let postAttributions = {}
-        if(this.attributions.length>0){
-          this.attributions.map(function(item){
-            let spec=[]
-            item.specValue.map(function(item1){
-              spec.push({
-                specName:item.specName,
-                specValue:item1
-              })
-            })
-            postAttributions[item.specName]=spec
-          })
-        }
-        return postAttributions
-      },
       parseSku(){
         let postSpec=[]
         if(this.sku.length>0){
           let attributions =  this.sku.filter(function(item){
             return item.price > 0
           })
-          if(attributions.length>0){
-            attributions.map(function(item){
-            let spec=[]
-            item.specName.map(function(item1,index){
-              spec.push({
-                specName:item1,
-                specValue:item.specValue[index]
-              })
-            })
-            postSpec.push({
-              price:item.price,
-              preferential_price:item.preferential_price,
-              spec:spec
-            })
-          })
+          if(attributions.length > 0){
+            postSpec=attributions
           }
         }
         return postSpec
@@ -266,7 +229,7 @@
       add(form) {
         this.$refs[form].validate((valid) => {
           if (valid) {
-            this.form.attributions=this.parseAttributions()
+            this.form.attributions=this.attributions
             this.form.postSpec=this.parseSku()
             this.isLoading = !this.isLoading
             this.apiPost('order/menus', this.form).then((res) => {
@@ -325,7 +288,7 @@
       }
     },
     created() {
-      this.getMenuCategory
+      this.getMenuCategory()
       this.uploadUrl= window.HOST + 'order/menus/upload'
       this.config.serverUrl = window.HOST + 'admin/ueditor/upload'
     },
