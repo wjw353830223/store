@@ -58,7 +58,8 @@ return [
 	'admin/posts/enables' => ['admin/posts/enables', ['method' => 'POST']],
     // 【uEditor】配置
     'admin/ueditor/upload' => ['admin/ueditor/upload', ['method' => ['GET','POST']]],
-
+    // 【数据库备份】配置
+    'admin/backup' => ['admin/backup/index', ['method' => ['GET']]],
     // MISS路由
 	'__miss__'  => 'admin/base/miss',
 ];

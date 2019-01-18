@@ -40,6 +40,7 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach(transition => {
   NProgress.done()
+  store.dispatch('showLoading', false)
 })
 
 Vue.use(ElementUI)

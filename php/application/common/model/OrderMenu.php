@@ -129,6 +129,51 @@ class OrderMenu extends Common
             return false;
         }
     }
+    /**
+     * [delDataById 根据id删除数据]
+     * @linchuangbin
+     * @DateTime  2017-02-11T20:57:55+0800
+     * @param     string                   $id     [主键]
+     * @param     boolean                  $delSon [是否删除子孙数据]
+     * @return    [type]                           [description]
+     */
+    public function delDataById($id = '',$delSon = false)
+    {
+        $menu=$this->get($id,'specs');
+        try {
+            $menu->together('specs')->delete();
+            return true;
+        } catch(\Exception $e) {
+            $this->error = '删除失败';
+            return false;
+        }
+    }
+    /**
+     * [delDatas 批量删除数据]
+     * @linchuangbin
+     * @DateTime  2017-02-11T20:59:34+0800
+     * @param     array                   $ids    [主键数组]
+     * @param     boolean                 $delSon [是否删除子孙数据]
+     * @return    [type]                          [description]
+     */
+    public function delDatas($ids = [], $delSon = false)
+    {
+        if (empty($ids)) {
+            $this->error = '删除失败';
+            return false;
+        }
+        try {
+            $this->where($this->getPk(), 'in', $ids)->delete();
+            OrderMenuAttribution::destroy(function($query) use ($ids){
+                $query->where('menu_id', 'in', $ids);
+            });
+            return true;
+        } catch (\Exception $e) {
+            $this->error = '操作失败';
+            return false;
+        }
+
+    }
 	/**
 	 * [getDataById 根据主键获取详情]
 	 * @linchuangbin

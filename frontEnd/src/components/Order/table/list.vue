@@ -47,6 +47,9 @@
             <span>
               <el-button size="small" type="danger" @click="confirmDelete(scope.row)">删除</el-button>
             </span>
+            <span>
+              <el-button size="small" type="primary" @click="qrcode(scope.row)">二维码</el-button>
+            </span>
           </div>
         </template>
 			</el-table-column>
@@ -110,6 +113,20 @@
         }).catch(() => {
           // catch error
         })
+      },
+      qrcode(item) {
+        this.apiGet('order/tables/qrcode', {
+          params:{
+            id: item.id
+          },
+          responseType:'arraybuffer'
+        }).then((res) => {
+        let href='data:image/png;base64,' + btoa(new Uint8Array(res).reduce((data, byte) => data + String.fromCharCode(byte), ''))
+        let alink = document.createElement("a");
+        alink.href = href;
+        alink.download = item.name
+        alink.click();
+      })
       },
       getAllTables() {
         this.loading = true

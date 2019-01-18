@@ -16,6 +16,8 @@ return [
 	'order/tables/deletes' => ['order/tables/deletes', ['method' => 'POST']],
     // 【餐桌】批量启用/禁用
     'order/tables/enables' => ['order/tables/enables', ['method' => 'POST']],
+    // 【餐桌】二维码
+    'order/tables/qrcode' => ['order/tables/qrcode', ['method' => 'GET']],
     // 【菜谱分类】批量删除
     'order/category/deletes' => ['order/menuCategory/deletes', ['method' => 'POST']],
     // 【菜谱分类】批量启用/禁用

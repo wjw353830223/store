@@ -33,7 +33,13 @@
 				<div class="grid-content bg-purple-light">
 					<el-col :span="24">
 						<transition name="fade" mode="out-in" appear>
-							<router-view v-loading="showLoading"></router-view>
+							<router-view 
+                element-loading-text="拼命加载中"
+                element-loading-spinner="el-icon-loading"
+                element-loading-background="rgba(0, 0, 0, 0.8)"
+                v-loading="showLoading"
+              >
+              </router-view>
 						</transition>
 					</el-col>
 				</div>
@@ -41,7 +47,6 @@
 		</el-col>
 
 		<changePwd ref="changePwd"></changePwd>
-
 	</el-row>
 </template>
 <style>
@@ -126,11 +131,15 @@
 	.hide-leftMenu {
 		left: 0px;
 	}
+  .el-loading-mask{
+    display: block !important;
+  }
 </style>
 <script>
   import leftMenu from './Common/leftMenu.vue'
   import changePwd from './Account/changePwd.vue'
   import http from '../assets/js/http'
+  import { setTimeout } from 'timers';
 
   export default {
     data() {
@@ -153,26 +162,37 @@
           confirmButtonText: '确定',
           cancelButtonText: '取消'
         }).then(() => {
-          _g.openGlobalLoading()
-          let data = {
-            authkey: Lockr.get('authKey'),
-            sessionId: Lockr.get('sessionId')
-          }
-          this.apiPost('admin/base/logout', data).then((res) => {
-            _g.closeGlobalLoading()
-            this.handelResponse(res, (data) => {
-              Lockr.rm('menus')
-              Lockr.rm('authKey')
-              Lockr.rm('rememberKey')
-              Lockr.rm('authList')
-              Lockr.rm('userInfo')
-              Lockr.rm('sessionId')
-              Cookies.remove('rememberPwd')
-              _g.toastMsg('success', '退出成功')
-              setTimeout(() => {
-                router.replace('/')
-              }, 1500)
-            })
+          const loading = this.$loading({
+            lock: true,
+            text: '数据库备份中，请稍后。。。。',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });
+          let _self=this
+          this.apiGet('admin/backup?type=backup').then(function(res1){
+            if(res1.code=='200'){
+              loading.close();
+              let data = {
+                authkey: Lockr.get('authKey'),
+                sessionId: Lockr.get('sessionId')
+              }
+              _self.apiPost('admin/base/logout', data).then((res) => {
+                _g.closeGlobalLoading()
+                _self.handelResponse(res, (data) => {
+                  Lockr.rm('menus')
+                  Lockr.rm('authKey')
+                  Lockr.rm('rememberKey')
+                  Lockr.rm('authList')
+                  Lockr.rm('userInfo')
+                  Lockr.rm('sessionId')
+                  Cookies.remove('rememberPwd')
+                  _g.toastMsg('success', '退出成功')
+                  setTimeout(() => {
+                    router.replace('/')
+                  }, 1500)
+                })
+              })
+            }
           })
         }).catch(() => {
 

@@ -1,6 +1,6 @@
 const state = {
   showLeftMenu: true,
-  globalLoading: true,
+  globalLoading: false,
   menus: [],
   rules: [],
   users: {},

@@ -20,13 +20,11 @@ class ApiCommon extends Common
         parent::_initialize();
         /*获取头部信息*/ 
         $header = Request::instance()->header();
-        
-        $authKey = $header['authkey']?$header['authkey']:($this->param['authkey']?:null);
-        $sessionId = $header['sessionId']?$header['sessionId']:($this->param['sessionId']?:null);;
+        $authKey = $header['authkey'];
+        $sessionid = $header['sessionid'];
         $cache = cache('Auth_'.$authKey);
-
         // 校验sessionid和authKey
-        if (empty($sessionId)||empty($authKey)||empty($cache)) {
+        if (empty($sessionid)||empty($authKey)||empty($cache)) {
             header('Content-Type:application/json; charset=utf-8');
             exit(json_encode(['code'=>101, 'error'=>'登录已失效']));
         }

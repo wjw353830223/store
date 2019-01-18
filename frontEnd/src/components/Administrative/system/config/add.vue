@@ -59,7 +59,8 @@
           IDENTIFYING_CODE: '0',
           LOGO_TYPE: '1',
           LOGIN_SESSION_VALID: 0,
-          SYSTEM_LOGO: ''
+          SYSTEM_LOGO: '',
+          LAN_IP:''
         },
         withCredentials:true,
         uploadUrl: '',

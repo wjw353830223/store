@@ -45,4 +45,6 @@ return [
     'sql_explain'    => false,
     // 时间字段是否自动格式化输出
     'datetime_format' => false,
+    'path' => reset(explode(DS, ROOT_PATH)) . DS . 'backup' . DS,//数据库备份目录
+    'sqlbakname' => date("YmdHis",time()).".sql"//数据库备份文件名
 ];

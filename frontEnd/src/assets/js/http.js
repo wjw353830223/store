@@ -28,21 +28,6 @@ const apiMethods = {
         })
       })
     },
-    apiFile(url, data) {
-      axios.defaults.headers['Content-Type'] = 'multipart/form-data'
-      return new Promise((resolve, reject) => {
-        axios.post(url, data).then((response) => {
-          resolve(response.data)
-        }).catch((response) => {
-          console.log('f', response)
-          resolve(response)
-          bus.$message({
-            message: '请求超时，请检查网络',
-            type: 'warning'
-          })
-        })
-      })
-    },
     apiDelete(url, id) {
       return new Promise((resolve, reject) => {
         axios.delete(url + id).then((response) => {
@@ -86,7 +71,6 @@ const apiMethods = {
       if (res.code) {
         switch (res.code) {
           case 101:
-            console.log('cookie = ', Cookies.get('rememberPwd'))
             if (Cookies.get('rememberPwd')) {
               let data = {
                 rememberKey: Lockr.get('rememberKey')
@@ -168,6 +152,9 @@ const apiMethods = {
     showLoading() {
       return store.state.globalLoading
     }
+  },
+  mounted() {
+    store.dispatch('showLoading', false)
   }
 }
 
