@@ -10,9 +10,8 @@
 // +----------------------------------------------------------------------
 namespace think;
 define('DS', DIRECTORY_SEPARATOR);
-defined('THINK_PATH') or define('THINK_PATH', __DIR__ . DS);
-defined('APP_PATH') or define('APP_PATH', dirname($_SERVER['SCRIPT_FILENAME']) . DS);
 defined('ROOT_PATH') or define('ROOT_PATH', dirname(realpath(APP_PATH)) . DS);
+defined('THINK_PATH') or define('THINK_PATH', ROOT_PATH. DS .'thinkphp' .DS);
 $arr=explode(DS, ROOT_PATH);
 defined('FIRST_ROOT_PATH') or define('FIRST_ROOT_PATH', reset($arr) . DS . 'backup' . DS);
 defined('EXTEND_PATH') or define('EXTEND_PATH', ROOT_PATH . 'extend' . DS);

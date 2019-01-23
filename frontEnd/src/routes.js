@@ -29,6 +29,7 @@ import menuCategoriesEdit from './components/Order/menu/category/edit.vue'
 import menusList from './components/Order/menu/menu/list.vue'
 import menusAdd from './components/Order/menu/menu/add.vue'
 import menusEdit from './components/Order/menu/menu/edit.vue'
+import backupRestore from './components/Administrative/system/backup/restore.vue'
 /**
  * meta参数解析
  * hideLeft: 是否隐藏左侧菜单，单页菜单为true
@@ -61,7 +62,13 @@ const routes = [
       { path: 'config/add', component: systemConfig, name: 'systemConfig', meta: { hideLeft: false, module: 'Administrative', menu: 'systemConfig' }}
     ]
   },
-
+  {
+    path: '/home',
+    component: Home,
+    children: [
+      { path: 'backup/restore', component: backupRestore, name: 'backupRestore', meta: { hideLeft: false, module: 'Administrative', menu: 'backupRestore' }}
+    ]
+  },
   {
     path: '/home',
     component: Home,
