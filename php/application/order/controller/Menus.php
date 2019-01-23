@@ -7,7 +7,7 @@
 
 namespace app\order\controller;
 
-use think\Request;
+use think\facade\Request;
 
 class Menus extends ApiCommon
 {

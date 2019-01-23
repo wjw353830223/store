@@ -6,7 +6,7 @@
 			</el-form-item>
 			<el-form-item label="父级用户组" prop="pid">
         <el-select v-model="form.pid" placeholder="父级用户组" class="w-200">
-          <el-option v-for="item in options" :label="item.title" :value="item.group_id"></el-option>
+          <el-option v-for="item in options" :label="item.title" :value="item.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="备注">
@@ -56,7 +56,7 @@
           remark: '',
           rules: ''
         },
-        options: [{ pid: 0, title: '无' }],
+        options: [{ id: 0, title: '无' }],
         nodes: [],
         selectedNodes: [],
         rules: {

@@ -68,7 +68,7 @@ class Tables extends ApiCommon
     {
         $tableModel = model('Table');
         $param = $this->param;
-        $data = $tableModel->delDatas($param['ids'], true);
+        $data = $tableModel->delDatas($param['ids'], false);
         if (!$data) {
             return resultArray(['error' => $tableModel->getError()]);
         } 

@@ -1,16 +1,12 @@
 <?php
 namespace app\admin\controller;
 
+use app\common\controller\Common;
 use com\ueditor\Uploader;
-use think\Controller;
-use think\Request;
-
-class Ueditor extends Controller {
-
-	private $config;
-    public function __construct(Request $request = null)
+class Ueditor extends Common {
+    public function initialize()
     {
-        parent::__construct($request);
+        parent::initialize();
         $config=file_get_contents(EXTEND_PATH . 'com' . DS . 'ueditor' . DS . 'config' . DS ."config.json");
         $this->config=json_decode(preg_replace("/\/\*[\s\S]+?\*\//", "", $config), true);
     }
@@ -20,13 +16,14 @@ class Ueditor extends Controller {
         date_default_timezone_set("Asia/chongqing");
         error_reporting(E_ERROR);
         header("Content-Type: text/html; charset=utf-8");
+        $origin = isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:(isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'');
         /*防止跨域*/
-        header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);//允许的请求域
+        header('Access-Control-Allow-Origin: '.$origin);//允许的请求域
         header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
         header('Access-Control-Allow-Headers:authkey, sessionid, x_requested_with');
         header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头
-        $param = Request::instance()->param();;
+        $param=$this->request->param();
         switch ($param['action']) {
             case 'config':
                 $result =  json_encode($this->config);

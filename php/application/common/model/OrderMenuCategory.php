@@ -27,7 +27,7 @@ class OrderMenuCategory extends Common
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-	public function getDataList($keywords, $page, $limit)
+	public function getDataList()
 	{
         $cat = new \com\Category('order_menu_category', array('id', 'pid', 'name', 'name'));
         $data = $cat->getList('', 0, 'id');

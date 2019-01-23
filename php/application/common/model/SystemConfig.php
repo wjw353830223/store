@@ -33,11 +33,11 @@ class SystemConfig extends Model
 	public function createData($param)
 	{
 		$list = [
-		    ['id' => 1, 'value' => $param['SYSTEM_NAME']],
-		    ['id' => 2, 'value' => $param['SYSTEM_LOGO']],
-		    ['id' => 3, 'value' => $param['LOGIN_SESSION_VALID']],
-		    ['id' => 4, 'value' => $param['IDENTIFYING_CODE']],	
-		    ['id' => 5, 'value' => $param['LOGO_TYPE']],			
+		    ['id' => 1, 'value' => $param['SYSTEM_NAME'], 'name'=>'SYSTEM_NAME'],
+		    ['id' => 2, 'value' => $param['SYSTEM_LOGO'], 'name'=>'SYSTEM_LOGO'],
+		    ['id' => 3, 'value' => $param['LOGIN_SESSION_VALID'], 'name'=>'LOGIN_SESSION_VALID'],
+		    ['id' => 4, 'value' => $param['IDENTIFYING_CODE'],'name'=>'IDENTIFYING_CODE'],
+		    ['id' => 5, 'value' => $param['LOGO_TYPE'],'name'=>'LOGO_TYPE'],
 		];
 		if ($this->saveAll($list)) {
 			$data = $this->getDataList();

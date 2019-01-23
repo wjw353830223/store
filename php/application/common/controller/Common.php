@@ -8,16 +8,18 @@
 namespace app\common\controller;
 
 use think\Controller;
-use think\Request;
+use think\facade\Request;
 
 class Common extends Controller
 {
     public $param;
-    public function _initialize()
+    public function initialize()
     {
-        parent::_initialize();
-        /*防止跨域*/      
-        header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);//允许的请求域
+        parent::initialize();
+        $origin = isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:(isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'');
+
+        /*防止跨域*/
+        header('Access-Control-Allow-Origin: '.$origin);//允许的请求域
         header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
         header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头

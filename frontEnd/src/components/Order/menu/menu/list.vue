@@ -59,6 +59,15 @@
 		</el-table>
 		<div class="pos-rel p-t-20">
 			<btnGroup :selectedData="multipleSelection" :type="'order/menus'"></btnGroup>
+      <div class="block pages">
+				<el-pagination
+				@current-change="handleCurrentChange"
+				layout="prev, pager, next"
+				:page-size="limit"
+				:current-page="currentPage"
+				:total="dataCount">
+				</el-pagination>
+			</div>
 		</div>
 	</div>
 </template>
@@ -71,10 +80,27 @@
     data() {
       return {
         tableData: [],
-        multipleSelection: []
+        multipleSelection: [],
+        dataCount: null,
+        currentPage: null,
+        keywords: '',
+        limit: 15
       }
     },
     methods: {
+       handleCurrentChange(page) {
+        router.push({ path: this.$route.path, query: { keywords: this.keywords, page: page }})
+      },
+      getCurrentPage() {
+        let data = this.$route.query
+        if (data) {
+          if (data.page) {
+            this.currentPage = parseInt(data.page)
+          } else {
+            this.currentPage = 1
+          }
+        }
+      },
       selectItem(val) {
         this.multipleSelection = val
       },
@@ -99,7 +125,14 @@
         })
       },
       getMenus() {
-        this.apiGet('order/menus').then((res) => {
+        const data = {
+          params: {
+            keywords: this.keywords,
+            page: this.currentPage,
+            limit: this.limit
+          }
+        }
+        this.apiGet('order/menus',data).then((res) => {
           this.handelResponse(res, (data) => {
             this.tableData = data.list
           })
@@ -107,6 +140,7 @@
       }
     },
     created() {
+      this.getCurrentPage()
       this.getMenus()
     },
     computed: {

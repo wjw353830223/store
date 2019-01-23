@@ -33,6 +33,7 @@ class Groups extends ApiCommon
     {
         $groupModel = model('Group');
         $param = $this->param;
+        $param['pid']=isset($param['pid'])?$param['pid']:0;
         $data = $groupModel->createData($param);
         if (!$data) {
             return resultArray(['error' => $groupModel->getError()]);
@@ -44,6 +45,7 @@ class Groups extends ApiCommon
     {
         $groupModel = model('Group');
         $param = $this->param;
+        $param['pid']=isset($param['pid'])?$param['pid']:0;
         $data = $groupModel->updateDataById($param, $param['id']);
         if (!$data) {
             return resultArray(['error' => $groupModel->getError()]);

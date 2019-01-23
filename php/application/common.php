@@ -1,9 +1,21 @@
 <?php
+use think\facade\Hook;
+// +----------------------------------------------------------------------
+// | ThinkPHP [ WE CAN DO IT JUST THINK ]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2006-2016 http://thinkphp.cn All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// +----------------------------------------------------------------------
+// | Author: 流年 <liu21st@gmail.com>
+// +----------------------------------------------------------------------
 
+// 应用公共文件
 /**
  * 行为绑定
  */
-\think\Hook::add('app_init','app\\common\\behavior\\InitConfigBehavior');
+
+Hook::add('app_init','app\\common\\behavior\\InitConfigBehavior');
 
 /**
  * 返回对象
@@ -47,4 +59,5 @@ function user_md5($str, $auth_key = '')
 {
     return '' === $str ? '' : md5(sha1($str) . $auth_key);
 }
+
 

@@ -7,6 +7,7 @@
 
 namespace app\common\model;
 
+
 use think\Db;
 use com\verify\HonrayVerify;
 
@@ -47,11 +48,11 @@ class User extends Common
 	{
 		$map = [];
 		if ($keywords) {
-			$map['username|realname'] = ['like', '%'.$keywords.'%'];
+			$map[] = ['username|realname','like', '%'.$keywords.'%'];
 		}
 
 		// 默认除去超级管理员
-		$map['user.id'] = array('neq', 1);
+		$map[] = ['user.id', 'neq', 1];
 		$dataCount = $this->alias('user')->where($map)->count('id');
 
 		$list = $this
@@ -68,7 +69,6 @@ class User extends Common
 		$list = $list
 				->field('user.*,structure.name as s_name, post.name as p_name')
 				->select();
-
 		$data['list'] = $list;
 		$data['dataCount'] = $dataCount;
 
@@ -311,7 +311,8 @@ class User extends Common
     protected function getMenuAndRule($u_id)
     {
     	if ($u_id === 1) {
-            $map['status'] = 1;
+            $map[] = ['status','=',1];
+            $rules =Db::name('admin_rule')->where($map)->select();
     		$menusList = Db::name('admin_menu')->where($map)->order('sort asc')->select();
     	} else {
     		$groups = $this->get($u_id)->groups;
@@ -320,8 +321,8 @@ class User extends Common
     			$ruleIds = array_unique(array_merge($ruleIds, explode(',', $v['rules'])));
     		}
 
-            $ruleMap['id'] = array('in', $ruleIds);
-            $ruleMap['status'] = 1;
+            $ruleMap[] = ['id','in', $ruleIds];
+            $ruleMap[] = ['status','=',1];
             // 重新设置ruleIds，除去部分已删除或禁用的权限。
             $rules =Db::name('admin_rule')->where($ruleMap)->select();
             foreach ($rules as $k => $v) {
@@ -329,8 +330,8 @@ class User extends Common
             	$rules[$k]['name'] = strtolower($v['name']);
             }
             empty($ruleIds)&&$ruleIds = '';
-    		$menuMap['status'] = 1;
-            $menuMap['rule_id'] = array('in',$ruleIds);
+    		$menuMap[] = ['status','=',1];
+            $menuMap[] = ['rule_id', 'in',$ruleIds];
             $menusList = Db::name('admin_menu')->where($menuMap)->order('sort asc')->select();
         }
         if (!$menusList) {

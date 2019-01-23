@@ -38,7 +38,7 @@ class Table extends Common
         $list = $this
             ->where($map)
             ->alias('table')
-            ->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'INNER')
+            ->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'LEFT')
             ->field('table.*, structure.name as structure_name');
         // 若有分页
         if ($page && $limit) {
@@ -63,7 +63,7 @@ class Table extends Common
 		$data = $this
 				->alias('table')
 				->where('table.id', $id)
-				->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'INNER')
+				->join('__ADMIN_STRUCTURE__ structure', 'table.structure_id=structure.id', 'LEFT')
 				->field('table.*, structure.name as structure_name')
 				->find();
 		if (!$data) {

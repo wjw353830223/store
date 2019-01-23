@@ -14,8 +14,6 @@ class Baksql {
     private $error;//错误信息
 
     public function __construct($config) {
-        //$config['path']=ROOT_PATH . 'public' . DS .'static'. DS .'data/'; //默认目录
-        //$config["sqlbakname"]=date("YmdHis",time()).".sql";//默认保存文件
         $this->config = $config;
         $this->begin = microtime(true);
         header("Content-type: text/html;charset=utf-8");

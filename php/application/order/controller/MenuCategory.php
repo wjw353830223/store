@@ -14,7 +14,7 @@ class MenuCategory extends ApiCommon
     {
         $menuCategoryModel = model('OrderMenuCategory');
         $param = $this->param;
-        $data = $menuCategoryModel->getDataList($param['keywords'], $param['page'], $param['limit']);
+        $data = $menuCategoryModel->getDataList();
         return resultArray(['data' => $data]);
     }
 

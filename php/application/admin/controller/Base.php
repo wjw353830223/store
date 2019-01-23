@@ -9,7 +9,8 @@ namespace app\admin\controller;
 
 use com\verify\HonrayVerify;
 use app\common\controller\Common;
-use think\Request;
+use think\facade\Config;
+use think\facade\Request;
 
 class Base extends Common
 {
@@ -52,10 +53,11 @@ class Base extends Common
 
     public function getConfigs()
     {
-        $systemConfig = cache('DB_CONFIG_DATA'); 
+        $systemConfig = cache('DB_CONFIG_DATA');
         if (!$systemConfig) {
             //获取所有系统配置
-            $systemConfig = model('admin/SystemConfig')->getDataList();
+            $model=model('SystemConfig');
+            $systemConfig = $model->getDataList();
             cache('DB_CONFIG_DATA', null);
             cache('DB_CONFIG_DATA', $systemConfig, 36000); //缓存配置
         }
@@ -64,7 +66,7 @@ class Base extends Common
 
     public function getVerify()
     {
-        $captcha = new HonrayVerify(config('captcha'));
+        $captcha = new HonrayVerify(config('captcha.'));
         return $captcha->entry();
     }
 
