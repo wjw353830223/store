@@ -77,6 +77,7 @@
             } else {
               data.isRemember = 0
             }
+            console.log(data)
             this.apiPost('admin/base/login', data).then((res) => {
               if (res.code != 200) {
                 this.loading = !this.loading

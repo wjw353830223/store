@@ -5,6 +5,7 @@ const apiMethods = {
         axios.get(url, data).then((response) => {
           resolve(response.data)
         }, (response) => {
+          console.log(resposne)
           reject(response)
           _g.closeGlobalLoading()
           bus.$message({

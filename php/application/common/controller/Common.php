@@ -23,7 +23,10 @@ class Common extends Controller
         header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
         header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头
-        $param =  Request::instance()->param();            
+        if(strtoupper($_SERVER['REQUEST_METHOD'])== 'OPTIONS'){
+            exit;
+        }
+        $param =  Request::instance()->param();
         $this->param = $param;
     }
 

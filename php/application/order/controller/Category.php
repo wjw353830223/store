@@ -7,13 +7,12 @@
 
 namespace app\order\controller;
 
-class MenuCategory extends ApiCommon
+class Category extends ApiCommon
 {
     
     public function index()
     {
         $menuCategoryModel = model('OrderMenuCategory');
-        $param = $this->param;
         $data = $menuCategoryModel->getDataList();
         return resultArray(['data' => $data]);
     }

@@ -7,7 +7,7 @@
 
 namespace app\admin\controller;
 
-class SystemConfigs extends ApiCommon
+class Configs extends ApiCommon
 {
     public function save()
     {

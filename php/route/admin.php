@@ -9,18 +9,13 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 
-Route::get('think', function () {
-    return 'hello,ThinkPHP5!';
-});
-
-Route::get('hello/:name', 'index/index/hello');
 Route::resource('admin/rules','admin/rules');
 Route::resource('admin/groups','admin/groups');
 Route::resource('admin/users','admin/users');
 Route::resource('admin/menus','admin/menus');
 Route::resource('admin/structures','admin/structures');
 Route::resource('admin/posts','admin/posts');
-Route::miss('admin/base/miss');
+//Route::miss('admin/base/miss');
 
 Route::post('admin/base/login','admin/base/login');
 Route::post('admin/base/relogin','admin/base/relogin');
@@ -31,7 +26,7 @@ Route::get('admin/base/getVerify','admin/base/getVerify');
 
 Route::post('admin/upload','admin/upload/index');
 
-Route::post('admin/systemConfigs','admin/systemConfigs/save');
+Route::post('admin/configs','admin/configs/save');
 
 Route::post('admin/rules/deletes','admin/rules/deletes');
 Route::post('admin/rules/enables','admin/rules/enables');
