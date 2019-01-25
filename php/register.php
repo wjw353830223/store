@@ -4,5 +4,5 @@ defined('APP_PATH') or define('APP_PATH', __DIR__ . '/application/');
 // 加载基础文件
 require __DIR__ . '/thinkphp/base.php';
 // 执行应用并响应
-Container::get('app')->path(APP_PATH)->bind('index/Sregister')->run()->send();
+Container::get('app')->path(APP_PATH)->bind('socket/Sregister')->run()->send();
 

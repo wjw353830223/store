@@ -7,6 +7,8 @@
 
 namespace app\admin\controller;
 
+use GatewayClient\Gateway;
+
 class Users extends ApiCommon
 {
 
@@ -85,6 +87,22 @@ class Users extends ApiCommon
             return resultArray(['error' => $userModel->getError()]);
         } 
         return resultArray(['data' => '操作成功']);         
+    }
+    /**
+     * websocket 绑定uid 和 client_id
+     */
+    public function bind(){
+        $param = $this->param;
+        $userinfo=$GLOBALS['userInfo'];
+        Gateway::bindUid($param['client_id'],$userinfo['id']);
+        if(empty($userinfo['groups'])){
+            Gateway::joinGroup($param['client_id'], 'admin');
+        }else{
+            foreach($userinfo['groups'] as $val){
+                Gateway::joinGroup($param['client_id'], $val['id']);
+            }
+        }
+        return resultArray(['data' => 'success']);
     }
     
 }

@@ -1,5 +1,6 @@
 <?php
 namespace app\common\job;
+use GatewayClient\Gateway;
 use think\Db;
 use think\queue\Job;
 use tp5er\Backup as Baksql;
@@ -76,18 +77,33 @@ class Backup{
      * @return boolean                 任务执行的结果
      */
     private function checkDatabaseToSeeIfJobNeedToBeDone($data){
+        $this->config=$data;
         return true;
     }
     private function doBackup() {
         $db= $this->__connect();
         $this->doDelete();
         $tables = $db->dataList();
+        $count=count($tables);
         foreach($tables as $key=>$table){
+            if($table['name']==config('database.prefix').'jobs'){
+                continue;
+            }
+            $message=json_encode([
+                'type'=>'backup',
+                'percentage'=>round($key/$count, 2) * 100
+            ]);
+            Gateway::sendToGroup('admin',$message);
             $db->setFile([
                 'name'=>date('Ymd-His'),
                 'part'=>1
             ])->backup($table['name']);
         }
+        $message=json_encode([
+            'type'=>'backup',
+            'percentage'=>100
+        ]);
+        Gateway::sendToGroup('admin',$message);
         return true;
     }
     private function doDelete() {
@@ -103,21 +119,37 @@ class Backup{
         $db= $this->__connect();
         $fileList=$db->fileList();
         if(!empty($fileList)){
+            $total=0;
+            $num=0;
             foreach($fileList as $key=>$val){
-                  $files=$db->getFile('timeverif',$val['time']);
-                  foreach($files as $file){
-                      $file['part']=1;
-                      $db->setFile($file)->import(0);
-                  }
+                $total += $val['part'];
+            }
+            foreach($fileList as $key=>$val){
+                $files=$db->getFile('timeverif',$val['time']);
+                foreach($files as $kk=>$file){
+                    $num+=1;
+                    $file['part']=1;
+                    $db->setFile($file)->import(0);
+                    $message=json_encode([
+                        'type'=>'restore',
+                        'percentage'=>round($num/$total, 2) * 100
+                    ]);
+                    Gateway::sendToGroup('admin',$message);
+                }
             }
         }
+        $message=json_encode([
+            'type'=>'restore',
+            'percentage'=>100
+        ]);
+        Gateway::sendToGroup('admin',$message);
         return true;
     }
     private function __connect($config=null){
         if(is_null($config)){
            $config=[
                'path'     => config('backup.')['path'],//数据库备份路径
-               'part'     => 10485760,//数据库备份卷大小 10M
+               'part'     => 1048576,//数据库备份卷大小 2M
                'compress' => 1,//数据库备份文件是否启用压缩 0不压缩 1 压缩
                'level'    => 9 //数据库备份文件压缩级别 1普通 4 一般  9最高
            ];

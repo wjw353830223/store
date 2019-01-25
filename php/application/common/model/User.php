@@ -211,6 +211,7 @@ class User extends Common
 
 		$map['username'] = $username;
 		$userInfo = $this->where($map)->find();
+		$userInfo['groups'] = $this->get($userInfo['id'])->groups->toArray();
     	if (!$userInfo) {
 			$this->error = '帐号不存在';
 			return false;

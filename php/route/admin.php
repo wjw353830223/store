@@ -36,6 +36,7 @@ Route::post('admin/groups/enables','admin/groups/enables');
 
 Route::post('admin/users/deletes','admin/users/deletes');
 Route::post('admin/users/enables','admin/users/enables');
+Route::post('admin/users/bind','admin/users/bind');
 
 Route::post('admin/menus/deletes','admin/menus/deletes');
 Route::post('admin/menus/enables','admin/menus/enables');
