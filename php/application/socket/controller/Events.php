@@ -8,8 +8,8 @@ namespace app\socket\controller;
  * 然后观察一段时间workerman.log看是否有process_timeout异常
  */
 //declare(ticks=1);
-use GatewayWorker\Lib\Db;
 use \GatewayWorker\Lib\Gateway;
+use Workerman\MySQL\Connection;
 
 class Events
 {
@@ -17,7 +17,7 @@ class Events
     //进程启动时 实例化数据库连接 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
     public static function onWorkerStart($worker){
         $db_config = config('database.');
-        self::$db = new Db($db_config['hostname'], $db_config['hostport'], $db_config['username'],
+        self::$db = new Connection($db_config['hostname'], $db_config['hostport'], $db_config['username'],
             $db_config['password'], $db_config['database'], $db_config['charset']);
     }
     /**
