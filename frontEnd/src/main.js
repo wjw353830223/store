@@ -1,71 +1,70 @@
-import 'babel-polyfill'
 import Vue from 'vue'
-import App from './App'
+import App from './App.vue'
+import router  from './router';
+import store from './store'
 import axios from 'axios'
+import VueAxios from 'vue-axios'
+import Vant from 'vant'
+import 'vant/lib/index.css'
+import 'lib-flexible/flexible.js'
 import Lockr from 'lockr'
-import Cookies from 'js-cookie'
-import _ from 'lodash'
-import moment from 'moment'
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-import routes from './routes'
-import VueRouter from 'vue-router'
-import store from './vuex/store'
-import filter from './assets/js/filter'
-import _g from './assets/js/global'
-import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
-import 'assets/css/global.css'
-import 'assets/css/base.css'
-axios.defaults.baseURL = HOST
-axios.defaults.timeout = 1000 * 15
-axios.defaults.headers.authKey = Lockr.get('authKey')
-axios.defaults.headers.sessionId = Lockr.get('sessionId')
-axios.defaults.withCredentials = true
-axios.defaults.headers['Content-Type'] = 'application/json'
 
-const router = new VueRouter({
-  mode: 'history',
-  base: __dirname,
-  routes
-})
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+axios.defaults.baseURL = process.env.VUE_APP_BASE_URL
 
-router.beforeEach((to, from, next) => {
-  const hideLeft = to.meta.hideLeft
-  store.dispatch('showLeftMenu', hideLeft)
-  store.dispatch('showLoading', true)
-  NProgress.start()
-  next()
-})
-
-router.afterEach(transition => {
-  NProgress.done()
-  store.dispatch('showLoading', false)
-})
-
-Vue.use(ElementUI)
-Vue.use(VueRouter)
-
+axios.interceptors.request.use(
+  config => {
+      config.timeout = 30 * 1000;
+      config.withCredentials = true;
+      let noAuthApi=[
+          'index/open/login',
+          'index/position',
+          'index/menus',
+          'index/menus/read',
+          'index/category',
+          'index/category/read'
+      ];
+      if(noAuthApi.indexOf(config.url) > -1){
+          return config;
+      }
+      let authApi=[
+          'index/member/bind'
+      ];
+      //拦截需要登录的后台接口
+      if(authApi.indexOf(config.url) > -1){
+        let token = store.state.token;
+        if(!token){
+          router.replace({ 
+              path: 'index/open/login',
+              query: { redirect: router.currentRoute.fullPath }
+          });
+        }
+        return config;
+      }
+  },
+  error => {
+      return Promise.reject(error);
+  }
+);
+axios.interceptors.response.use(
+  response => {
+      return response.data;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
 window.router = router
 window.store = store
-window.HOST = HOST
 window.axios = axios
-window._ = _
-window.moment = moment
 window.Lockr = Lockr
-window.Cookies = Cookies
-window._g = _g
-window.pageSize = 15
-
-const bus = new Vue()
-window.bus = bus
-window.wsUrl = 'ws://127.0.0.1:7272'
+window.wsUrl = process.env.VUE_APP_WS_URL
+window.baseUrl = process.env.VUE_APP_BASE_URL
+Vue.config.productionTip = false
+Vue.use(VueAxios, axios)
+Vue.use(Vant)
 new Vue({
-  el: '#app',
-  template: '<App/>',
-  filters: filter,
   router,
   store,
-  components: { App }
-// render: h => h(Login)
+  render: h => h(App),
 }).$mount('#app')

@@ -1,162 +1,117 @@
+let axios = window.axios
+let store = window.store
+let sha1 = require('sha1');
 const apiMethods = {
-  methods: {
-    apiGet(url, data) {
-      return new Promise((resolve, reject) => {
-        axios.get(url, data).then((response) => {
-          resolve(response.data)
-        }, (response) => {
-          console.log(resposne)
-          reject(response)
-          _g.closeGlobalLoading()
-          bus.$message({
-            message: '请求超时，请检查网络',
-            type: 'warning'
-          })
-        })
-      })
-    },
-    apiPost(url, data) {
-      return new Promise((resolve, reject) => {
-        axios.post(url, data).then((response) => {
-          resolve(response.data)
-        }).catch((response) => {
-          console.log('f', response)
-          resolve(response)
-          bus.$message({
-            message: '请求超时，请检查网络',
-            type: 'warning'
-          })
-        })
-      })
-    },
-    apiDelete(url, id) {
-      return new Promise((resolve, reject) => {
-        axios.delete(url + id).then((response) => {
-          resolve(response.data)
-        }, (response) => {
-          reject(response)
-          _g.closeGlobalLoading()
-          bus.$message({
-            message: '请求超时，请检查网络',
-            type: 'warning'
-          })
-        })
-      })
-    },
-    apiPut(url, id, obj) {
-      return new Promise((resolve, reject) => {
-        axios.put(url + id, obj).then((response) => {
-          resolve(response.data)
-        }, (response) => {
-          _g.closeGlobalLoading()
-          bus.$message({
-            message: '请求超时，请检查网络',
-            type: 'warning'
-          })
-          reject(response)
-        })
-      })
-    },
-    handelResponse(res, cb, errCb) {
-      _g.closeGlobalLoading()
-      if (res.code == 200) {
-        cb(res.data)
-      } else {
-        if (typeof errCb == 'function') {
-          errCb()
-        }
-        this.handleError(res)
-      }
-    },
-    handleError(res) {
-      if (res.code) {
-        switch (res.code) {
-          case 101:
-            if (Cookies.get('rememberPwd')) {
-              let data = {
-                rememberKey: Lockr.get('rememberKey')
-              }
-              this.reAjax('admin/base/relogin', data).then((res) => {
-                this.handelResponse(res, (data) => {
-                  this.resetCommonData(data)
-                })
-              })
-            } else {
-              _g.toastMsg('error', res.error)
-              setTimeout(() => {
-                router.replace('/')
-              }, 1500)
-            }
-            break
-          case 103:
-            _g.toastMsg('error', res.error)
-            setTimeout(() => {
-              router.replace('/')
-            }, 1500)
-            break
-          case 102:
-            _g.toastMsg('error', res.error)
-            this.goback()
-            break
-          default :
-            _g.toastMsg('error', res.error)
-        }
-      } else {
-        console.log('default error')
-      }
-    },
-    resetCommonData(data) {
-      _(data.menusList).forEach((res, key) => {
-        if (key == 0) {
-          res.selected = true
+    methods: {
+      urlEncode(param, key, encode) {
+        if (param==null) return '';
+        var paramStr = '';
+        var t = typeof (param);
+        if (t == 'string' || t == 'number' || t == 'boolean') {
+            paramStr += '&' + key + '='  + ((encode==null||encode) ? encodeURIComponent(param) : param); 
         } else {
-          res.selected = false
+          for (var i in param) {
+              var k = key == null ? i : key + (param instanceof Array ? '[' + i + ']' : '.' + i)
+              paramStr += this.urlEncode(param[i], k, encode)
+          }
         }
-      })
-      Lockr.set('menus', data.menusList)              // 菜单数据
-      Lockr.set('authKey', data.authKey)              // 权限认证
-      Lockr.set('rememberKey', data.rememberKey)      // 记住密码的加密字符串
-      Lockr.set('authList', data.authList)            // 权限节点列表
-      Lockr.set('userInfo', data.userInfo)            // 用户信息
-      Lockr.set('sessionId', data.sessionId)          // 用户sessionid
-      window.axios.defaults.headers.authKey = Lockr.get('authKey')
-      let routerUrl = ''
-      if (data.menusList[0].url) {
-        routerUrl = data.menusList[0].url
-      } else {
-        routerUrl = data.menusList[0].child[0].child[0].url
-      }
-      setTimeout(() => {
-        let path = this.$route.path
-        if (routerUrl != path) {
-          router.replace(routerUrl)
-        } else {
-          _g.shallowRefresh(this.$route.name)
-        }
-      }, 1000)
-    },
-    reAjax(url, data) {
-      return new Promise((resolve, reject) => {
-        axios.post(url, data).then((response) => {
-          resolve(response.data)
-        }, (response) => {
-          reject(response)
-          bus.$message({
-            message: '请求超时，请检查网络',
-            type: 'warning'
+        return paramStr;
+      },
+      apiGet(url, data) {
+        let _self=this;
+        return new Promise((resolve, reject) => {
+          axios.get(url, data).then((response) => {
+            resolve(response)
+          }, (response) => {
+            reject(response)
+            _self.$toast.fail('请求超时，请检查网络');
           })
         })
-      })
+      },
+      apiPost(url, data) {
+        let newData = Object.assign(data, {
+          token: store.state.token,
+          _timestamp: Date.parse(new Date()) / 1000
+        });
+        let parseData = Object.keys(newData).sort();
+        let newObj={};
+        for (let i = 0; i < parseData.length; i++) {
+          newObj[parseData[i]] = newData[parseData[i]];
+        }
+        let queryData = this.urlEncode(newObj).slice(1)
+        let signature = sha1(queryData);
+        newObj.signature = signature
+        let _self=this;
+        return new Promise((resolve, reject) => {
+          axios.post(url, newObj).then((response) => {
+            resolve(response)
+          }).catch((response) => {
+            reject(response)
+            _self.$toast.fail('请求超时，请检查网络');
+          })
+        })
+      },
+      apiDelete(url, id) {
+        let _self=this;
+        return new Promise((resolve, reject) => {
+          axios.delete(url + id).then((response) => {
+            resolve(response)
+          }, (response) => {
+            reject(response)
+            _self.$toast.fail('请求超时，请检查网络');
+          })
+        })
+      },
+      apiPut(url, id, obj) {
+        let _self=this;
+        return new Promise((resolve, reject) => {
+          axios.put(url + id, obj).then((response) => {
+            resolve(response)
+          }, (response) => {
+            reject(response)
+            _self.$toast.fail('请求超时，请检查网络');
+          })
+        })
+      },
+      handelResponse(res, cb, errCb) {
+        if (res.code == 200) {
+          cb(res.data)
+        } else {
+          if (typeof errCb == 'function') {
+            errCb()
+          }
+          this.handleError(res)
+        }
+      },
+      handleError(res) {
+        let _self=this;
+        if (res.code) {
+          if(res.code=='400') {
+            _self.$toast.fail(res.error);
+          }
+        } else {
+          _self.$toast.fail('default error');
+        }
+      },
+      reAjax(url, data) {
+        let _self=this;
+        return new Promise((resolve, reject) => {
+          axios.post(url, data).then((response) => {
+            resolve(response.data)
+          }, (response) => {
+            reject(response)
+            _self.$toast.fail('请求超时，请检查网络');
+          })
+        })
+      }
+    },
+    computed: {
+      
+    },
+    mounted() {
+      
     }
-  },
-  computed: {
-    showLoading() {
-      return store.state.globalLoading
-    }
-  },
-  mounted() {
-    store.dispatch('showLoading', false)
   }
-}
-
-export default apiMethods
+  
+  export default apiMethods
+  

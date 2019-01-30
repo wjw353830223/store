@@ -30,6 +30,12 @@ import menusList from './components/Order/menu/menu/list.vue'
 import menusAdd from './components/Order/menu/menu/add.vue'
 import menusEdit from './components/Order/menu/menu/edit.vue'
 import backupRestore from './components/Administrative/system/backup/restore.vue'
+import adPositionList from './components/Order/advert/positions/list.vue'
+import adPositionAdd from './components/Order/advert/positions/add.vue'
+import adPositionEdit from './components/Order/advert/positions/edit.vue'
+import advertList from './components/Order/advert/advert/list.vue'
+import advertAdd from './components/Order/advert/advert/add.vue'
+import advertEdit from './components/Order/advert/advert/edit.vue'
 /**
  * meta参数解析
  * hideLeft: 是否隐藏左侧菜单，单页菜单为true
@@ -139,6 +145,24 @@ const routes = [
       { path: 'menus/list', component: menusList, name: 'menusList', meta: { hideLeft: false, module: 'Order', menu: 'menus' }},
       { path: 'menus/add', component: menusAdd, name: 'menusAdd', meta: { hideLeft: false, module: 'Order', menu: 'menus' }},
       { path: 'menus/edit/:id', component: menusEdit, name: 'menusEdit', meta: { hideLeft: false, module: 'Order', menu: 'menus' }}
+    ]
+  },
+  {
+    path: '/order',
+    component: Home,
+    children: [
+      { path: 'adPosition/list', component: adPositionList, name: 'adPositionList', meta: { hideLeft: false, module: 'Order', menu: 'adPosition' }},
+      { path: 'adPosition/add', component: adPositionAdd, name: 'adPositionAdd', meta: { hideLeft: false, module: 'Order', menu: 'adPosition' }},
+      { path: 'adPosition/edit/:id', component: adPositionEdit, name: 'adPositionEdit', meta: { hideLeft: false, module: 'Order', menu: 'adPosition' }}
+    ]
+  },
+  {
+    path: '/order',
+    component: Home,
+    children: [
+      { path: 'advert/list', component: advertList, name: 'advertList', meta: { hideLeft: false, module: 'Order', menu: 'advert' }},
+      { path: 'advert/add', component: advertAdd, name: 'advertAdd', meta: { hideLeft: false, module: 'Order', menu: 'advert' }},
+      { path: 'advert/edit/:id', component: advertEdit, name: 'advertEdit', meta: { hideLeft: false, module: 'Order', menu: 'advert' }}
     ]
   }
 ]

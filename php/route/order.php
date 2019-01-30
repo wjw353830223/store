@@ -11,11 +11,19 @@
 Route::resource('order/tables','order/tables');
 Route::resource('order/category','order/category');
 Route::resource('order/menus','order/menus');
-
+Route::resource('order/positions','order/positions');
+Route::resource('order/advert','order/advert');
 
 Route::post('order/tables/deletes','order/tables/deletes');
 Route::post('order/tables/enables','order/tables/enables');
 Route::get('order/tables/qrcode','order/tables/qrcode');
+
+Route::post('order/positions/deletes','order/positions/deletes');
+Route::post('order/positions/enables','order/positions/enables');
+
+Route::post('order/advert/deletes','order/advert/deletes');
+Route::post('order/advert/enables','order/advert/enables');
+Route::post('order/advert/upload','order/advert/upload');
 
 Route::post('order/category/deletes','order/category/deletes');
 Route::post('order/category/enables','order/category/enables');

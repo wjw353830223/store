@@ -8,10 +8,18 @@ namespace app\socket\controller;
  * 然后观察一段时间workerman.log看是否有process_timeout异常
  */
 //declare(ticks=1);
+use GatewayWorker\Lib\Db;
 use \GatewayWorker\Lib\Gateway;
 
 class Events
 {
+    public static $db;
+    //进程启动时 实例化数据库连接 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
+    public static function onWorkerStart($worker){
+        $db_config = config('database.');
+        self::$db = new Db($db_config['hostname'], $db_config['hostport'], $db_config['username'],
+            $db_config['password'], $db_config['database'], $db_config['charset']);
+    }
     /**
      * 当客户端连接时触发
      * 将client_id 发给客户端 客户端通过ajax请求绑定用户uid
@@ -51,7 +59,7 @@ class Events
             case 'pong':
                 return;
             // 客户端登录 message格式: {type:login, name:xx, room_id:1} ，添加到客户端，广播给所有客户端xx进入聊天室
-            case 'backup':
+            case 'waiter':
 
                 return;
         }
