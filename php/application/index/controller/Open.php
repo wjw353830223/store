@@ -61,7 +61,7 @@ class Open extends ApiCommon
         if (is_null($token)) {
             return resultArray(['error'=>'token创建失败']);
         }else{
-            return resultArray(['data'=>$member_id]);
+            return resultArray(['data'=>$token]);
         }
     }
 }

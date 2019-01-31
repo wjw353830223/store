@@ -1,0 +1,26 @@
+<template>
+    <ui-page >
+      menu/list.ui
+    </ui-page>
+</template>
+
+<script>
+export default {
+  config: {
+    navigationBarTitleText: "菜单列表"
+  },
+  data () {
+    return {
+     
+    }
+  },
+  methods: {
+
+  }
+}
+
+</script>
+
+<style lang="less">
+
+</style>
