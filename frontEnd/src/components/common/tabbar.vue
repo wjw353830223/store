@@ -4,7 +4,7 @@
             <van-tabbar-item icon="fuwu" @click='waiter'>服务员</van-tabbar-item>
             <van-tabbar-item icon="airudiantubiaohuizhi-zhuanqu_meishicaipu">码上点餐</van-tabbar-item>
             <van-tabbar-item :info="info" icon="navicon-xtcp">我的菜谱</van-tabbar-item>
-            <van-tabbar-item  icon="gerenzhongxin">个人中心</van-tabbar-item>
+            <van-tabbar-item  icon="gerenzhongxin" @click="member">个人中心</van-tabbar-item>
         </van-tabbar>
     </div>
 </template>
@@ -31,7 +31,7 @@ export default {
                         message:'系统检测到你未登录，请先登录！'
                     }).then(()=> {
                         router.replace({ 
-                            path: 'index/open/login',
+                            path: Api.login.path,
                             query: { redirect: router.currentRoute.fullPath }
                         });
                     })
@@ -45,11 +45,28 @@ export default {
                             mid:16
                         }
                     },
-                    this.bindUid
+                    //this.bindUid
                 )
             }).catch(() => {
                 // on cancel
             });
+       },
+       member() {
+            let token = store.state.token;
+            if(!token){
+                _self.$dialog.alert({
+                    message:'系统检测到你未登录，请先登录！'
+                }).then(()=> {
+                    router.replace({ 
+                        path: Api.login.path,
+                        query: { redirect: router.currentRoute.fullPath }
+                    });
+                })
+                return;
+            }
+            router.push({
+                path: Api.memberRead.path
+            })
        }
     },
     components: {

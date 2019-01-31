@@ -27,5 +27,9 @@ const Api = {
         path:'index/member/bind',//'admin/users/bind'
         auth:true
     },
+    memberRead: {
+        path:'index/member/read',
+        auth:true
+    },
 }
 export  { Api }

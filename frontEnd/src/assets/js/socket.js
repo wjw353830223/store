@@ -48,16 +48,24 @@ const webSocket = {
         this.$toast.fail("connection closed (" + e.code + ")");
       },
       websocketOpen() {
-        this.$toast.success("websocket连接成功");
+        this.$notify({
+          message: 'websocket连接成功!',
+          duration: 3000,
+          background: '#1989fa'
+        });
       },
       websocketonmessage(e) {
         let data = JSON.parse(e.data)
-        // let _self=this
         if (this.callback != null && this.callback != "" && this.callback != undefined) {
           this.callback(data)
           this.callback = null
           return
         }
+        // this.$notify({
+        //   message: 'websocket用户绑定成功！',
+        //   duration: 3000,
+        //   background: '#1989fa'
+        // });
         //if(data.type=='backup' || data.type=='restore') { }
       },
       heartbeat() {
@@ -76,11 +84,17 @@ const webSocket = {
                 client_id: data.client_id,
             }).then((res) => {
                 this.handelResponse(res, (data) => {
-                if(data!='success'){
+                  if(data!='success'){
+                      _self.$notify({
+                          message: 'socket网络故障！'
+                      });
+                  }else{
                     _self.$notify({
-                        message: 'socket网络故障！'
-                    });
-                }
+                      message: 'websocket用户绑定成功！',
+                      duration: 3000,
+                      background: '#1989fa'
+                   });
+                  }
                 })
             })
         }
