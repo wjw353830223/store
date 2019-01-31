@@ -1,4 +1,5 @@
 let store = window.store
+let Api = window.Api
 const webSocket = {
     data() {
       return {
@@ -71,8 +72,7 @@ const webSocket = {
       bindUid(data){
         let _self=this
         if(data.type=='init'){
-            //let role = store.state.member;
-            this.apiPost('index/member/bind', {
+            this.apiPost(Api.bind.path, {
                 client_id: data.client_id,
             }).then((res) => {
                 this.handelResponse(res, (data) => {

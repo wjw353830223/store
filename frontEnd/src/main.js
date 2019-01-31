@@ -31,7 +31,7 @@ axios.interceptors.request.use(
         let token = store.state.token;
         if(!token){
           router.replace({ 
-              path: 'index/open/login',
+              path: Api.login.path,
               query: { redirect: router.currentRoute.fullPath }
           });
         }
@@ -39,7 +39,7 @@ axios.interceptors.request.use(
       }
       if(auth === null){
         router.replace({ 
-          path: 'index/open/login',
+          path: Api.login.path,
           query: { redirect: router.currentRoute.fullPath }
         });
       }
@@ -60,6 +60,7 @@ window.router = router
 window.store = store
 window.axios = axios
 window.Lockr = Lockr
+window.Api = Api
 window.wsUrl = process.env.VUE_APP_WS_URL
 window.baseUrl = process.env.VUE_APP_BASE_URL
 Vue.config.productionTip = false

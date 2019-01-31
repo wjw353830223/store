@@ -64,7 +64,7 @@ export default {
     },
     created() {
         let _self=this
-        this.apiGet('index/position').then((res) => {
+        this.apiGet(Api.position.path).then((res) => {
           this.handelResponse(res, (data) => {
            data[0].adverts.map(function(item){
                _self.swipeImages.push(baseUrl + item.image)
