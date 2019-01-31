@@ -71,6 +71,7 @@ const webSocket = {
       bindUid(data){
         let _self=this
         if(data.type=='init'){
+            //let role = store.state.member;
             this.apiPost('index/member/bind', {
                 client_id: data.client_id,
             }).then((res) => {

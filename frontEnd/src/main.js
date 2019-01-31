@@ -8,30 +8,26 @@ import Vant from 'vant'
 import 'vant/lib/index.css'
 import 'lib-flexible/flexible.js'
 import Lockr from 'lockr'
-
+import { Api } from './api'
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 axios.defaults.baseURL = process.env.VUE_APP_BASE_URL
-
 axios.interceptors.request.use(
   config => {
       config.timeout = 30 * 1000;
       config.withCredentials = true;
-      let noAuthApi=[
-          'index/open/login',
-          'index/position',
-          'index/menus',
-          'index/menus/read',
-          'index/category',
-          'index/category/read'
-      ];
-      if(noAuthApi.indexOf(config.url) > -1){
+      let auth=null
+      let arr =  Object.keys(Api)
+      for(let i=0; i< arr.length; i++){
+        if(Api[arr[i]].path==config.url){
+          auth = Api[arr[i]].auth
+          break;
+        }
+      }
+      if(auth===false){
           return config;
       }
-      let authApi=[
-          'index/member/bind'
-      ];
       //拦截需要登录的后台接口
-      if(authApi.indexOf(config.url) > -1){
+      if(auth === true){
         let token = store.state.token;
         if(!token){
           router.replace({ 
@@ -40,6 +36,12 @@ axios.interceptors.request.use(
           });
         }
         return config;
+      }
+      if(auth === null){
+        router.replace({ 
+          path: 'index/open/login',
+          query: { redirect: router.currentRoute.fullPath }
+        });
       }
   },
   error => {
