@@ -51,7 +51,7 @@ export default {
     return {
       //全局变量
       globalData: {
-  
+       
       },
       WIN_WIDTH:ui.WIN_WIDTH,
       tabIndex: 0,
@@ -141,7 +141,7 @@ export default {
       this.initBodyStyle()
     }
   },
-    // 初始化
+  // 初始化
   created () {
     this.initTab()
     this.initPaths()

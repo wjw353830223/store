@@ -86,11 +86,13 @@ class Tables extends ApiCommon
         return resultArray(['data' => '操作成功']);         
     }
     public function qrcode(){
+        $tableModel = model('Table');
         $host_name = exec("hostname");
         $host_ip = gethostbyname($host_name); //获取本机的局域网IP
         $param = $this->param;
-        $url = $url = url('/dist/frontend','tid='.$param['id'],'', $host_ip);
-
+        $table = $tableModel->getDataById($param['id']);
+        //$url = $url = url('/dist/#/pages/index','tid='.$table->id.'&tableName='.$table->name,'', $host_ip);
+        $url = $host_ip . '/dist/#/pages/index?tid='.$table->id.'&tableName='.$table->name;
         $qrcode = new Qrcode();
         $qrcode->content = $url;
         $qrcode->is_save = true;
