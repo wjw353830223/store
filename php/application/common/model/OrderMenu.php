@@ -50,6 +50,19 @@ class OrderMenu extends Common
         $data['dataCount'] = $dataCount;
         return $data;
 	}
+    public function getCategoryDataList($category_id,$page, $limit)
+    {
+        $dataCount = $this->where('category_id',$category_id)->count('id');
+        $list = $this->where('category_id',$category_id);
+        // 若有分页
+        if ($page && $limit) {
+            $list = $list->page($page, $limit);
+        }
+        $list = $list->select();
+        $data['list'] = $list;
+        $data['dataCount'] = $dataCount;
+        return $data;
+    }
     /**
      * [createData 新建]
      * @linchuangbin

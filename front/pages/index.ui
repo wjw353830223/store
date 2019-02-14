@@ -1,17 +1,31 @@
 <template>
   <ui-page>
-      <ui-view class="sliderContent" ui:if="{{isShow}}">
-        <ui-slider width="260"></ui-slider>      
+      <ui-view class='index-swiper'>
+        <ui-ex-swiper pagination loop autoplay="{{ autoplay }}">
+          <ui-ex-swiper-item ui:for="{{swiperFirst}}" ui:for-item="item">
+            <ui-image src="{{ item.image }}" mode="simple"></ui-image>
+            <ui-text class="slide-title">{{ item.title }}</ui-text>
+          </ui-ex-swiper-item>
+        </ui-ex-swiper>
       </ui-view>
-      <ui-view class="buttonContent">
-        <ui-button type="primary" bindtap="sliderShow">创建滑动条控件</ui-button>
-        <ui-button type="primary" bindtap="navHandle">{{ buttonText }}</ui-button>
+      <ui-view class='search'>
+        <ui-text class="eat">今天吃点什么？</ui-text>
+        <ui-input type="search" name="search" placeholder="搜索" show-clear></ui-input>
       </ui-view>
+      <van-button type="default">默认按钮</van-button>
+<van-button type="primary">主要按钮</van-button>
+<van-button type="warning">警告按钮</van-button>
+<van-button type="danger">危险按钮</van-button>
   </ui-page>
 </template>
 
 <script>
-import { Api } from '#/api.js'
+import { Api, baseUrl } from '#/api.js'
+import Vue from 'vue';
+import 'vant/lib/button/style';
+import { Button } from 'vant';
+
+Vue.use(Button);
 export default {
   config: {
     navigationBarTitleText: '首页',
@@ -21,10 +35,22 @@ export default {
   data () {
     return {
       buttonText: '界面跳转',
-      isShow:false
+      isShow:false,
+      autoplay: {
+        delay: 3000
+      },
+      swiperFirst:[{
+        image:''
+      }],
+      swiperSecond:[],
     }
   },
   methods: {
+    handleChange (index) {
+      ui.showToast({
+        title: `切换到第${index + 1}项`
+      })
+    },
     sliderShow() {
       this.isShow=true
     },
@@ -42,10 +68,18 @@ export default {
     }, 1000);
   },
   created() {
+    let that=this
     this.fetch(Api.position.path, {
       method:'GET'
     }).then((response) => {
-      console.log(response)
+      response[0].adverts.map((item) => {
+        item.image=baseUrl+item.image
+      })
+      response[1].adverts.map((item) => {
+        item.image=baseUrl+item.image
+      })
+      that.swiperFirst = response[0].adverts
+      that.swiperSecond = response[1].adverts
     }).catch((error) => {
       console.log(error)
     })
@@ -63,5 +97,37 @@ export default {
 }
 .buttonContent{
   padding:50px;
+}
+.swiper-slide {
+    .ui-image {
+      width: 100%;
+      height:175px;
+  }
+}
+.index-swiper{
+  .swiper-pagination {
+    bottom: 30px;
+  }
+  .swiper-lazy-preloader {
+      width: 24px;
+      height: 24px;
+      margin-left: -12px;
+      margin-top: -12px;
+    }
+  .swiper-slide {
+    position: relative;
+    .slide-title {
+      color:#fff;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      text-align: center;
+      height: 24px;
+      line-height: 24px;
+      font-size: 14px;
+      background-color: rgba(51, 51, 51, .2);
+    }
+  }
 }
 </style>

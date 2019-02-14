@@ -81,6 +81,24 @@
               <el-input v-model="scope.row.preferential_price" placeholder="输入优惠价"></el-input>
             </template>
           </el-table-column>
+          <el-table-column label="图片">
+            <template slot-scope="scope">
+              <el-upload
+                :action="uploadSpecUrl+'?index='+scope.$index"
+                name='imageSpec'
+                :headers="uploadHeaders"
+                :show-file-list="false"
+                :on-success="handleUploadSpecSuccess"
+                :with-credentials='withCredentials'
+              > 
+                {{sku}}
+                <br/>
+                {{scope.row}}
+                <img v-if="scope.row.image" :src="host+'/'+scope.row.image" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </template>
+          </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
@@ -105,6 +123,7 @@
   export default {
     data() {
       return {
+        host:window.HOST,
         isLoading: false,
         withCredentials:true,
         attributions:[],
@@ -126,6 +145,7 @@
         },
         options: [{ pid: 0, name: '无' }],
         uploadUrl:null,
+        uploadSpecUrl:null,
         uploadHeaders:{
           authKey:Lockr.get('authKey'),
           sessionId:Lockr.get('sessionId')
@@ -168,6 +188,12 @@
       }
     },
     methods: {
+      handleRemove(file, fileList) {
+        console.log(file, fileList);
+      },
+      handlePreview(file) {
+        console.log(file);
+      },
       handleDelete(index, row) {
         this.sku.splice(index,1)
       },
@@ -209,7 +235,7 @@
         });
       },
       handleCheckedValueChange(value){
-
+      
       },
       ready (editorInstance) {
        
@@ -227,27 +253,47 @@
         return postSpec
       },
       edit(form) {
-        this.$refs[form].validate((valid) => {
-          if (valid) {
-            this.isLoading = !this.isLoading
-            this.form.attributions=this.attributions
-            this.form.postSpec=this.parseSku()
-            this.apiPut('order/menus/', this.form.id, this.form).then((res) => {
-              this.handelResponse(res, (data) => {
-                _g.toastMsg('success', '编辑成功')
-                setTimeout(() => {
-                  this.goback()
-                }, 1500)
-              }, () => {
-                this.isLoading = !this.isLoading
-              })
-            })
+        let specImageChecked=[]
+        first:
+        for(let i=0;i<this.attributions[0].specValueChecked.length;i++){
+          second:
+          for(let j=0;j<this.sku.length;j++){
+            third:
+            for(let m=0;m<this.sku[j].specValue.length;m++){
+              if(this.sku[j].specValue[m] == this.attributions[0].specValueChecked[i]){
+                specImageChecked.push(this.sku[j].image)
+                break second;
+              }
+            }
           }
-        })
+        }
+        this.attributions[0].specImageChecked=specImageChecked
+        // this.$refs[form].validate((valid) => {
+        //   if (valid) {
+        //     this.isLoading = !this.isLoading
+        //     this.form.attributions=this.attributions
+        //     this.form.postSpec=this.parseSku()
+        //     this.apiPut('order/menus/', this.form.id, this.form).then((res) => {
+        //       this.handelResponse(res, (data) => {
+        //         _g.toastMsg('success', '编辑成功')
+        //         setTimeout(() => {
+        //           this.goback()
+        //         }, 1500)
+        //       }, () => {
+        //         this.isLoading = !this.isLoading
+        //       })
+        //     })
+        //   }
+        // })
       },
       handleUploadSuccess(response, file, fileList) {
         this.handelResponse(response, (data) => {
           this.form.image = data
+        })
+      },
+      handleUploadSpecSuccess(response, file, fileList) {
+        this.handelResponse(response, (data) => {
+          this.sku[data.index].image=data.path
         })
       },
       getMenuCategory() {
@@ -303,6 +349,7 @@
       this.getMenuCategory()
       this.getMenuInfo()
       this.uploadUrl= window.HOST + 'order/menus/upload'
+      this.uploadSpecUrl= window.HOST + 'order/menus/uploadSpec'
       this.config.serverUrl = window.HOST + 'admin/ueditor/upload'
     },
     computed: {
@@ -322,7 +369,8 @@
                 specName:[attributions[0].specName],
                 specValue:[attributions[0].specValueChecked[i]],
                 price:attributions[0].price,
-                preferential_price:attributions[0].preferential_price
+                preferential_price:attributions[0].preferential_price,
+                image:attributions[0].image
               })
             }
             if(attributions.length > 1){
@@ -337,9 +385,15 @@
           let _self=this
           newValue.map(function(item,index){
             _self.sku[index].price=item.price
-             _self.sku[index].preferential_price=item.preferential_price
+            _self.sku[index].preferential_price=item.preferential_price
+            _self.sku[index].image=item.image
           })
         }
+      }
+    },
+    watch: {
+      sku(newValue,oldValue){
+        console.log(newValue,oldValue)
       }
     },
     components: {
@@ -351,5 +405,8 @@
 <style>
 .el-form-item__content{
   line-height: 0;
+}
+.el-form-item .el-table .el-upload img{
+  height:60px;
 }
 </style>

@@ -33,7 +33,38 @@ class OrderMenuCategory extends Common
         $data = $cat->getList('', 0, 'id');
         return $data;
 	}
+    public function getSortDataList(){
+	    $data = $this->getDataList();
+	    if(!empty($data)){
+	        $data = $this->genTree9($data);
+        }
+        return $data;
+    }
+    public function genTree5($items) {
+	    $data = [];
+	    foreach($items as $item){
+	        $item['text'] = $item['else'];
+            $data[$item['id']] = $item;
+        }
 
+        foreach ($data as $item)
+            $data[$item['pid']]['children'][$item['id']] = &$data[$item['id']];
+        return isset($data[0]['children']) ? $data[0]['children'] : array();
+    }
+    function genTree9($items) {
+        $data = [];
+        foreach($items as $item){
+            $item['text'] = $item['else'];
+            $data[$item['id']] = $item;
+        }
+        $tree = array(); //格式化好的树
+        foreach ($data as $item)
+            if (isset($data[$item['pid']]))
+                $data[$item['pid']]['children'][] = &$data[$item['id']];
+            else
+                $tree[] = &$data[$item['id']];
+        return $tree;
+    }
 	/**
 	 * [getDataById 根据主键获取详情]
 	 * @linchuangbin

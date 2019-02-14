@@ -103,6 +103,27 @@ class Menus extends ApiCommon
         }
         return resultArray(['error' =>  $file->getError()]);
     }
+    public function uploadSpec()
+    {
+        /*防止跨域*/
+        header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);//允许的请求域
+        header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
+        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头
+        $request = Request::instance();
+        $file = $request->file('imageSpec');
+        if (!$file) {
+            return resultArray(['error' => '请上传规格图片']);
+        }
+        $info = $file->validate(['ext'=>'jpg,png,jpeg'])->move(ROOT_PATH . DS . 'public' . DS . 'uploads' . DS . 'specs');
+        if ($info) {
+            return resultArray(['data' =>  [
+                'path' => 'uploads/specs/'. $info->getSaveName(),
+                'index' => $this->request->param()['index']
+            ] ]);
+        }
+        return resultArray(['error' =>  $file->getError()]);
+    }
     public function uploadDetailFiles()
     {
         /*防止跨域*/

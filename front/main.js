@@ -19,7 +19,7 @@ let options = {
             return
           }
           ui.showConfirm({
-            content: '您所在的桌号是 ' + tableName + '?',
+            content: '您所在的桌号是 ' + tableName + ' 吗?',
             confirmButtonText: '是',
             cancelButtonText: '否',
             success (result) {
@@ -47,6 +47,6 @@ let options = {
   }
 }
 ui.extend({
-  fetch:fetch,
+  fetch:fetch
 })
 ui.start(options)

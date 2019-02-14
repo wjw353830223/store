@@ -31,6 +31,7 @@ Route::post('order/category/enables','order/category/enables');
 Route::post('order/menus/deletes','order/menus/deletes');
 Route::post('order/menus/enables','order/menus/enables');
 Route::post('order/menus/upload','order/menus/upload');
+Route::post('order/menus/uploadSpec','order/menus/uploadSpec');
 Route::post('order/menus/detailFiles','order/menus/uploadDetailFiles');
 return [
 

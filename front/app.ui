@@ -29,7 +29,7 @@ export default {
           "text": "首页"
         },
         {
-          "pagePath": "pages/menu/list",
+          "pagePath": "pages/menu/category",
           "iconName": "airudiantubiaohuizhi-zhuanqu_meishicaipu",
           "text": "码上点餐"
         },

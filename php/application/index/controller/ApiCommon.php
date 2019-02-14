@@ -7,18 +7,21 @@
 
 namespace app\index\controller;
 use app\common\controller\Common;
-use think\facade\Request;
-
+use think\Request;
 class ApiCommon extends Common
 {
     protected $open_controller = ['Open','Position','Menus','Category'];
-    protected $request = null;
+    public $request = null;
     protected $member_info = null;
+    public function __construct(Request $request)
+    {
+        parent::__construct();
+        $this->request = $request;
+    }
     public function initialize()
     {
         parent::initialize();
-        $this->request = Request::instance();
-        $param = $this->param;
+        $param = $this->request->param();
         $controller = $this->request->controller();
         if (!in_array($controller,$this->open_controller) && $this->check_access($param)) {
             $token_info = model('Token')->getInfoByToken($param['token']);

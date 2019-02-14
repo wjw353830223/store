@@ -11,12 +11,12 @@
 
 Route::post('index/open/login','index/open/login');
 
-Route::get('index/position','index/position/index');
+Route::get('index/position/index','index/position/index');
 
-Route::get('index/menus','index/menus/index');
+Route::get('index/menus/index','index/menus/index');
 Route::get('index/menus/read','index/menus/read');
 
-Route::get('index/category','index/category/index');
+Route::get('index/category/index','index/category/index');
 Route::get('index/category/read','index/category/read');
 
 Route::Post('index/member/bind','index/member/bind');

@@ -13,7 +13,7 @@ class Category extends ApiCommon
     public function index()
     {
         $menuCategoryModel = model('OrderMenuCategory');
-        $data = $menuCategoryModel->getDataList();
+        $data = $menuCategoryModel->getSortDataList();
         return resultArray(['data' => $data]);
     }
 

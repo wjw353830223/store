@@ -1,21 +1,172 @@
 <template>
     <ui-page >
-      menu/list.ui
+      <van-card
+        :price="item.preferential_price/100"
+        :desc="item.introduction"  
+        :title="item.name"
+        :thumb="item.image"
+        :origin-price="item.price/100"
+        ui:for="{{ items }}" 
+        ui:for-item="item"
+      >
+        <div slot="num">
+          销量：{{item.sale_nums}}
+        </div>
+        <div slot="footer">
+          <van-button size="mini" type="primary" @click="showsku(item)">加入菜谱</van-button>
+          <van-button size="mini" type="primary" @click='showsku(item)'>立即点餐</van-button>
+        </div>
+      </van-card>
+      
+      <!-- <van-sku
+        v-model="skuShow"
+        stepper-title="数量"
+        :sku="sku"
+        :goods="goods"
+        :goods-id="goodsId"
+        quota=0
+        show-add-cart-btn
+        reset-stepper-on-hide
+        :initial-sku="initialSku"
+        :custom-stepper-config="customStepperConfig"
+        @buy-clicked="onBuyClicked"
+        @add-cart="onAddCartClicked"
+      >
+        <template slot="sku-header-price" slot-scope="props">
+          <div class="van-sku__goods-price">
+            <span class="van-sku__price-symbol">￥</span><span class="van-sku__price-num">{{ props.price }}</span>
+          </div>
+        </template>
+        <template slot="sku-actions" slot-scope="props">
+          <div class="van-sku-actions">
+            <van-button bottom-action @click="onPointClicked">积分兑换</van-button>
+            <van-button type="primary" bottom-action @click="props.skuEventBus.$emit('sku:buy')">买买买</van-button>
+          </div>
+        </template>
+      </van-sku> -->
+      
+
+
     </ui-page>
 </template>
 
 <script>
+import { Api, baseUrl } from '#/api.js'
+import Vue from 'vue';
+import { Card, Button } from 'vant';
+import 'vant/lib/card/style';
+import 'vant/lib/button/style';
+Vue.use(Card);
+Vue.use(Button);
 export default {
   config: {
     navigationBarTitleText: "菜单列表"
   },
   data () {
     return {
-     
+      items: [],
+      skuShow: false,
+      initialSku: {},
+      sku: {
+        tree:[],
+        list:[],
+        price:0,
+        stock_num:0,
+        collection_id:0,
+        none_sku:false,
+        message:[
+          {
+            datetime: '0',
+            multiple: '1',
+            name: '留言',
+            type: 'text', 
+            required: '0'
+          }
+        ],
+        hide_stock: false
+      },
+      goods: {
+        title: '测试商品',
+        picture: 'https://img.yzcdn.cn/1.jpg'
+      },
+      goodsId: '',
+      customStepperConfig: {
+        quotaText: '',
+        // 自定义步进器超过限制时的回调
+        handleOverLimit: (data) => {
+          // const { action, limitType, quota, quotaUsed } = data;
+          // if (action === 'minus') {
+          //   Toast('至少选择一件商品');
+          // } else if (action === 'plus') {
+          //   if (limitType === LIMIT_TYPE.QUOTA_LIMIT) {
+          //     let msg = `单次限购${quota}件`;
+          //     if (quotaUsed > 0) msg += `，你已购买${quotaUsed}`;
+          //     Toast(msg);
+          //   } else {
+          //     Toast('库存不够了');
+          //   }
+          // }
+        }
+      }
     }
   },
   methods: {
-
+    showsku(item){
+      let that=this
+      that.skuShow=true
+      that.fetch(Api.menusRead.path, {
+        method:'GET',
+        data: {
+          id: item.id
+        }
+      }).then((response) => {
+        console.log(response)
+        let attributions = JSON.parse(response.attributions)
+        console.log(attributions)
+        attributions.map((item,index) => {
+          let spec={}
+          for(let i=0; i< item.specValueChecked.length;i++){
+            spec={
+              id: i+1,
+              name: item.specValueChecked[i]
+            }
+            if(index==0){
+              spec.imgUrl=item.specValueCheckedImage[i]
+            }
+            that.sku.tree.push(spec)
+          }
+        })
+        response.specs.map((item) => {
+          that.sku.list.push({
+            id: item.id,
+            price: item.preferential_price, 
+            s1: '1215',
+            s2: '1193',
+            s3: '0',
+            stock_num: 110 
+          })
+        })
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+  },
+  created() {
+    let query = ui.getQuery()
+    let that=this
+    this.fetch(Api.menusIndex.path, {
+      method:'GET',
+      data: {
+        cid: query.cid
+      }
+    }).then((response) => {
+       response.list.map((item) => {
+         item.image = baseUrl+item.image
+         that.items.push(item)
+       })
+    }).catch((error) => {
+      console.log(error)
+    })
   }
 }
 

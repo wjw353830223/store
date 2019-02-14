@@ -81,6 +81,21 @@
               <el-input v-model="scope.row.preferential_price" placeholder="输入优惠价"></el-input>
             </template>
           </el-table-column>
+          <el-table-column label="图片">
+            <template slot-scope="scope">
+              <el-upload
+                :action="uploadSpecUrl+'?index='+scope.$index"
+                name='imageSpec'
+                :headers="uploadHeaders"
+                :show-file-list="false"
+                :on-success="handleUploadSpecSuccess"
+                :with-credentials='withCredentials'
+              >
+                <img v-if="scope.row.image" :src="host+'/'+scope.row.image" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </template>
+          </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
@@ -105,6 +120,7 @@
   export default {
     data() {
       return {
+        host:window.HOST,
         attributions:[],
         specName:null,
         isLoading: false,
@@ -126,6 +142,7 @@
         },
         options: [{ pid: 0, name: '无' }],
         uploadUrl:null,
+        uploadSpecUrl:null,
         uploadHeaders:{
           authKey:Lockr.get('authKey'),
           sessionId:Lockr.get('sessionId')
@@ -227,6 +244,23 @@
         return postSpec
       },
       add(form) {
+        console.log(this.attributions)
+        console.log(this.sku)
+        let specImageChecked=[]
+        first:
+        for(let i=0;i<this.attributions[0].specValueChecked.length;i++){
+          second:
+          for(let j=0;j<this.sku.length;j++){
+            third:
+            for(let m=0;m<this.sku[j].specValue.length;m++){
+              if(this.sku[j].specValue[m] == this.attributions[0].specValueChecked[i]){
+                specImageChecked.push(this.sku[j].image)
+                break second;
+              }
+            }
+          }
+        }
+        this.attributions[0].specImageChecked=specImageChecked
         this.$refs[form].validate((valid) => {
           if (valid) {
             this.form.attributions=this.attributions
@@ -248,6 +282,11 @@
       handleUploadSuccess(response, file, fileList) {
         this.handelResponse(response, (data) => {
           this.form.image = data
+        })
+      },
+      handleUploadSpecSuccess(response, file, fileList) {
+        this.handelResponse(response, (data) => {
+          this.sku[data.index].image=data.path
         })
       },
       getMenuCategory() {
@@ -290,6 +329,7 @@
     created() {
       this.getMenuCategory()
       this.uploadUrl= window.HOST + 'order/menus/upload'
+      this.uploadSpecUrl= window.HOST + 'order/menus/uploadSpec'
       this.config.serverUrl = window.HOST + 'admin/ueditor/upload'
     },
     computed: {
@@ -306,7 +346,8 @@
           for(var i=0;i<attributions[0].specValueChecked.length;i++){
             sku.push({
               specName:[attributions[0].specName],
-              specValue:[attributions[0].specValueChecked[i]]
+              specValue:[attributions[0].specValueChecked[i]],
+              image:null
             })
           }
           if(attributions.length > 1){
@@ -318,6 +359,7 @@
         sku.map(function(item){
           item.price=null
           item.preferential_price=null
+          item.image=null
         })
         return sku;
       }
@@ -328,3 +370,8 @@
     mixins: [http, fomrMixin]
   }
 </script>
+<style>
+.el-form-item .el-table .el-upload img{
+  height:60px;
+}
+</style>

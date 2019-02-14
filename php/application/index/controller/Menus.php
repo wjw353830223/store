@@ -13,14 +13,16 @@ class Menus extends ApiCommon
     public function index()
     {
         $menuModel = model('OrderMenu');
-        $param = $this->request->param;
-        $data = $menuModel->getDataList($param['keywords'], $param['page'], $param['limit']);
+        $param = $this->request->param();
+        $page = isset($param['page'])?$param['page']:0;
+        $limit = isset($param['limit'])?$param['limit']:0;
+        $data = $menuModel->getCategoryDataList($param['cid'], $page, $limit);
         return resultArray(['data' => $data]);
     }
     public function read()
     {
         $menuModel = model('OrderMenu');
-        $param = $this->param;
+        $param = $this->request->param();
         $data = $menuModel->getDataById($param['id']);
         if (!$data) {
             return resultArray(['error' => $menuModel->getError()]);

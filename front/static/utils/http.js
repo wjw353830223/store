@@ -1,6 +1,5 @@
 import { urlEncode } from './util'
 import { Api, baseUrl } from '../../api.js'
-import { fetch } from './http.js'
 import './jquery'
 import './jquery.sha1'
 //接口请求封装
@@ -84,8 +83,7 @@ function fetch(path, options) {
             data: newObj,
             header: header,
             success: function(res){
-                console.log(res)
-                if(res.data.code=='200'){
+                if(res.data.code=='200') {
                     resolve(res.data.data)
                 }else{
                     ui.showConfirm({
@@ -101,12 +99,10 @@ function fetch(path, options) {
                                     cancelButtonText: '取消',
                                     success: (result) => {
                                         login(result.value).then((response) => {
-                                            console.log(response)
                                             if(response.code=='200'){
                                                 ui.showToast({
                                                     title: '登录成功！'
                                                 })
-                                                ui.setStorageSync('token',response.data);
                                             }else{
                                                 ui.showToast({
                                                     title: '登录失败！'
@@ -127,7 +123,7 @@ function fetch(path, options) {
         })
     })
 }
-//登录弹框
+//登录接口
 function login(mobile){
     return new Promise((resolve,reject) => {
         ui.request({

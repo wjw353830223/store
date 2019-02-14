@@ -4,11 +4,11 @@ const Api = {
         auth:false
     },
     position: {
-        path:'index/position',
+        path:'index/position/index',
         auth:false
     },
     menusIndex: {
-        path:'index/menus',
+        path:'index/menus/index',
         auth:false
     },
     menusRead: {
@@ -16,7 +16,7 @@ const Api = {
         auth:false
     },
     categoryIndex: {
-        path:'index/category',
+        path:'index/category/index',
         auth:false
     },
     categorRead: {
