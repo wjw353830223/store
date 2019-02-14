@@ -244,8 +244,6 @@
         return postSpec
       },
       add(form) {
-        console.log(this.attributions)
-        console.log(this.sku)
         let specImageChecked=[]
         first:
         for(let i=0;i<this.attributions[0].specValueChecked.length;i++){
