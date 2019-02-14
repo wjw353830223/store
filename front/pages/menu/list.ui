@@ -18,32 +18,37 @@
         </div>
       </van-card>
       
-      <!-- <van-sku
+      <van-sku
         v-model="skuShow"
-        stepper-title="数量"
+        stepper-title="购买份数"
         :sku="sku"
         :goods="goods"
         :goods-id="goodsId"
-        quota=0
+        :quota="quota"
+        hide-stock=true
         show-add-cart-btn
         reset-stepper-on-hide
         :initial-sku="initialSku"
         :custom-stepper-config="customStepperConfig"
         @buy-clicked="onBuyClicked"
         @add-cart="onAddCartClicked"
+        @sku-selected="onSkuSelected"
       >
-        <template slot="sku-header-price" slot-scope="props">
+        <!-- <template 
+          slot="sku-header-price" 
+          slot-scope="props"
+        >
           <div class="van-sku__goods-price">
             <span class="van-sku__price-symbol">￥</span><span class="van-sku__price-num">{{ props.price }}</span>
           </div>
-        </template>
+        </template> -->
         <template slot="sku-actions" slot-scope="props">
           <div class="van-sku-actions">
-            <van-button bottom-action @click="onPointClicked">积分兑换</van-button>
-            <van-button type="primary" bottom-action @click="props.skuEventBus.$emit('sku:buy')">买买买</van-button>
+            <van-button bottom-action @click="onPointClicked">加入菜谱</van-button>
+            <van-button type="primary" bottom-action @click="props.skuEventBus.$emit('sku:buy')">立即点餐</van-button>
           </div>
         </template>
-      </van-sku> -->
+      </van-sku>
       
 
 
@@ -53,11 +58,13 @@
 <script>
 import { Api, baseUrl } from '#/api.js'
 import Vue from 'vue';
-import { Card, Button } from 'vant';
+import { Card, Button, Sku } from 'vant';
 import 'vant/lib/card/style';
 import 'vant/lib/button/style';
+import 'vant/lib/sku/style';
 Vue.use(Card);
 Vue.use(Button);
+Vue.use(Sku);
 export default {
   config: {
     navigationBarTitleText: "菜单列表"
@@ -66,7 +73,14 @@ export default {
     return {
       items: [],
       skuShow: false,
-      initialSku: {},
+      initialSku: {
+        s0: '1',
+        s1: '1',
+        s2: '1',
+        s3: '1',
+        s4: '1',
+        s5: '1'
+      },
       sku: {
         tree:[],
         list:[],
@@ -85,6 +99,7 @@ export default {
         ],
         hide_stock: false
       },
+      quota:0,
       goods: {
         title: '测试商品',
         picture: 'https://img.yzcdn.cn/1.jpg'
@@ -111,7 +126,23 @@ export default {
     }
   },
   methods: {
+    onBuyClicked() {
+
+    },
+    onAddCartClicked() {
+
+    },
+    onPointClicked(){
+
+    },
+    onSkuSelected(value){
+      if(value.skuValue.imgUrl){
+        this.goods.picture=baseUrl+value.skuValue.imgUrl
+      }
+    },
     showsku(item){
+      this.sku.list=[]
+      this.sku.tree=[]
       let that=this
       that.skuShow=true
       that.fetch(Api.menusRead.path, {
@@ -120,32 +151,61 @@ export default {
           id: item.id
         }
       }).then((response) => {
-        console.log(response)
+        that.goodsId = response.id
+        that.goods = {
+          title: response.name,
+          picture: baseUrl + response.image
+        }
+
         let attributions = JSON.parse(response.attributions)
-        console.log(attributions)
         attributions.map((item,index) => {
-          let spec={}
+          let specs=[]
           for(let i=0; i< item.specValueChecked.length;i++){
-            spec={
+            let spec={
               id: i+1,
               name: item.specValueChecked[i]
             }
             if(index==0){
-              spec.imgUrl=item.specValueCheckedImage[i]
+              spec.imgUrl=item.specImageChecked[i]
             }
-            that.sku.tree.push(spec)
+            specs.push(spec)
           }
-        })
-        response.specs.map((item) => {
-          that.sku.list.push({
-            id: item.id,
-            price: item.preferential_price, 
-            s1: '1215',
-            s2: '1193',
-            s3: '0',
-            stock_num: 110 
+          that.sku.tree.push({
+            k:item.specName,
+            v:specs,
+            k_s:'s'+index
           })
         })
+        response.specs.map((item) => {
+          let sku={
+            id: item.id,
+            price: item.preferential_price || item.price, 
+            stock_num: 110 
+          }
+          for(let i=0;i<item.specName.length;i++){
+            for(let j=0;j<that.sku.tree.length;j++){
+              if(that.sku.tree[j].k==item.specName[i]){
+                for(let m=0;m<that.sku.tree[j].v.length;m++){
+                  if(that.sku.tree[j].v[m].name==item.specValue[i]){
+                    sku[that.sku.tree[j].k_s] = that.sku.tree[j].v[m].id
+                  }
+                }
+              }
+            }
+          }
+          that.sku.list.push(sku)
+        })
+        let price = response.preferential_price || response.price
+        that.sku.price = price/100
+        that.sku.stock_num = 1000
+        that.sku.collection_id = response.id
+        that.sku.none_sku = true;
+        if(response.specs.length>0){
+          that.sku.none_sku = false;
+        }
+        that.sku.hide_stock = true;
+        that.initialSku=that.sku.list[0]
+
       }).catch((error) => {
         console.log(error)
       })
