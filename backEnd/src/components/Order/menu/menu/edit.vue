@@ -91,9 +91,6 @@
                 :on-success="handleUploadSpecSuccess"
                 :with-credentials='withCredentials'
               > 
-                {{sku}}
-                <br/>
-                {{scope.row}}
                 <img v-if="scope.row.image" :src="host+'/'+scope.row.image" class="avatar">
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
@@ -143,6 +140,15 @@
           preferential_price: 0,
           postSpec:[]
         },
+        sku:[
+          {
+            specName:[],
+            specValue:[],
+            price:0,
+            preferential_price:0,
+            image:null
+          }
+        ],
         options: [{ pid: 0, name: '无' }],
         uploadUrl:null,
         uploadSpecUrl:null,
@@ -235,7 +241,7 @@
         });
       },
       handleCheckedValueChange(value){
-      
+        this.sku = this.getSku()
       },
       ready (editorInstance) {
        
@@ -268,23 +274,23 @@
           }
         }
         this.attributions[0].specImageChecked=specImageChecked
-        // this.$refs[form].validate((valid) => {
-        //   if (valid) {
-        //     this.isLoading = !this.isLoading
-        //     this.form.attributions=this.attributions
-        //     this.form.postSpec=this.parseSku()
-        //     this.apiPut('order/menus/', this.form.id, this.form).then((res) => {
-        //       this.handelResponse(res, (data) => {
-        //         _g.toastMsg('success', '编辑成功')
-        //         setTimeout(() => {
-        //           this.goback()
-        //         }, 1500)
-        //       }, () => {
-        //         this.isLoading = !this.isLoading
-        //       })
-        //     })
-        //   }
-        // })
+        this.$refs[form].validate((valid) => {
+          if (valid) {
+            this.isLoading = !this.isLoading
+            this.form.attributions=this.attributions
+            this.form.postSpec=this.parseSku()
+            this.apiPut('order/menus/', this.form.id, this.form).then((res) => {
+              this.handelResponse(res, (data) => {
+                _g.toastMsg('success', '编辑成功')
+                setTimeout(() => {
+                  this.goback()
+                }, 1500)
+              }, () => {
+                this.isLoading = !this.isLoading
+              })
+            })
+          }
+        })
       },
       handleUploadSuccess(response, file, fileList) {
         this.handelResponse(response, (data) => {
@@ -293,7 +299,9 @@
       },
       handleUploadSpecSuccess(response, file, fileList) {
         this.handelResponse(response, (data) => {
-          this.sku[data.index].image=data.path
+          let item = JSON.parse(JSON.stringify(this.sku[data.index]))
+          item.image=data.path
+          this.$set(this.sku, data.index, item)
         })
       },
       getMenuCategory() {
@@ -343,6 +351,27 @@
           }
         }
         return ret
+      },
+      getSku(){
+        let attributions=JSON.parse(JSON.stringify(this.attributions))
+        let sku=[];
+        if(attributions.length >= 1){
+          for(var i=0;i<attributions[0].specValueChecked.length;i++){
+            sku.push({
+              specName:[attributions[0].specName],
+              specValue:[attributions[0].specValueChecked[i]],
+              price:attributions[0].price,
+              preferential_price:attributions[0].preferential_price,
+              image:attributions[0].image
+            })
+          }
+          if(attributions.length > 1){
+            for(var i=1; i< attributions.length; i++){
+              sku = this.multiCartesian(sku, attributions[i])
+            }
+          } 
+        }
+        return sku;
       }
     },
     created() {
@@ -351,6 +380,7 @@
       this.uploadUrl= window.HOST + 'order/menus/upload'
       this.uploadSpecUrl= window.HOST + 'order/menus/uploadSpec'
       this.config.serverUrl = window.HOST + 'admin/ueditor/upload'
+      this.sku = this.getSku();
     },
     computed: {
       currentImage() {
@@ -358,43 +388,9 @@
           return window.HOST + this.form.image
         }
         return null
-      },
-      sku: {
-        get: function(){
-          let attributions=JSON.parse(JSON.stringify(this.attributions))
-          let sku=[];
-          if(attributions.length >= 1){
-            for(var i=0;i<attributions[0].specValueChecked.length;i++){
-              sku.push({
-                specName:[attributions[0].specName],
-                specValue:[attributions[0].specValueChecked[i]],
-                price:attributions[0].price,
-                preferential_price:attributions[0].preferential_price,
-                image:attributions[0].image
-              })
-            }
-            if(attributions.length > 1){
-              for(var i=1; i< attributions.length; i++){
-                sku = this.multiCartesian(sku, attributions[i])
-              }
-            } 
-          }
-          return sku;
-        },
-        set: function(newValue){
-          let _self=this
-          newValue.map(function(item,index){
-            _self.sku[index].price=item.price
-            _self.sku[index].preferential_price=item.preferential_price
-            _self.sku[index].image=item.image
-          })
-        }
       }
     },
     watch: {
-      sku(newValue,oldValue){
-        console.log(newValue,oldValue)
-      }
     },
     components: {
       'vue-ueditor-wrap':VueUeditorWrap
