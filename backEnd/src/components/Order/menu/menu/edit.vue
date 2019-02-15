@@ -259,21 +259,23 @@
         return postSpec
       },
       edit(form) {
-        let specImageChecked=[]
-        first:
-        for(let i=0;i<this.attributions[0].specValueChecked.length;i++){
-          second:
-          for(let j=0;j<this.sku.length;j++){
-            third:
-            for(let m=0;m<this.sku[j].specValue.length;m++){
-              if(this.sku[j].specValue[m] == this.attributions[0].specValueChecked[i]){
-                specImageChecked.push(this.sku[j].image)
-                break second;
+        if(this.attributions.length>0){
+          let specImageChecked=[]
+          first:
+          for(let i=0;i<this.attributions[0].specValueChecked.length;i++){
+            second:
+            for(let j=0;j<this.sku.length;j++){
+              third:
+              for(let m=0;m<this.sku[j].specValue.length;m++){
+                if(this.sku[j].specValue[m] == this.attributions[0].specValueChecked[i]){
+                  specImageChecked.push(this.sku[j].image)
+                  break second;
+                }
               }
             }
           }
+          this.attributions[0].specImageChecked=specImageChecked
         }
-        this.attributions[0].specImageChecked=specImageChecked
         this.$refs[form].validate((valid) => {
           if (valid) {
             this.isLoading = !this.isLoading
@@ -320,7 +322,7 @@
           this.handelResponse(res, (data) => {
             data.category_id = data.category_id.toString()
             data.recommend = parseInt(data.recommend )
-            this.attributions = JSON.parse(data.attributions)
+            this.attributions = data.attributions?JSON.parse(data.attributions):[]
             this.form=data   
             this.sku=data.specs
           })

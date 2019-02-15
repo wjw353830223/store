@@ -244,21 +244,23 @@
         return postSpec
       },
       add(form) {
-        let specImageChecked=[]
-        first:
-        for(let i=0;i<this.attributions[0].specValueChecked.length;i++){
-          second:
-          for(let j=0;j<this.sku.length;j++){
-            third:
-            for(let m=0;m<this.sku[j].specValue.length;m++){
-              if(this.sku[j].specValue[m] == this.attributions[0].specValueChecked[i]){
-                specImageChecked.push(this.sku[j].image)
-                break second;
+        if(this.attributions.length>0){
+          let specImageChecked=[]
+          first:
+          for(let i=0;i<this.attributions[0].specValueChecked.length;i++){
+            second:
+            for(let j=0;j<this.sku.length;j++){
+              third:
+              for(let m=0;m<this.sku[j].specValue.length;m++){
+                if(this.sku[j].specValue[m] == this.attributions[0].specValueChecked[i]){
+                  specImageChecked.push(this.sku[j].image)
+                  break second;
+                }
               }
             }
           }
+          this.attributions[0].specImageChecked=specImageChecked
         }
-        this.attributions[0].specImageChecked=specImageChecked
         this.$refs[form].validate((valid) => {
           if (valid) {
             this.form.attributions=this.attributions
