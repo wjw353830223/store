@@ -28,30 +28,32 @@
         hide-stock=true
         show-add-cart-btn
         reset-stepper-on-hide
+        :message-config="messageConfig"
         :initial-sku="initialSku"
         :custom-stepper-config="customStepperConfig"
+        @sku-selected="onSkuSelected"
         @buy-clicked="onBuyClicked"
         @add-cart="onAddCartClicked"
-        @sku-selected="onSkuSelected"
-      >
-        <!-- <template 
-          slot="sku-header-price" 
-          slot-scope="props"
-        >
-          <div class="van-sku__goods-price">
-            <span class="van-sku__price-symbol">￥</span><span class="van-sku__price-num">{{ props.price }}</span>
-          </div>
-        </template> -->
-        <template slot="sku-actions" slot-scope="props">
+        ref='sku'
+      > 
+        <template slot="sku-actions" scope="props">
           <div class="van-sku-actions">
-            <van-button bottom-action @click="onPointClicked">加入菜谱</van-button>
-            <van-button type="primary" bottom-action @click="props.skuEventBus.$emit('sku:buy')">立即点餐</van-button>
+            <van-button 
+              bottom-action 
+              @click="props.skuEventBus.$emit('sku:addCart')"
+            >
+              加入菜谱
+            </van-button>
+            <van-button
+              type="primary"
+              bottom-action
+              @click="props.skuEventBus.$emit('sku:buy')"
+            >
+              立即点餐
+            </van-button>
           </div>
         </template>
       </van-sku>
-      
-
-
     </ui-page>
 </template>
 
@@ -88,13 +90,14 @@ export default {
         stock_num:0,
         collection_id:0,
         none_sku:false,
-        message:[
+        messages:[
           {
             datetime: '0',
-            multiple: '1',
-            name: '留言',
+            multiple: '0',
+            name: '留言1',
             type: 'text', 
-            required: '0'
+            required: '0',
+            disable_type: false,
           }
         ],
         hide_stock: false
@@ -107,33 +110,22 @@ export default {
       goodsId: '',
       customStepperConfig: {
         quotaText: '',
-        // 自定义步进器超过限制时的回调
         handleOverLimit: (data) => {
-          // const { action, limitType, quota, quotaUsed } = data;
-          // if (action === 'minus') {
-          //   Toast('至少选择一件商品');
-          // } else if (action === 'plus') {
-          //   if (limitType === LIMIT_TYPE.QUOTA_LIMIT) {
-          //     let msg = `单次限购${quota}件`;
-          //     if (quotaUsed > 0) msg += `，你已购买${quotaUsed}`;
-          //     Toast(msg);
-          //   } else {
-          //     Toast('库存不够了');
-          //   }
-          // }
+        }
+      },
+      messageConfig:{
+        placeholderMap: {
+          text: '输入点餐留言',
         }
       }
     }
   },
   methods: {
-    onBuyClicked() {
-
+    onBuyClicked(skuData) {
+      console.log(skuData)
     },
-    onAddCartClicked() {
-
-    },
-    onPointClicked(){
-
+    onAddCartClicked(skuData) {
+      console.log(skuData)
     },
     onSkuSelected(value){
       if(value.skuValue.imgUrl){
@@ -157,7 +149,7 @@ export default {
           picture: baseUrl + response.image
         }
 
-        let attributions = JSON.parse(response.attributions)
+        let attributions = response.attributions?JSON.parse(response.attributions):[]
         attributions.map((item,index) => {
           let specs=[]
           for(let i=0; i< item.specValueChecked.length;i++){
@@ -176,7 +168,8 @@ export default {
             k_s:'s'+index
           })
         })
-        response.specs.map((item) => {
+        let newSpecs = response.specs || []
+        newSpecs.map((item) => {
           let sku={
             id: item.id,
             price: item.preferential_price || item.price, 
@@ -205,7 +198,6 @@ export default {
         }
         that.sku.hide_stock = true;
         that.initialSku=that.sku.list[0]
-
       }).catch((error) => {
         console.log(error)
       })
