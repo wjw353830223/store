@@ -27,32 +27,180 @@
         </i>
         我的菜谱
       </div>  
-      <button class="van-button van-button--warning van-button--large van-button--square van-goods-action-big-btn" @click="showsku(good)"><span class="van-button__text">加入菜谱</span></button>
-      <button class="van-button van-button--danger van-button--large van-button--square van-goods-action-big-btn" @click="showsku(good)"><span class="van-button__text">立即点餐</span></button> 
+      <button class="van-button van-button--warning van-button--large van-button--square van-goods-action-big-btn" @click="showsku()"><span class="van-button__text">加入菜谱</span></button>
+      <button class="van-button van-button--danger van-button--large van-button--square van-goods-action-big-btn" @click="showsku()"><span class="van-button__text">立即点餐</span></button> 
     </div>
+    <van-sku
+      v-model="skuShow"
+      stepper-title="购买份数"
+      :sku="sku"
+      :goods="goods"
+      :goods-id="goodsId"
+      :quota="quota"
+      hide-stock=true
+      show-add-cart-btn
+      reset-stepper-on-hide
+      :message-config="messageConfig"
+      :initial-sku="initialSku"
+      :custom-stepper-config="customStepperConfig"
+      @sku-selected="onSkuSelected"
+      @buy-clicked="onBuyClicked"
+      @add-cart="onAddCartClicked"
+      ref='sku'
+    > 
+      <template slot="sku-actions" scope="props">
+        <div class="van-sku-actions">
+          <van-button 
+            bottom-action 
+            @click="props.skuEventBus.$emit('sku:addCart')"
+          >
+            加入菜谱
+          </van-button>
+          <van-button
+            type="primary"
+            bottom-action
+            @click="props.skuEventBus.$emit('sku:buy')"
+          >
+            立即点餐
+          </van-button>
+        </div>
+      </template>
+    </van-sku>
   </ui-page>
 </template>
 
 <script>
 import { Api, baseUrl } from '#/api.js'
 import Vue from 'vue';
-import { GoodsAction, GoodsActionBigBtn, GoodsActionMiniBtn, Cell, CellGroup } from 'vant';
+import { GoodsAction, GoodsActionBigBtn, GoodsActionMiniBtn, Cell, CellGroup, Button, Sku } from 'vant';
 import 'vant/lib/goods-action/style';
 import 'vant/lib/goods-action-big-btn/style';
 import 'vant/lib/goods-action-mini-btn/style';
 import 'vant/lib/cell/style';
 import 'vant/lib/cell-group/style';
-Vue.use(GoodsAction).use(GoodsActionBigBtn).use(GoodsActionMiniBtn).use(Cell).use(CellGroup)
+import 'vant/lib/button/style';
+import 'vant/lib/sku/style';
+Vue.use(GoodsAction).use(GoodsActionBigBtn).use(GoodsActionMiniBtn).use(Cell).use(CellGroup).use(Button).use(Sku);
 export default {
   config: {
     navigationBarTitleText: "菜单详情"
   },
   data() {
     return {
-      good:{}
+      good:{},
+      skuShow: false,
+      initialSku: {
+        s0: '1',
+        s1: '1',
+        s2: '1',
+        s3: '1',
+        s4: '1',
+        s5: '1'
+      },
+      sku: {
+        tree:[],
+        list:[],
+        price:0,
+        stock_num:0,
+        collection_id:0,
+        none_sku:false,
+        messages:[
+          {
+            datetime: '0',
+            multiple: '0',
+            name: '留言1',
+            type: 'text', 
+            required: '0',
+            disable_type: false,
+          }
+        ],
+        hide_stock: false
+      },
+      quota:0,
+      goods: {
+        title: '测试商品',
+        picture: 'https://img.yzcdn.cn/1.jpg'
+      },
+      goodsId: '',
+      customStepperConfig: {
+        quotaText: '',
+        handleOverLimit: (data) => {
+        }
+      },
+      messageConfig:{
+        placeholderMap: {
+          text: '输入点餐留言',
+        }
+      }
     }
   },
   methods: {
+    onBuyClicked(skuData) {
+      console.log(skuData)
+    },
+    onAddCartClicked(skuData) {
+      console.log(skuData)
+    },
+    onSkuSelected(value){
+      if(value.skuValue.imgUrl){
+        this.goods.picture=baseUrl+value.skuValue.imgUrl
+      }
+    },
+    showsku(){
+      this.sku.list=[]
+      this.sku.tree=[]
+      this.skuShow=true
+
+      let attributions = this.good.attributions?JSON.parse(this.good.attributions):[]
+      attributions.map((item,index) => {
+        let specs=[]
+        for(let i=0; i< item.specValueChecked.length;i++){
+          let spec={
+            id: i+1,
+            name: item.specValueChecked[i]
+          }
+          if(index==0){
+            spec.imgUrl=item.specImageChecked[i]
+          }
+          specs.push(spec)
+        }
+        this.sku.tree.push({
+          k:item.specName,
+          v:specs,
+          k_s:'s'+index
+        })
+      })
+      let newSpecs = this.good.specs || []
+      newSpecs.map((item) => {
+        let sku={
+          id: item.id,
+          price: item.preferential_price || item.price, 
+          stock_num: 110 
+        }
+        for(let i=0;i<item.specName.length;i++){
+          for(let j=0;j<this.sku.tree.length;j++){
+            if(this.sku.tree[j].k==item.specName[i]){
+              for(let m=0;m<this.sku.tree[j].v.length;m++){
+                if(this.sku.tree[j].v[m].name==item.specValue[i]){
+                  sku[this.sku.tree[j].k_s] = this.sku.tree[j].v[m].id
+                }
+              }
+            }
+          }
+        }
+        this.sku.list.push(sku)
+      })
+      let price = this.good.preferential_price || this.good.price
+      this.sku.price = price/100
+      this.sku.stock_num = 1000
+      this.sku.collection_id = this.good.id
+      this.sku.none_sku = true;
+      if(this.good.specs.length>0){
+        this.sku.none_sku = false;
+      }
+      this.sku.hide_stock = true;
+      this.initialSku=this.sku.list[0]
+    },
     formatPrice(price) {
       return '¥' + (price / 100).toFixed(2);
     }
@@ -79,6 +227,11 @@ export default {
       response.detail = response.detail.replace(new RegExp('<img src=\"(http:\/\/[^\/]+)\/([^\"]+).*?\/>',"g"), '<img src=\"'+baseUrl+'$2\"\/>')
       response.image = baseUrl + response.image 
       this.good = response
+      this.goods = {
+        title: this.good.name,
+        picture: this.good.image
+      }
+      this.goodsId = this.good.id
     }).catch((error) => {
       console.log(error)
     })
