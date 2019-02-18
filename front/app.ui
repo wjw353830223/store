@@ -4,9 +4,10 @@ export default {
     "pages": [
       "pages/index",
       "pages/menu/list",
+      "pages/menu/category",
       "pages/member/menu",
       "pages/member/user",
-      "pages/detail"
+      "pages/menu/detail",
     ],
     "theme": {
       "theme-color": "#3399ff"

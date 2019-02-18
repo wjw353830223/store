@@ -23,7 +23,7 @@ class Menus extends ApiCommon
     {
         $menuModel = model('OrderMenu');
         $param = $this->request->param();
-        $data = $menuModel->getDataById($param['id']);
+        $data = $menuModel->getDataById($param['mid']);
         if (!$data) {
             return resultArray(['error' => $menuModel->getError()]);
         }

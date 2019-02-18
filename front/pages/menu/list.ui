@@ -5,6 +5,7 @@
         :desc="item.introduction"  
         :title="item.name"
         :thumb="item.image"
+        :thumb-link="'#/pages/menu/detail?mid='+item.id"
         :origin-price="item.price/100"
         ui:for="{{ items }}" 
         ui:for-item="item"
@@ -140,7 +141,7 @@ export default {
       that.fetch(Api.menusRead.path, {
         method:'GET',
         data: {
-          id: item.id
+          mid: item.id
         }
       }).then((response) => {
         that.goodsId = response.id

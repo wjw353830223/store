@@ -1,0 +1,105 @@
+<!--菜单详情-->
+<template>
+  <ui-page>
+    <div class='good'>
+      <ui-image src="{{ good.image }}" mode="scaleToFill" height='200' width='100%'></ui-image>
+      <van-cell-group>
+        <van-cell>
+          <div class="good-title">{{ good.name }}</div>
+          <div class="good-price">{{ formatPrice(good.preferential_price) }}</div>
+        </van-cell>
+      </van-cell-group>
+      <ui-rich-text 
+        selectable 
+        decode
+      >
+        {{good.detail}}
+      </ui-rich-text>
+    </div>
+    <div class="van-goods-action">
+      <div class="van-goods-action-mini-btn van-hairline">
+        <i class="van-icon van-icon-chat-o van-goods-action-mini-btn__icon"></i>
+        服务员
+      </div>
+      <div class="van-goods-action-mini-btn van-hairline">
+        <i class="van-icon van-icon-cart-o van-goods-action-mini-btn__icon">
+        	<div class="van-info">5</div>
+        </i>
+        我的菜谱
+      </div>  
+      <button class="van-button van-button--warning van-button--large van-button--square van-goods-action-big-btn" @click="showsku(good)"><span class="van-button__text">加入菜谱</span></button>
+      <button class="van-button van-button--danger van-button--large van-button--square van-goods-action-big-btn" @click="showsku(good)"><span class="van-button__text">立即点餐</span></button> 
+    </div>
+  </ui-page>
+</template>
+
+<script>
+import { Api, baseUrl } from '#/api.js'
+import Vue from 'vue';
+import { GoodsAction, GoodsActionBigBtn, GoodsActionMiniBtn, Cell, CellGroup } from 'vant';
+import 'vant/lib/goods-action/style';
+import 'vant/lib/goods-action-big-btn/style';
+import 'vant/lib/goods-action-mini-btn/style';
+import 'vant/lib/cell/style';
+import 'vant/lib/cell-group/style';
+Vue.use(GoodsAction).use(GoodsActionBigBtn).use(GoodsActionMiniBtn).use(Cell).use(CellGroup)
+export default {
+  config: {
+    navigationBarTitleText: "菜单详情"
+  },
+  data() {
+    return {
+      good:{}
+    }
+  },
+  methods: {
+    formatPrice(price) {
+      return '¥' + (price / 100).toFixed(2);
+    }
+  },
+  mounted() {},
+  created() {
+    let query = ui.getQuery()
+    console.log(query)
+    let that=this
+    this.fetch(Api.menusRead.path, {
+      method:'GET',
+      data: {
+        mid: query.mid
+      }
+    }).then((response) => {
+      // let pattern=new RegExp('<img src=\"(http:\/\/[^\/]+)([^\"]+).*?\/>',"g")
+      // let match = null
+      // do{
+      //       match = pattern.exec(response.detail)
+      //       if(match!=null){
+      //         console.log(match);
+      //       }             
+      // }while(match!=null);
+      response.detail = response.detail.replace(new RegExp('<img src=\"(http:\/\/[^\/]+)\/([^\"]+).*?\/>',"g"), '<img src=\"'+baseUrl+'$2\"\/>')
+      response.image = baseUrl + response.image 
+      this.good = response
+    }).catch((error) => {
+      console.log(error)
+    })
+  }
+}
+</script>
+
+<style lang="less">
+.goods {
+  padding-bottom: 50px;
+  &-title {
+    font-size: 16px;
+  }
+  &-price {
+    color: #f44;
+  }
+  &-cell-group {
+    margin: 15px 0;
+    .van-cell__value {
+      color: #999;
+    }
+  }
+}
+</style>
