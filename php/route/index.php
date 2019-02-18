@@ -20,6 +20,10 @@ Route::get('index/category/index','index/category/index');
 Route::get('index/category/read','index/category/read');
 
 Route::Post('index/member/bind','index/member/bind');
+
+Route::resource('index/car','index/car');
+Route::post('index/car/deletes','index/car/deletes');
+Route::post('index/car/enables','index/car/enables');
 return [
 
 ];

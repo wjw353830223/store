@@ -8,6 +8,7 @@ export default {
       "pages/member/menu",
       "pages/member/user",
       "pages/menu/detail",
+      "pages/car/list"
     ],
     "theme": {
       "theme-color": "#3399ff"

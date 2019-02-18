@@ -21,7 +21,7 @@
         <i class="van-icon van-icon-chat-o van-goods-action-mini-btn__icon"></i>
         服务员
       </div>
-      <div class="van-goods-action-mini-btn van-hairline">
+      <div class="van-goods-action-mini-btn van-hairline" @click='goCar'>
         <i class="van-icon van-icon-cart-o van-goods-action-mini-btn__icon">
         	<div class="van-info">5</div>
         </i>
@@ -135,6 +135,11 @@ export default {
     }
   },
   methods: {
+    goCar(){
+      ui.redirectTo({
+        url: '/pages/car/list'
+      })
+    },
     onBuyClicked(skuData) {
       console.log(skuData)
     },
