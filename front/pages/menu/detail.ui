@@ -72,7 +72,7 @@
 <script>
 import { Api, baseUrl } from '#/api.js'
 import Vue from 'vue';
-import { GoodsAction, GoodsActionBigBtn, GoodsActionMiniBtn, Cell, CellGroup, Button, Sku } from 'vant';
+import { GoodsAction, GoodsActionBigBtn, GoodsActionMiniBtn, Cell, CellGroup, Button, Sku, Toast } from 'vant';
 import 'vant/lib/goods-action/style';
 import 'vant/lib/goods-action-big-btn/style';
 import 'vant/lib/goods-action-mini-btn/style';
@@ -80,7 +80,8 @@ import 'vant/lib/cell/style';
 import 'vant/lib/cell-group/style';
 import 'vant/lib/button/style';
 import 'vant/lib/sku/style';
-Vue.use(GoodsAction).use(GoodsActionBigBtn).use(GoodsActionMiniBtn).use(Cell).use(CellGroup).use(Button).use(Sku);
+import 'vant/lib/toast/style';
+Vue.use(GoodsAction).use(GoodsActionBigBtn).use(GoodsActionMiniBtn).use(Cell).use(CellGroup).use(Button).use(Sku).use(Toast);
 export default {
   config: {
     navigationBarTitleText: "菜单详情"
@@ -144,7 +145,23 @@ export default {
       console.log(skuData)
     },
     onAddCartClicked(skuData) {
-      console.log(skuData)
+      this.fetch(Api.car.path, {
+        method:'POST',
+        data: {
+          menu_id: skuData.goodsId,
+          sku_id: skuData.selectedSkuComb.id==skuData.goodsId?0:skuData.selectedSkuComb.id,
+          nums:skuData.selectedNum,
+          message:skuData.messages.message_0,
+          price:skuData.selectedSkuComb.price,
+          is_check:1
+        }
+      }).then((response) => {
+          if(response =='success'){
+            Toast.success('加入菜谱成功');
+          }
+      }).catch((error) => {
+        console.log(error)
+      })
     },
     onSkuSelected(value){
       if(value.skuValue.imgUrl){

@@ -8,6 +8,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+Route::get('index/signature','index/signature/get_sign');
 
 Route::post('index/open/login','index/open/login');
 
@@ -22,8 +23,7 @@ Route::get('index/category/read','index/category/read');
 Route::Post('index/member/bind','index/member/bind');
 
 Route::resource('index/car','index/car');
-Route::post('index/car/deletes','index/car/deletes');
-Route::post('index/car/enables','index/car/enables');
+Route::Post('index/car/updates','index/car/updates');
 return [
 
 ];

@@ -33,6 +33,12 @@ class ApiCommon extends Common
         }
     }
     protected function check_access($param){
+        if($this->request->method()=='PUT'){
+            $param = $this->request->put();
+        }
+        if($this->request->method()=='DELETE'){
+            $param = $this->request->delete();
+        }
         //时间戳向后不大于300 向前不大于300
         $now_time = time();
         $timestamp = isset($param['_timestamp']) ? intval($param['_timestamp']) : 0;
@@ -59,7 +65,6 @@ class ApiCommon extends Common
         }
         ksort($param);
         unset($param['signature']);
-
         $sort_str = http_build_query($param);
         $oper_sign = sha1($sort_str);
         if ($oper_sign !== $signature) {

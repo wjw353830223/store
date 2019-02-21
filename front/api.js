@@ -31,6 +31,14 @@ const Api = {
         path:'index/member/read',
         auth:true
     },
+    car: {
+        path:'index/car',
+        auth:true
+    },
+    carUpdates: {
+        path:'index/car/updates',
+        auth:true
+    },
 }
 const baseUrl='http://www.vuethink.com/'
 const wsUrl='ws://127.0.0.1:7272'

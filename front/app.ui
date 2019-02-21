@@ -4,11 +4,7 @@ export default {
     "pages": [
       "pages/index",
       "pages/menu/list",
-      "pages/menu/category",
-      "pages/member/menu",
-      "pages/member/user",
       "pages/menu/detail",
-      "pages/car/list"
     ],
     "theme": {
       "theme-color": "#3399ff"
@@ -36,7 +32,7 @@ export default {
           "text": "码上点餐"
         },
         {
-          "pagePath": "pages/member/menu",
+          "pagePath": "pages/car/list",
           "iconName": "navicon-xtcp",
           "text": "我的菜谱"
         },

@@ -61,13 +61,12 @@
 <script>
 import { Api, baseUrl } from '#/api.js'
 import Vue from 'vue';
-import { Card, Button, Sku } from 'vant';
+import { Card, Button, Sku, Toast } from 'vant';
 import 'vant/lib/card/style';
 import 'vant/lib/button/style';
 import 'vant/lib/sku/style';
-Vue.use(Card);
-Vue.use(Button);
-Vue.use(Sku);
+import 'vant/lib/toast/style';
+Vue.use(Card).use(Button).use(Sku).use(Toast);
 export default {
   config: {
     navigationBarTitleText: "菜单列表"
@@ -126,7 +125,23 @@ export default {
       console.log(skuData)
     },
     onAddCartClicked(skuData) {
-      console.log(skuData)
+      this.fetch(Api.car.path, {
+        method:'POST',
+        data: {
+          menu_id: skuData.goodsId,
+          sku_id: skuData.selectedSkuComb.id==skuData.goodsId?0:skuData.selectedSkuComb.id,
+          nums:skuData.selectedNum,
+          message:skuData.messages.message_0,
+          price:skuData.selectedSkuComb.price,
+          is_check:1
+        }
+      }).then((response) => {
+          if(response =='success'){
+            Toast.success('加入菜谱成功');
+          }
+      }).catch((error) => {
+        console.log(error)
+      })
     },
     onSkuSelected(value){
       if(value.skuValue.imgUrl){
@@ -136,6 +151,16 @@ export default {
     showsku(item){
       this.sku.list=[]
       this.sku.tree=[]
+      this.sku.messages=[
+        {
+          datetime: '0',
+          multiple: '0',
+          name: '留言1',
+          type: 'text', 
+          required: '0',
+          disable_type: false,
+        }
+      ]
       let that=this
       that.skuShow=true
       that.fetch(Api.menusRead.path, {

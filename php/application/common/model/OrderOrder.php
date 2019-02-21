@@ -9,7 +9,7 @@ namespace app\common\model;
 
 use think\Db;
 
-class OrderCar extends Common
+class OrderOrder extends Common
 {
 
     protected $autoWriteTimestamp = true;
@@ -19,7 +19,7 @@ class OrderCar extends Common
      * 为了数据库的整洁，同时又不影响Model和Controller的名称
      * 我们约定每个模块的数据表都加上相同的前缀，比如微信模块用weixin作为数据表前缀
      */
-    protected $name = 'order_car';
+    protected $name = 'order_order';
 
     /**
      * @param $keywords
@@ -89,24 +89,6 @@ class OrderCar extends Common
             return false;
         }
     }
-    public function batchUpdate($goods){
-        if(empty($goods)){
-           return true;
-        }
-        try{
-            foreach($goods as $val){
-                $car = OrderCar::get($val['id']);
-                $car->is_check = $val['is_check'];
-                $car->nums = $val['nums'];
-                $car->message = $val['message'];
-                $car->save();
-            }
-            return true;
-        }catch (\Exception $e) {
-            $this->error = '保存出错';
-            return false;
-        }
-    }
     /**
      * [updateDataById 编辑]
      * @linchuangbin
@@ -157,32 +139,6 @@ class OrderCar extends Common
             $this->error = '删除失败';
             return false;
         }
-    }
-    /**
-     * [delDatas 批量删除数据]
-     * @linchuangbin
-     * @DateTime  2017-02-11T20:59:34+0800
-     * @param     array                   $ids    [主键数组]
-     * @param     boolean                 $delSon [是否删除子孙数据]
-     * @return    [type]                          [description]
-     */
-    public function delDatas($ids = [], $delSon = false)
-    {
-        if (empty($ids)) {
-            $this->error = '删除失败';
-            return false;
-        }
-        try {
-            $this->where($this->getPk(), 'in', $ids)->delete();
-            OrderMenuAttribution::destroy(function($query) use ($ids){
-                $query->where('menu_id', 'in', $ids);
-            });
-            return true;
-        } catch (\Exception $e) {
-            $this->error = '操作失败';
-            return false;
-        }
-
     }
 	/**
 	 * [getDataById 根据主键获取详情]
