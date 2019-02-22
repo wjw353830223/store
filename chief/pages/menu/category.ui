@@ -1,0 +1,69 @@
+<template>
+    <ui-page >
+      <van-tree-select
+        :items="items"
+        :main-active-index="mainActiveIndex"
+        :active-id="activeId"
+        @navclick="onNavClick"
+        @itemclick="onItemClick"
+      />
+    </ui-page>
+</template>
+
+<script>
+import { Api, baseUrl } from '#/api.js'
+import Vue from 'vue';
+import 'vant/lib/tree-select/style';
+import { TreeSelect  } from 'vant';
+
+Vue.use(TreeSelect );
+export default {
+  config: {
+    navigationBarTitleText: "菜单列表"
+  },
+  data () {
+    return {
+      items: [
+        {
+          text: ''
+        }
+      ],
+      // 左侧高亮元素的index
+      mainActiveIndex: 0,
+      // 被选中元素的id
+      activeId: 1
+    }
+  },
+  methods: {
+     onNavClick(index) {
+      this.mainActiveIndex = index;
+      if(!this.items[index].children){
+        ui.navigateTo({
+          url: 'list?cid='+this.items[index].id
+        })
+      }
+    },
+    onItemClick(data) {
+      this.activeId = data.id;
+      ui.navigateTo({
+        url: 'list?cid='+data.id
+      })
+    }
+  },
+  created() {
+    let that=this
+    this.fetch(Api.categoryIndex.path, {
+      method:'GET'
+    }).then((response) => {
+      that.items = response
+    }).catch((error) => {
+      console.log(error)
+    })
+  }
+}
+
+</script>
+
+<style lang="less">
+
+</style>

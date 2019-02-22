@@ -1,0 +1,239 @@
+<!--购物车-->
+<template>
+  <ui-page>
+    <ui-nav-bar slot="nav-bar" custom-style="{{ {'border-bottom':'1px solid rgba(231, 231, 231, 0.6)','background-color':'#fff'} }}">
+      <ui-row height="46">
+        <ui-col vertical-align="middle" align="center" width="60" bindtap="navigateBack">
+          <ui-view class="nav_left">
+              <!-- <ui-icon type="arrow-left" size="16" color="#39f"></ui-icon>返回 -->
+          </ui-view>
+        </ui-col>
+        <ui-col vertical-align="middle" align="center">
+          <ui-view class="nav_title">我的菜谱</ui-view>
+        </ui-col>
+        <ui-col vertical-align="middle" align="center" width="60" bindtap="editCar">
+          {{editText}}
+        </ui-col>
+      </ui-row>
+    </ui-nav-bar>
+    <div>
+      <van-checkbox-group class="card-goods" v-model="checkedGoods" @change="goodsChange">
+          <div class="card-goods__item" v-for="item in goods" :key='item.id'>
+            <van-checkbox
+              :name="item.id"
+            >
+            </van-checkbox>
+            <van-card
+              :title="item.name"
+              :desc="item.desc"
+              :price="formatPrice(item.price)"
+              :thumb="item.thumb"
+            > 
+              <div slot="num">
+                <van-stepper
+                  v-model="item.nums"
+                  :disabled="editClose"
+                  integer
+                  :min="1"
+                  :step="1"
+                >
+                </van-stepper>
+              </div>
+              <div slot="footer">
+                <van-cell-group>
+                  <van-field
+                    v-model="item.message"
+                    :disabled="editClose"
+                    label="留言"
+                    type="textarea"
+                    placeholder="请输入留言"
+                    rows="1"
+                    autosize
+                  />
+                </van-cell-group>
+                <van-button size="mini">删除</van-button>
+              </div>
+            </van-card>
+          </div>
+      </van-checkbox-group>
+      <van-submit-bar
+        :price="totalPrice"
+        :disabled="!checkedGoods.length"
+        :button-text="submitBarText"
+        @submit="onSubmit"
+      >
+      </van-submit-bar>
+    </div>
+  </ui-page>
+</template>
+
+<script>
+import { Checkbox, CheckboxGroup, Card, SubmitBar, Stepper, Button, Field, CellGroup, Toast } from 'vant';
+import { Api, baseUrl } from '#/api.js'
+import Vue from 'vue';
+import 'vant/lib/checkbox/style';
+import 'vant/lib/checkbox-group/style';
+import 'vant/lib/card/style';
+import 'vant/lib/submit-bar/style';
+import 'vant/lib/stepper/style';
+import 'vant/lib/button/style';
+import 'vant/lib/field/style';
+import 'vant/lib/cell-group/style';
+import 'vant/lib/toast/style';
+Vue.use(Checkbox).use(CheckboxGroup).use(Card).use(SubmitBar).use(Stepper).use(Button).use(Field).use(CellGroup).use(Toast)
+export default {
+  config: {
+    navigationBarTitleText: "我的菜谱",
+    navigationStyle: 'custom',
+    scrollType:'body'
+  },
+  data() {
+    return {
+      editClose:true,
+      editText:'编辑',
+      value:1,
+      checkedGoods: [],
+      goods: []
+    }
+  },
+  methods: {
+    goodsChange(items){
+      for(let i=0;i<this.goods.length;i++){
+        this.goods[i].is_check=0
+        for(let j=0;j<items.length;j++){
+          if(this.goods[i].id==items[j]){
+            this.goods[i].is_check=1
+            break;
+          }
+        }
+      }
+    },
+    editCar(){
+      let that=this
+      if(this.editClose){
+        this.editClose=false
+        this.editText='保存'
+      }else{
+        let goods = JSON.stringify(this.goods)
+        this.fetch(Api.carUpdates.path, {
+          method:'POST',
+          data: { goods }
+        }).then((response)=>{
+          if(response =='success'){
+            Toast.success('保存成功');
+            this.editText='编辑'
+            this.editClose=true
+          }
+        }).catch((error)=>{
+          console.log(error)
+        })
+      }
+    },
+    navigateBack () {
+      ui.navigateBack()
+    },
+    formatPrice(price) {
+      return (price / 100).toFixed(2);
+    },
+    onSubmit() {
+      let orderGoods = [];
+      this.goods.map((item) => {
+        if(item.is_check){
+          orderGoods.push(item)
+        }
+      })
+      orderGoods = JSON.stringify(orderGoods);
+      let tid = ui.getStorageSync('tid')
+      let type = 0
+      let order_amount=this.totalPrice
+      this.fetch(Api.order.path, {
+        method:'POST',
+        data: { orderGoods, tid, type, order_amount }
+      }).then((response)=>{
+        if(response =='success'){
+          Toast.success('点餐成功！');
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
+    }
+  },
+  created(){
+    let that=this
+    this.fetch(Api.car.path, {
+      method:'GET',
+      data: {
+      }
+    }).then((response) => {
+      response.list.map((item)=>{
+        item.thumb = baseUrl + item.image
+        if(item.is_check){
+          that.checkedGoods.push(item.id)
+        }
+      })
+      that.goods = response.list
+    }).catch((error) => {
+      console.log(error)
+    })
+  },
+  computed: {
+    submitBarText() {
+      const count = this.checkedGoods.length;
+      return '确认点餐' + (count ? `(${count})` : '');
+    },
+    totalPrice() {
+      return this.goods.reduce((total, item) => total + (this.checkedGoods.indexOf(item.id) !== -1 ? item.price * item.nums : 0), 0);
+    }
+  },
+  mounted() {},
+  components: {
+    [Card.name]: Card,
+    [Checkbox.name]: Checkbox,
+    [SubmitBar.name]: SubmitBar,
+    [CheckboxGroup.name]: CheckboxGroup
+  }
+}
+</script>
+
+<style lang="less">
+.card-goods {
+  padding: 10px 0;
+  background-color: #fff;
+  &__item {
+    position: relative;
+    background-color: #fafafa;
+    .van-checkbox__label {
+      width: 100%;
+      height: auto; // temp
+      padding: 0 10px 0 15px;
+      box-sizing: border-box;
+    }
+    .van-checkbox__icon {
+      top: 50%;
+      left: 10px;
+      z-index: 1;
+      position: absolute;
+      margin-top: -10px;
+    }
+    .van-card {
+      width:90%;
+      right:-35px;
+      .van-card__price {
+        color: #f44;
+      }
+      .van-stepper{
+        display:inline-block;
+        button{
+          height:22px;
+        }
+        input{
+          height:18px;
+        }
+      }
+    }
+  }
+}
+.van-submit-bar{
+  bottom:-100px;
+}
+</style>

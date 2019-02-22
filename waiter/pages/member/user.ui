@@ -1,0 +1,147 @@
+<template>
+    <ui-page >
+      <ui-nav-bar slot="nav-bar"  class="nav_bar">
+        <ui-row height="46">
+          <ui-col vertical-align="middle" align="center" width="50">
+            <ui-view class="msg">
+              <ui-icon type="xiaoxi" size="22" color="#fff"></ui-icon>
+              <ui-badge class="num-dat" text="1"></ui-badge>
+            </ui-view>
+          </ui-col>
+          <ui-col vertical-align="middle" align="center">
+            <ui-view class="nav_title">我的</ui-view>
+          </ui-col>
+          <ui-col vertical-align="middle" align="center" width="50">
+            <ui-icon type="shezhi" size="24" color="#fff"></ui-icon>
+          </ui-col>
+        </ui-row>
+      </ui-nav-bar>
+      <ui-view class="user_content">
+        <ui-row height="150" class="header_top">
+          <ui-col vertical-align="middle" align="center" width="90">
+            <ui-view class="head_portrait">
+            </ui-view>
+            <ui-image
+            src="{{ portraitUrl }}"
+            mode='aspectFill'
+            width="60"
+            height="60"
+            class="head_portrait"
+            ></ui-image>
+          </ui-col>
+          <ui-col vertical-align="middle" align="left">
+            <ui-view class="login" bindtap="goLogin">{{mobile}}</ui-view>
+            <ui-view class="login_after">登录后可享受自助点餐服务</ui-view>
+          </ui-col>
+          <ui-col vertical-align="middle" align="right" width="50" space-right="15">
+            <ui-icon name="arrow-right" size="18" color="#fff"></ui-icon>
+          </ui-col>
+        </ui-row>
+      </ui-view>
+      <ui-view>
+        <ui-row-list>
+          <ui-row height="50" border-indent bindtap="goOrders">
+            <ui-col class="text" >
+              我的订单
+            </ui-col>
+            <ui-col width="40" vertical-align="middle" >
+              <ui-icon name="previewright" ></ui-icon>
+            </ui-col>
+          </ui-row>
+        </ui-row-list>
+      </ui-view>
+    </ui-page>
+</template>
+
+<script>
+import { Api, baseUrl } from '#/api.js'
+import socket from '#/static/utils/socket'
+export default {
+  config: {
+    navigationStyle: 'custom',
+    navigationBarTextStyle: 'white',
+    backgroundColor: '#F4F4F4'
+  },
+  data () {
+    return {
+      portraitUrl: require('#/images/portrait_bg.png'),
+      mobile: ui.getStorageSync('mobile') || '立即登录'
+    }
+  },
+  methods: {
+    goOrders(){
+      console.log(11111111)
+      ui.navigateTo({
+        url: '/pages/order/list'
+      })
+    },
+    goLogin(){
+      let _self=this
+      ui.showPrompt({
+        title: '登录',
+        placeholder: '请输入您的电话',
+        confirmButtonText: '登录',
+        cancelButtonText: '取消',
+        success: (result) => {
+            ui.request({
+              url: baseUrl + Api.login.path,
+              method: 'POST',
+              data: {
+                  mobile: result.value
+              },
+              header: {
+                  'content-type': 'application/x-www-form-urlencoded'
+              },
+              success: function(res){
+                  if(res.data.code=='200'){
+                      ui.setStorageSync('token',res.data.data);
+                      ui.setStorageSync('mobile',result.value);
+                      _self.mobile=result.value
+                      _self.establish()
+                      ui.showToast({ title: '登录成功！', icon: 'success' })
+                  }
+                  if(res.data.code=='400'){
+                      console.log(res.data)
+                  }
+              },
+              fail: function(res){
+                console.log(res)
+              }
+          })
+        }
+      })
+    }
+  },
+  computed: {
+    
+  },
+  mixins: [ socket ]
+}
+
+</script>
+
+<style lang="less">
+
+.nav_bar {
+    background: @theme-color;
+    .nav_title {
+        color: #fff;
+    }
+}
+
+.header_top {
+    background: @theme-color;
+    .head_portrait {
+      border-radius: 50%; 
+    }
+    .login {
+      color: #fff;
+      font-size: 18px;
+    }
+    .login_after {
+        color: #fff;
+        font-size: 12px;
+    }
+}
+
+</style>

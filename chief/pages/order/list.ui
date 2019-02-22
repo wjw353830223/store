@@ -1,0 +1,456 @@
+<!--订单列表-->
+<template>
+  <ui-page>
+    <ui-tab-view bindchange="handleChange"
+      ink-bar
+      on-begin="{{ handleBegin }}" 
+      on-active="{{ handleActive }}"
+      on-after="{{ handleAfter }}"
+      pull-down-distance="94"
+      >
+      <ui-view slot="pull-down" class="pull-down-content" ui:show="{{proportion}}">
+        <ui-view class="img-layer" ui:if="{{proportion < 1}}">
+          <ui-view class="img_content" style="{{{ height : proportion * 100+'px' }}}"></ui-view>
+        </ui-view>
+        <ui-view class="img-layer" ui:else>
+          <ui-view class="mt-ready" ui:if="{{state === 2}}"></ui-view>
+          <ui-view class="mt-loading" ui:show="{{state === 3 || state === 4}}"></ui-view>
+        </ui-view>
+      </ui-view>
+
+      <template slot="header">
+        <ui-tab-view-header>全部</ui-tab-view-header>
+        <ui-tab-view-header>已下单</ui-tab-view-header>
+        <ui-tab-view-header>已取餐</ui-tab-view-header>
+        <ui-tab-view-header>已支付</ui-tab-view-header>
+        <ui-tab-view-header>已取消</ui-tab-view-header>
+        <ui-tab-view-header>已删除</ui-tab-view-header>
+      </template>
+      <template slot="body">
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items0 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col>
+                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20" v-if="item.partitions.length>3">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items1 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col>
+                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20" v-if="item.partitions.length>3">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items5 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col>
+                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20" v-if="item.partitions.length>3">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items6 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col>
+                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20" v-if="item.partitions.length>3">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items8 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col>
+                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20" v-if="item.partitions.length>3">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items9 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col>
+                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20" v-if="item.partitions.length>3">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+      </template>
+    </ui-tab-view>
+    <ui-popup ui:model="{{ moreImg }}" position='bottom' background="transparent">
+      <ui-view class="popup5">
+        <ui-row height="40" border-bottom>
+          <ui-col vertical-align="middle" space-left="20">菜单</ui-col>
+          <ui-col width="40" vertical-align="middle" align="center" bindtap="handleShow('moreImg')">
+            <ui-icon name="close" type='close' size="18" color="#FC8950"></ui-icon>
+          </ui-col>
+        </ui-row>
+        <van-card
+          v-for="(item, index) in currentPartitions" 
+          :key = "index"
+          :title="item.name"
+          :thumb="apiUrl + item.image"
+        />
+      </ui-view>
+    </ui-popup>
+  </ui-page>
+</template>
+
+<script>
+import { Api, baseUrl } from '#/api.js'
+import { Card } from 'vant';
+import Vue from 'vue';
+import 'vant/lib/card/style';
+Vue.use(Card)
+export default {
+  config: {
+    navigationBarTitleText: "订单列表"
+  },
+  data() {
+    return {
+      moreImg:false,
+      height:ui.DEFAULT_CONTENT_HEIGHT,
+      apiUrl: baseUrl,
+      items0: [],
+      items1: [],
+      items5: [],
+      items6: [],
+      items8: [],
+      items9: [],
+      top: 0,
+      index: 0,
+      bottom: 30,
+      proportion: 0,
+      // 下拉刷新（初始状态）
+      state: 1,
+      showLoading: false,
+      imgSrc: require('#/static/img/frush.gif'),
+      currentPage:{
+        items0:1,
+        items1:1,
+        items5:1,
+        items6:1,
+        items8:1,
+        items9:1
+      },
+      currentStatus:0,//订单状态 0:全部,1：已下单,5：已取餐,6：已支付,8：已取消,9：已删除,
+      currentPartitions:[]
+    }
+  },
+  methods: {
+    showMore(partitions){
+      this.moreImg=true
+      this.currentPartitions=partitions
+      console.log(partitions)
+    },
+    handleShow (key) {
+      this[key] = false
+    },
+    handleChange (index) {
+      this.index = index
+    },
+    handleBegin ({ distance, direction }) {
+      this.proportion = distance / 94
+      // 拉满94px
+      if (this.proportion >= 1) {
+        if (this.state === 1 && direction === 'down') {
+          // 释放刷新
+          this.state = 2
+        }
+      } else {
+        this.state = 1
+      }
+    },
+    getData(status){
+      let limit=10
+      let type=0
+      let that = this
+      let page = this.currentPage['items'+status]
+      this.fetch(Api.order.path, {
+        method:'GET',
+        data: { page, limit, status, type }
+      }).then((response) => {
+        that.state = 3
+        that['items'+status] = response.list
+        ++that.currentPage['items'+status]
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    handleActive () {
+      this.getData(this.currentStatus)
+    },
+    handleAfter (flag) {
+      this.proportion = 0
+      if (flag) {
+        // 刷新成功...
+        this.state = 4
+        this.top -= 10
+      }
+    },
+    handleLoadMore () {
+      window.setTimeout(() => {
+        this.bottom += 10
+        this.getData(this.currentStatus)
+      }, 1500)
+    }
+  },
+  mounted() {
+    let limit=10
+    let type=0
+    let status = 0
+    let that = this
+    let page = this.currentPage.items0
+    this.fetch(Api.order.path, {
+      method:'GET',
+      data: { page, limit, status, type }
+    }).then((response) => {
+      that.items0=response.list
+      response.list.map((item) => {
+        that['items'+item.status].push(item)
+      })
+      ++that.currentPage.items0
+    }).catch((error) => {
+      console.log(error)
+    })
+  }
+}
+</script>
+
+<style lang="less">
+.pull-down-content {
+  height: 60px;
+  margin-top: -60px;
+  display: flex;
+  align-items:flex-end;
+  padding-bottom: 8px;
+}
+
+.img-layer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .img_content{
+    width: 272px;
+    background: url('/static/img/frush.gif') no-repeat;
+    background-position: -2px center;
+    background-size: 1149px 100%;
+    zoom: 1;
+  }
+}
+
+.mt-ready {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 272px;
+  height: 94px;
+  background: url('/static/img/frush.gif') no-repeat;
+  animation: mt-ready steps(5, end) 3000ms;
+  zoom: 1;
+}
+
+.mt-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 272px;
+  height: 94px;
+  background: url('/static/img/frush.gif') no-repeat;
+  animation: mt-loading steps(1, end) 3000ms infinite;
+  zoom: 1;
+}
+
+@keyframes mt-ready {
+
+  100% {
+    background-position: -410px center;
+  }
+}
+
+@keyframes mt-loading {
+  0%{
+    background-position: -495px center;
+  }
+
+  20%{
+    background-position: -576px center;
+  }
+
+  40%{
+    background-position: -658px center;
+  }
+  50%{
+    background-position: -740px center;
+  }
+  60%{
+    background-position: -823px center;
+  }
+  80%{
+    background-position: -905px center;
+  }
+  90%{
+    background-position: -986px center;
+  }
+
+  100% {
+    background-position: -1068px center;
+  }
+}
+.content_list{
+  .imgbox{
+    width:60px;
+    height:60px;
+  }
+  .more{
+    height:60px;
+    text-align: center;
+    line-height: 60px;
+  }
+  .ui-button-mini{
+    line-height: 1.6
+  }
+}
+.popup5{
+  background-color:#fff;
+  height:450px;
+  margin:0 auto;
+  .ui-view{
+    line-height: 30px;
+    padding: 10px 20px;
+  }
+}
+</style>
