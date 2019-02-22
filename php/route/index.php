@@ -24,6 +24,7 @@ Route::Post('index/member/bind','index/member/bind');
 
 Route::resource('index/car','index/car');
 Route::Post('index/car/updates','index/car/updates');
+Route::resource('index/order','index/order');
 return [
 
 ];

@@ -136,7 +136,26 @@ export default {
       return (price / 100).toFixed(2);
     },
     onSubmit() {
-      Toast('点击结算');
+      let orderGoods = [];
+      this.goods.map((item) => {
+        if(item.is_check){
+          orderGoods.push(item)
+        }
+      })
+      orderGoods = JSON.stringify(orderGoods);
+      let tid = ui.getStorageSync('tid')
+      let type = 0
+      let order_amount=this.totalPrice
+      this.fetch(Api.order.path, {
+        method:'POST',
+        data: { orderGoods, tid, type, order_amount }
+      }).then((response)=>{
+        if(response =='success'){
+          Toast.success('点餐成功！');
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
     }
   },
   created(){

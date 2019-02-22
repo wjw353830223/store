@@ -5,6 +5,7 @@ export default {
       "pages/index",
       "pages/menu/list",
       "pages/menu/detail",
+      "pages/order/list"
     ],
     "theme": {
       "theme-color": "#3399ff"

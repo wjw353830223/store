@@ -37,7 +37,18 @@
             <ui-icon name="arrow-right" size="18" color="#fff"></ui-icon>
           </ui-col>
         </ui-row>
-        
+      </ui-view>
+      <ui-view>
+        <ui-row-list>
+          <ui-row height="50" border-indent bindtap="goOrders">
+            <ui-col class="text" >
+              我的订单
+            </ui-col>
+            <ui-col width="40" vertical-align="middle" >
+              <ui-icon name="previewright" ></ui-icon>
+            </ui-col>
+          </ui-row>
+        </ui-row-list>
       </ui-view>
     </ui-page>
 </template>
@@ -58,6 +69,12 @@ export default {
     }
   },
   methods: {
+    goOrders(){
+      console.log(11111111)
+      ui.navigateTo({
+        url: '/pages/order/list'
+      })
+    },
     goLogin(){
       let _self=this
       ui.showPrompt({
