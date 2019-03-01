@@ -25,17 +25,12 @@ export default {
         {
           "pagePath": "pages/index",
           "iconName": "home",
-          "text": "首页"
+          "text": "订单"
         },
         {
           "pagePath": "pages/menu/category",
           "iconName": "airudiantubiaohuizhi-zhuanqu_meishicaipu",
-          "text": "码上点餐"
-        },
-        {
-          "pagePath": "pages/car/list",
-          "iconName": "navicon-xtcp",
-          "text": "我的菜谱"
+          "text": "统计"
         },
         {
           "pagePath": "pages/member/user",

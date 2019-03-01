@@ -234,6 +234,7 @@ export default {
   }
 }
 .van-submit-bar{
-  bottom:-100px;
+  
+  position: relative;
 }
 </style>

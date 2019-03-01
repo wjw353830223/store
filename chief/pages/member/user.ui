@@ -39,16 +39,7 @@
         </ui-row>
       </ui-view>
       <ui-view>
-        <ui-row-list>
-          <ui-row height="50" border-indent bindtap="goOrders">
-            <ui-col class="text" >
-              我的订单
-            </ui-col>
-            <ui-col width="40" vertical-align="middle" >
-              <ui-icon name="previewright" ></ui-icon>
-            </ui-col>
-          </ui-row>
-        </ui-row-list>
+        
       </ui-view>
     </ui-page>
 </template>
@@ -65,50 +56,60 @@ export default {
   data () {
     return {
       portraitUrl: require('#/images/portrait_bg.png'),
-      mobile: ui.getStorageSync('mobile') || '立即登录'
+      mobile: ui.getStorageSync('mobile') || '立即登录',
     }
   },
   methods: {
-    goOrders(){
-      console.log(11111111)
-      ui.navigateTo({
-        url: '/pages/order/list'
-      })
-    },
     goLogin(){
-      let _self=this
-      ui.showPrompt({
-        title: '登录',
-        placeholder: '请输入您的电话',
-        confirmButtonText: '登录',
-        cancelButtonText: '取消',
-        success: (result) => {
-            ui.request({
-              url: baseUrl + Api.login.path,
-              method: 'POST',
-              data: {
-                  mobile: result.value
-              },
-              header: {
-                  'content-type': 'application/x-www-form-urlencoded'
-              },
-              success: function(res){
-                  if(res.data.code=='200'){
-                      ui.setStorageSync('token',res.data.data);
-                      ui.setStorageSync('mobile',result.value);
-                      _self.mobile=result.value
-                      _self.establish()
-                      ui.showToast({ title: '登录成功！', icon: 'success' })
-                  }
-                  if(res.data.code=='400'){
-                      console.log(res.data)
-                  }
-              },
-              fail: function(res){
-                console.log(res)
-              }
-          })
-        }
+      // let _self=this
+      // ui.showPrompt({
+      //   title: '登录',
+      //   placeholder: '请输入您的电话',
+      //   confirmButtonText: '登录',
+      //   cancelButtonText: '取消',
+      //   success: (result) => {
+      //       ui.request({
+      //         url: baseUrl + Api.login.path,
+      //         method: 'POST',
+      //         data: {
+      //             mobile: result.value
+      //         },
+      //         header: {
+      //             'content-type': 'application/x-www-form-urlencoded'
+      //         },
+      //         success: function(res){
+      //             if(res.data.code=='200'){
+      //                 ui.setStorageSync('token',res.data.data);
+      //                 ui.setStorageSync('mobile',result.value);
+      //                 _self.mobile=result.value
+      //                 _self.establish()
+      //                 ui.showToast({ title: '登录成功！', icon: 'success' })
+      //             }
+      //             if(res.data.code=='400'){
+      //                 console.log(res.data)
+      //             }
+      //         },
+      //         fail: function(res){
+      //           console.log(res)
+      //         }
+      //     })
+      //   }
+      // })
+      let that=this
+      import(`#/pages/dialogs/login.ui`).then((content) => {
+        ui.showDialog({
+            title: '登录',
+            content: content,
+            statusBarColor: 'black',
+            data: {
+                
+            },
+            // 接收ui.hideDialog回传的数据
+            onHide: (data) => {
+                ui.setStorageSync('authKey',data.authKey);
+                ui.setStorageSync('sessionId',data.sessionId);
+            }
+        })
       })
     }
   },

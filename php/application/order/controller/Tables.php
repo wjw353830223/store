@@ -11,7 +11,7 @@ use Lib\Qrcode;
 
 class Tables extends ApiCommon
 {
-    
+
     public function index()
     {
         $tableModel = model('Table');
@@ -92,7 +92,7 @@ class Tables extends ApiCommon
         $param = $this->param;
         $table = $tableModel->getDataById($param['id']);
         //$url = $url = url('/dist/#/pages/index','tid='.$table->id.'&tableName='.$table->name,'', $host_ip);
-        $url = $host_ip . '/dist/#/pages/index?tid='.$table->id.'&tableName='.$table->name;
+        $url = $host_ip . '/dist/#/pages/index?tid='.$table->id.'&tableHash='.$table->hash;
         $qrcode = new Qrcode();
         $qrcode->content = $url;
         $qrcode->is_save = true;

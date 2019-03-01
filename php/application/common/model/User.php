@@ -68,6 +68,7 @@ class User extends Common
 
 		$list = $list
 				->field('user.*,structure.name as s_name, post.name as p_name')
+                ->with('groups')
 				->select();
 		$data['list'] = $list;
 		$data['dataCount'] = $dataCount;

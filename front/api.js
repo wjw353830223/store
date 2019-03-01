@@ -3,6 +3,10 @@ const Api = {
         path:'index/open/login',
         auth:false
     },
+    table: {
+        path:'index/open/table',
+        auth:false
+    },
     position: {
         path:'index/position/index',
         auth:false

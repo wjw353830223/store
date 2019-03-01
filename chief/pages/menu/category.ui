@@ -51,14 +51,7 @@ export default {
     }
   },
   created() {
-    let that=this
-    this.fetch(Api.categoryIndex.path, {
-      method:'GET'
-    }).then((response) => {
-      that.items = response
-    }).catch((error) => {
-      console.log(error)
-    })
+    
   }
 }
 

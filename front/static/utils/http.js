@@ -86,36 +86,38 @@ function fetch(path, options) {
                 if(res.data.code=='200') {
                     resolve(res.data.data)
                 }else{
-                    ui.showConfirm({
-                        content: '登录已过期，请重新登录',
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        success (result) {
-                            if(result.confirm){
-                                ui.showPrompt({
-                                    title: '登录',
-                                    placeholder: '请输入您的电话',
-                                    confirmButtonText: '登录',
-                                    cancelButtonText: '取消',
-                                    success: (result) => {
-                                        login(result.value).then((response) => {
-                                            if(response.code=='200'){
-                                                ui.showToast({
-                                                    title: '登录成功！'
-                                                })
-                                            }else{
-                                                ui.showToast({
-                                                    title: '登录失败！'
-                                                })
-                                            }
-                                        }).catch((error)=>{
-                                            console.log(error)
-                                        })
-                                    }
-                                })
+                    if(path!=Api.table.path){
+                        ui.showConfirm({
+                            content: '登录已过期，请重新登录',
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            success (result) {
+                                if(result.confirm){
+                                    ui.showPrompt({
+                                        title: '登录',
+                                        placeholder: '请输入您的电话',
+                                        confirmButtonText: '登录',
+                                        cancelButtonText: '取消',
+                                        success: (result) => {
+                                            login(result.value).then((response) => {
+                                                if(response.code=='200'){
+                                                    ui.showToast({
+                                                        title: '登录成功！'
+                                                    })
+                                                }else{
+                                                    ui.showToast({
+                                                        title: '登录失败！'
+                                                    })
+                                                }
+                                            }).catch((error)=>{
+                                                console.log(error)
+                                            })
+                                        }
+                                    })
+                                }
                             }
-                        }
-                    })
+                        }) 
+                    }
                     resolve(res.data.error)
                 }
             },

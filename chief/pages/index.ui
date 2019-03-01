@@ -1,12 +1,7 @@
 <template>
   <ui-page>
       <ui-view class='index-swiper'>
-        <ui-ex-swiper pagination loop autoplay="{{ autoplay }}">
-          <ui-ex-swiper-item ui:for="{{swiperFirst}}" ui:for-item="item">
-            <ui-image src="{{ item.image }}" mode="simple"></ui-image>
-            <ui-text class="slide-title">{{ item.title }}</ui-text>
-          </ui-ex-swiper-item>
-        </ui-ex-swiper>
+        
       </ui-view>
       <ui-view class='search'>
         <ui-text class="eat">今天吃点什么？</ui-text>
@@ -64,21 +59,7 @@ export default {
     }, 1000);
   },
   created() {
-    let that=this
-    this.fetch(Api.position.path, {
-      method:'GET'
-    }).then((response) => {
-      response[0].adverts.map((item) => {
-        item.image=baseUrl+item.image
-      })
-      response[1].adverts.map((item) => {
-        item.image=baseUrl+item.image
-      })
-      that.swiperFirst = response[0].adverts
-      that.swiperSecond = response[1].adverts
-    }).catch((error) => {
-      console.log(error)
-    })
+   
   }
 }
 

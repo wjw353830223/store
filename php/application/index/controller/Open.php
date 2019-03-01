@@ -8,6 +8,7 @@
 namespace app\index\controller;
 
 use app\common\model\Member;
+use app\common\model\Table;
 
 class Open extends ApiCommon
 {
@@ -63,5 +64,16 @@ class Open extends ApiCommon
         }else{
             return resultArray(['data'=>$token]);
         }
+    }
+    public function table(){
+        $param=$this->request->param();
+        $table=Table::get($param['tid']);
+        if(empty($table)){
+            return resultArray(['error'=>'餐桌号不存在']);
+        }
+        if($table->hash!=$param['hash']){
+            return resultArray(['error'=>'餐桌号不匹配']);
+        }
+        return resultArray(['data'=>'success']);
     }
 }

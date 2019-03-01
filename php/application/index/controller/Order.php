@@ -31,6 +31,7 @@ class Order extends ApiCommon
         if (!$data) {
             return resultArray(['error' => $orderModel->getError()]);
         }
+
         return resultArray(['data' => 'success']);
     }
 

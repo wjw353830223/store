@@ -1,0 +1,98 @@
+<template>
+  <ui-page>
+    <ui-view class="log_box">
+        <ui-view>
+            <ui-input ui:model="username" type="text" placeholder="请输入帐号"></ui-input>
+        </ui-view>
+        <ui-view class="sample_content">
+            <ui-input type="password" placeholder="密码输入框" ui:model="{{ password }}"></ui-virtual-input>
+        </ui-view>
+        <ui-button class="login" bindtap="confirmLogin">登录</ui-button>
+    </ui-view>
+  </ui-page>
+</template>
+
+
+<script>
+import { Api, baseUrl } from '#/api.js'
+export default {
+  data () {
+    return {
+      username: '',
+      password: ''
+    }
+  },
+  mounted () {
+    this.$DialogOpen((data) => {
+      //console.log(data)
+    })
+  },
+
+  methods: {
+    confirmLogin () {
+        let that=this
+        this.fetch(Api.login,{
+            method:'POST',
+            data: {
+                username: that.username,
+                password: that.password
+            },
+            header: {
+                  'content-type': 'application/x-www-form-urlencoded'
+            }
+        }).then((response)=>{
+            // 调用ui.hideDialog关闭窗体，并回传数据
+            ui.hideDialog({
+                authKey: response.authKey,
+                sessionId: response.sessionId
+            })
+        }).catch((error)=>{
+            console.log(error)
+        })
+    }
+  }
+}
+
+</script>
+
+<style lang="less">
+.ui-row {
+  height: 50px;
+  line-height: 50px;
+  background-color: #fff;
+  font-size: 14px;
+}
+
+.ui-sms-input {
+  .ui-button {
+    width: 110px;
+  }
+}
+
+.log_box{
+  padding: 20px 50px;
+  .ui-view{
+    padding: 10px 0 5px 0;
+    .mix-1px(0, 0, 1, 0, #ccc);
+    .ui-input{
+      border: 0;
+    }
+    .ui-input-inner{
+      height: 30px;
+    }
+    .ui-button {
+      background-color: #F64E16;
+      border-color: #F64E16;
+      border-radius: 25px;
+    }
+  }
+  .login{
+    background-color: #F64E16;
+    border: 0;
+    border-radius: 25px;
+    font-size: 14px;
+    color: #fff;
+    margin-top: 30px;
+  }
+}
+</style>

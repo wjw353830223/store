@@ -7,6 +7,7 @@
 
 namespace app\common\model;
 
+use GatewayClient\Gateway;
 use think\Db;
 
 class OrderOrder extends Common
@@ -20,6 +21,113 @@ class OrderOrder extends Common
      * 我们约定每个模块的数据表都加上相同的前缀，比如微信模块用weixin作为数据表前缀
      */
     protected $name = 'order_order';
+    const STATUS_ORDER = 1;
+    const STATUS_MAKE = 2;
+    const STATUS_GET = 3;
+    const STATUS_NO_GET = 4;
+    const STATUS_EAT = 5;
+    const STATUS_PAY = 6;
+    const STATUS_FINISH = 7;
+    const STATUS_CANCEL = 8;
+    const STATUS_DELETE = 9;
+    const STATUS_PRESS = 1;
+    protected static function init()
+    {
+        self::afterInsert(function ($order) {
+            $member = Member::get($order->member_id);
+            $goods = json_decode($order->orderGoods,true);
+            if(!empty($goods)){
+                foreach($goods as &$good){
+                    $good['sku'] = [];
+                    if($good['sku_id']){
+                        $sku = OrderMenuAttribution::get($good['sku_id']);
+                        $good['sku'] = json_decode($sku->specValue,true);
+                    }
+                }
+                unset($good);
+            }
+            $message = json_encode([
+                'type'=> 'order',
+                'data'=> [
+                    'type'=>$order->type,
+                    'tid'=>$order->tid,
+                    'member'=>[
+                        'id'=>$member->member_id,
+                        'mobile'=>$member->member_mobile
+                    ],
+                    'orderGoods' => $goods
+                ]
+            ]);
+            try{
+                Gateway::sendToGroup(2, $message);
+                $list=Gateway::getUidListByGroup(2);
+                $data = [
+                    'sender_id' => $order->member_id,
+                    'message' => $message,
+                    'communicate' => Message::COMMUNICATE_CUSTOMER_TO_CHIEF,
+                    'type' => 'order'
+                ];
+                foreach($list as $uid){
+                    $data['receiver_id'] = $uid;
+                    Message::create($data);
+                }
+            }catch (\Exception $e){
+                return;
+            }
+        });
+        self::afterUpdate(function($order){
+            $member = Member::get($order->member_id);
+            $goods = json_decode($order->orderGoods,true);
+            $goods = json_decode($order->orderGoods,true);
+            if(!empty($goods)){
+                foreach($goods as &$good){
+                    $good['sku'] = [];
+                    if($good['sku_id']){
+                        $sku = OrderMenuAttribution::get($good['sku_id']);
+                        $good['sku'] = json_decode($sku->specValue,true);
+                    }
+                }
+                unset($good);
+            }
+            $data = [
+                'type'=>$order->type,
+                'tid'=>$order->tid,
+                'member'=>[
+                    'id'=>$member->member_id,
+                    'mobile'=>$member->member_mobile
+                ],
+                'orderGoods' => $goods
+            ];
+            if($order->status==self::STATUS_CANCEL){
+                $message = json_encode([
+                    'type'=> 'cancel',
+                    'data'=> $data
+                ]);
+            }
+            if($order->press_status==self::STATUS_PRESS){
+                $message = json_encode([
+                    'type'=> 'press',
+                    'data'=> $data
+                ]);
+            }
+            try{
+                Gateway::sendToGroup(2, $message);
+                $list=Gateway::getUidListByGroup(2);
+                $data = [
+                    'sender_id' => $order->member_id,
+                    'message' => $message,
+                    'communicate' => Message::COMMUNICATE_CUSTOMER_TO_CHIEF,
+                    'type' => 'order'
+                ];
+                foreach($list as $uid){
+                    $data['receiver_id'] = $uid;
+                    Message::create($data);
+                }
+            }catch (\Exception $e){
+                return;
+            }
+        });
+    }
     public function partitions(){
         return $this->hasMany('OrderOrderPartition','order_id', 'id');
     }

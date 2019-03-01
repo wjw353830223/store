@@ -11,6 +11,7 @@
 Route::get('index/signature','index/signature/get_sign');
 
 Route::post('index/open/login','index/open/login');
+Route::post('index/open/table','index/open/table');
 
 Route::get('index/position/index','index/position/index');
 
