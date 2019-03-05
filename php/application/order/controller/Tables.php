@@ -14,7 +14,7 @@ class Tables extends ApiCommon
 
     public function index()
     {
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $param = $this->param;
         $data = $tableModel->getDataList($param['keywords'], $param['page'], $param['limit']);
         return resultArray(['data' => $data]);
@@ -22,7 +22,7 @@ class Tables extends ApiCommon
 
     public function read()
     {
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $param = $this->param;
         $data = $tableModel->getDataById($param['id']);
         if (!$data) {
@@ -33,7 +33,7 @@ class Tables extends ApiCommon
 
     public function save()
     {
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $param = $this->param;
         $data = $tableModel->createData($param);
         if (!$data) {
@@ -44,7 +44,7 @@ class Tables extends ApiCommon
 
     public function update()
     {
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $param = $this->param;
         $data = $tableModel->updateDataById($param, $param['id']);
         if (!$data) {
@@ -55,7 +55,7 @@ class Tables extends ApiCommon
 
     public function delete()
     {
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $param = $this->param;
         $data = $tableModel->delDataById($param['id']);
         if (!$data) {
@@ -66,7 +66,7 @@ class Tables extends ApiCommon
 
     public function deletes()
     {
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $param = $this->param;
         $data = $tableModel->delDatas($param['ids'], false);
         if (!$data) {
@@ -77,7 +77,7 @@ class Tables extends ApiCommon
 
     public function enables()
     {
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $param = $this->param;
         $data = $tableModel->enableDatas($param['ids'], $param['status'], true);
         if (!$data) {
@@ -86,7 +86,7 @@ class Tables extends ApiCommon
         return resultArray(['data' => '操作成功']);         
     }
     public function qrcode(){
-        $tableModel = model('Table');
+        $tableModel = model('Desk');
         $host_name = exec("hostname");
         $host_ip = gethostbyname($host_name); //获取本机的局域网IP
         $param = $this->param;

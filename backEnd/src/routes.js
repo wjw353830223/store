@@ -36,6 +36,7 @@ import adPositionEdit from './components/Order/advert/positions/edit.vue'
 import advertList from './components/Order/advert/advert/list.vue'
 import advertAdd from './components/Order/advert/advert/add.vue'
 import advertEdit from './components/Order/advert/advert/edit.vue'
+import orderList from './components/Order/order/list.vue'
 /**
  * meta参数解析
  * hideLeft: 是否隐藏左侧菜单，单页菜单为true
@@ -163,6 +164,13 @@ const routes = [
       { path: 'advert/list', component: advertList, name: 'advertList', meta: { hideLeft: false, module: 'Order', menu: 'advert' }},
       { path: 'advert/add', component: advertAdd, name: 'advertAdd', meta: { hideLeft: false, module: 'Order', menu: 'advert' }},
       { path: 'advert/edit/:id', component: advertEdit, name: 'advertEdit', meta: { hideLeft: false, module: 'Order', menu: 'advert' }}
+    ]
+  },
+  {
+    path: '/order',
+    component: Home,
+    children: [
+      { path: 'orders/list', component: orderList, name: 'orderList', meta: { hideLeft: false, module: 'Order', menu: 'order' }}
     ]
   }
 ]

@@ -1,119 +1,293 @@
 <template>
 	<div>
-		<div class="m-b-20">
-  		<router-link class="btn-link-large add-btn" to="add">
-  		  <i class="el-icon-plus"></i>&nbsp;&nbsp;添加菜单
-  		</router-link>
+		<div>
+			<div>
+				<el-switch
+					v-model="mod"
+					active-text=""
+					inactive-text="营业模式">
+				</el-switch>
+				<el-input
+					size="mini"
+					placeholder="订单号"
+					v-model="orderSn">
+				</el-input>
+				<el-select v-model="currentStatus" placeholder="订单状态">
+					<el-option
+						v-for="item in status"
+						:key="item.value"
+						:label="item.label"
+						:value="item.value">
+					</el-option>
+				</el-select>
+				<el-select v-model="currentPayStatus" placeholder="支付状态">
+					<el-option
+						v-for="item in payStatus"
+						:key="item.value"
+						:label="item.label"
+						:value="item.value">
+					</el-option>
+				</el-select>
+				<el-date-picker
+					v-model="dateArray"
+					type="daterange"
+					start-placeholder="开始日期"
+					end-placeholder="结束日期"
+					:default-time="['00:00:00', '23:59:59']">
+				</el-date-picker>
+				<el-button type="primary" icon="el-icon-search" @click='search'>搜索</el-button>
+			</div>
+		</div>
+		<div>
+			应收餐费:{{accountsReceivable}}元  实际到账{{accountsReceipted}}元
 		</div>
 		<el-table
 		:data="tableData"
 		style="width: 100%"
-		@selection-change="selectItem">
-			<el-table-column
-			type="selection"
-			:context="_self"
-			width="50">
-			</el-table-column>
-			<el-table-column
-			prop="p_title"
-			label="上级菜单"
-			width="150">
-			</el-table-column>
-			<el-table-column
-			prop="title"
-			label="标题">
-			</el-table-column>
-			<el-table-column
-		
-			label="状态"
-			width="100">
-				<template slot-scope="scope">
-					<span>{{ scope.row.status==1?'启用':'禁用' }}</span>
+		>
+			<el-table-column type="expand">
+				<template slot-scope="props">
+						<el-card :body-style="{ padding: '0px' }" v-for="(item,index) in props.row.partitions" :key="index">
+							<img :src="HOST + item.image " class="image">
+							<div style="padding: 14px;">
+								<span>好吃的汉堡</span>
+								<div class="bottom clearfix">
+									
+								</div>
+							</div>
+						</el-card>
 				</template>
-			</el-table-column>
+    	</el-table-column>
 			<el-table-column
-			label="操作"
-			width="200">
-				<template slot-scope="scope">
-					<span>
-						<router-link :to="{ name: 'menuEdit', params: { id: scope.row.id }}" class="el-button el-button--primary el-button--small">
-						编辑
-						</router-link>
-					</span>
-					<span>
-						<el-button
-						size="small"
-						type="danger"
-						@click="confirmDelete(scope.row)">
-						删除
-						</el-button>
-					</span>
-				</template>
+			label="订单号"
+			prop="order_sn">
 			</el-table-column>
-		</el-table>
+      <el-table-column
+			label="桌号"
+      prop="desk.name">
+			</el-table-column>
+      <el-table-column
+      label="用户账号"
+      prop="member.member_mobile">
+      </el-table-column>
+      <el-table-column
+      label="订单来源"
+      prop="type">
+      </el-table-column>
+			<el-table-column
+			label="订单总额"
+      prop="order_amount">
+			</el-table-column>
+      <el-table-column
+			label="订单状态"
+      prop="statusText">
+			</el-table-column>
+      <el-table-column
+			label="下单时间"
+      prop="createTime">
+			</el-table-column>
+    </el-table>
 		<div class="pos-rel p-t-20">
-			<btnGroup :selectedData="multipleSelection" :type="'menus'"></btnGroup>
+      <div class="block pages">
+				<el-pagination
+				@current-change="handleCurrentChange"
+				layout="prev, pager, next"
+				:page-size="limit"
+				:current-page="currentPage"
+				:total="dataCount">
+				</el-pagination>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-  import btnGroup from '../../../Common/btn-group.vue'
-  import http from '../../../../assets/js/http'
-
-  export default {
+import http from '../../../assets/js/http'
+export default {
     data() {
       return {
         tableData: [],
-        multipleSelection: []
+        dataCount: null,
+        currentPage: null,
+				limit: 50,
+				orderSn: null,
+				status: [
+					{
+						value:0,
+						label:'订单状态'
+					},
+					{
+						value:1,
+						label:'用户已下单'
+					},
+					{
+						value:2,
+						label:'厨师烹饪中'
+					},
+					{
+						value:3,
+						label:'用户取餐中'
+					},
+					{
+						value:4,
+						label:'无人取餐'
+					},
+					{
+						value:5,
+						label:'用户进食中'
+					},
+					{
+						value:6,
+						label:'用户已支付'
+					},
+					{
+						value:7,
+						label:'订单已完成'
+					},
+					{
+						value:8,
+						label:'订单被取消'
+					},
+					{
+						value:9,
+						label:'订单被删除'
+					},
+				],
+				payStatus: [
+					{
+						value:0,
+						label: '支付状态'
+					},
+					{
+						value:1,
+						label: '未支付'
+					},
+					{
+						value:2,
+						label: '已支付'
+					}
+				],
+				currentStatus: 0,
+				currentPayStatus:0,
+				mod:true,
+				dateArray:[],
+				startTime:null,
+				endTime:null,
+				accountsReceivable:0,
+				accountsReceipted:0
       }
     },
-    methods: {
-      selectItem(val) {
-        this.multipleSelection = val
+		methods: {
+			search(){
+				if(this.dateArray){
+					this.startTime=this.dateArray[0].getTime()/1000
+					this.endTime=this.dateArray[1].getTime()/1000
+				}
+				let data={
+					params: {
+						page: this.currentPage,
+						limit: this.limit,
+						orderSn:this.orderSn,
+						status:this.currentStatus,
+						payStatus:this.currentPayStatus,
+						mod:this.mod?1:0,
+						startTime:this.startTime,
+						endTime:this.endTime
+					}
+				}
+				this.getOrders(data)
+			},
+			handleCurrentChange(page) {
+				//router.push({ path: this.$route.path, query: })
+				let data={
+					params:{ 
+						page: page,
+						limit: this.limit,
+						orderSn:this.orderSn,
+						status:this.currentStatus,
+						payStatus:this.currentPayStatus,
+						mod:this.mod?1:0,
+						startTime:this.startTime,
+						endTime:this.endTime
+					}
+				}
+				this.getOrders(data)
       },
-      confirmDelete(item) {
-        this.$confirm('确认删除该菜单?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          _g.openGlobalLoading()
-          this.apiDelete('admin/menus/', item.id).then((res) => {
-            _g.closeGlobalLoading()
-            this.handelResponse(res, (data) => {
-              _g.toastMsg('success', '删除成功')
-              setTimeout(() => {
-                _g.shallowRefresh(this.$route.name)
-              }, 1500)
-            })
+			getOrders(data) {
+        this.apiGet('order/orders',data).then((res) => {
+          this.handelResponse(res, (data) => {
+						data.list.map((item) => {
+							item.type = item.type==0?'用户':'服务员'
+							switch(item.status){
+								case '1':
+									item.statusText='已下单'
+									break;
+								case '2':
+									item.statusText='制作中'
+									break;
+								case '3':
+									item.statusText='取餐中'
+									break;
+								case '4':
+									item.statusText='无人取餐'
+									break;
+								case '5':
+									item.statusText='进食中'
+									break;
+								case '6':
+									item.statusText='已支付'
+									break;
+								case '7':
+									item.statusText='已完成'
+									break;
+								case '8':
+									item.statusText='已取消'
+									break;
+								case '9':
+									item.statusText='已删除'
+									break;
+							}
+							item.createTime = new Date(parseInt(item.created_at) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
+						})
+						this.tableData = data.list
+						this.accountsReceivable = data.accountsReceivable/100
+						this.accountsReceipted = data.accountsReceipted/100
+						this.dataCount = data.dataCount
           })
-        }).catch(() => {
-          // handel error
         })
       }
-    },
-    created() {
-      this.apiGet('admin/menus').then((res) => {
-        this.handelResponse(res, (data) => {
-          this.tableData = data
-        })
-      })
+		},
+		created() {
+			this.getCurrentPage()
+			const data = {
+				params: {
+					page: this.currentPage,
+					limit: this.limit,
+					orderSn:this.orderSn,
+					status:this.currentStatus,
+					payStatus:this.currentPayStatus,
+					mod:this.mod?1:0,
+					startTime:this.startTime,
+					endTime:this.endTime
+				}
+			}
+      this.getOrders(data)
     },
     computed: {
-      addShow() {
-        return _g.getHasRule('menus-save')
-      },
-      editShow() {
-        return _g.getHasRule('menus-update')
-      },
-      deleteShow() {
-        return _g.getHasRule('menus-delete')
-      }
+			getCurrentPage() {
+        let data = this.$route.query
+        if (data) {
+          if (data.page) {
+            this.currentPage = parseInt(data.page)
+          } else {
+            this.currentPage = 1
+          }
+        }
+			}
     },
     components: {
-      btnGroup
-    },
+      
+		},
     mixins: [http]
-  }
+}
 </script>

@@ -30,4 +30,10 @@ class OrderOrderPartition extends Common
     public function order(){
         return $this->belongsTo('OrderOrder','order_id', 'id');
     }
+    public function sku(){
+        return $this->hasOne('OrderMenuAttribution','id','sku_id');
+    }
+    public function menu(){
+        return $this->hasOne('OrderMenu','id','menu_id');
+    }
 }

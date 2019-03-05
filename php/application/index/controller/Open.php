@@ -8,7 +8,7 @@
 namespace app\index\controller;
 
 use app\common\model\Member;
-use app\common\model\Table;
+use app\common\model\Desk;
 
 class Open extends ApiCommon
 {
@@ -67,7 +67,7 @@ class Open extends ApiCommon
     }
     public function table(){
         $param=$this->request->param();
-        $table=Table::get($param['tid']);
+        $table=Desk::get($param['tid']);
         if(empty($table)){
             return resultArray(['error'=>'餐桌号不存在']);
         }

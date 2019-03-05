@@ -131,6 +131,12 @@ class OrderOrder extends Common
     public function partitions(){
         return $this->hasMany('OrderOrderPartition','order_id', 'id');
     }
+    public function member(){
+        return $this->hasOne('Member','member_id', 'member_id');
+    }
+    public function desk(){
+        return $this->hasOne('Desk','id', 'tid');
+    }
 
     /**
      * @param $keywords
@@ -162,6 +168,82 @@ class OrderOrder extends Common
         $data['dataCount'] = $dataCount;
         return $data;
 	}
+
+    /**
+     * * @param null $orderSn 订单号
+     * @param null $startTime 开始时间
+     * @param null $endTime 结束时间
+     * @param int $status 订单状态
+     * @param int $page 页码
+     * @param int $limit 每页记录数
+     * @param int $pay_status 支付状态
+     * @param int $mod 查询模式  0 营业模式，每次取最新 1 非营业模式
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+	public function ordersList($orderSn, $startTime, $endTime, $status, $page=1, $limit=50,$pay_status=0,$mod=0){
+        $startTime = $startTime?$startTime:strtotime(date('Y-m-d'),time());
+        $endTime = $endTime?$endTime:(time() + 5 * 60);
+        $map[] = ['created_at', 'gt', $startTime];
+        $map[] = ['created_at', 'lt', $endTime];
+        if($orderSn){
+            $map[] = ['order_sn', 'eq', $orderSn];
+        }
+        if($status){
+            $map[] = ['status', 'eq', $status];
+        }
+        if($pay_status==1){
+            $map[] = ['payed_at', 'eq', 0];
+        }
+        if($pay_status==2){
+            $map[] = ['payed_at', 'neq', 0];
+        }
+        $dataCount = $this->where($map)->count('id');
+        $list = $this->where($map);
+        $accountList = $list->select()->toArray();
+        $accountsReceivable = array_reduce($accountList, function($carry, $item){
+            $carry += $item['order_amount'];
+            return $carry;
+        },0);
+        $accountsReceipted = array_reduce($accountList, function($carry, $item){
+            $amount=0;
+            if($item['payed_at'] > 0){
+                $amount = $item['order_amount'];
+            }
+            $carry += $amount;
+            return $carry;
+        },0);
+        if($mod){
+            $list = $list->page($page, $limit);
+        }else{
+            $list = $list->limit(0,$page*$limit);
+        }
+        $list = $list->with([
+            'partitions'=>function($query){
+                $query->with([
+                    'sku'=>function($query){
+                        $query->field('id,image,specName,specValue');
+                    },
+                    'menu'=>function($query){
+                        $query->field('name,id,image');
+                    }
+                ]);
+            },
+            'member'=>function($query){
+                $query->field('member_mobile,member_id');
+            },
+            'desk'=>function($query){
+                $query->field('name,id');
+            },
+        ])->select();
+        $data['list'] = $list;
+        $data['dataCount'] = $dataCount;
+        $data['accountsReceivable'] = $accountsReceivable;
+        $data['accountsReceipted'] = $accountsReceipted;
+        return $data;
+    }
     /**
      * 生成支付单编号(两位随机 + 从2000-01-01 00:00:00 到现在的秒数+微秒+会员ID%1000)，该值会传给第三方支付接口
      * 长度 =2位 + 10位 + 3位 + 3位  = 18位
