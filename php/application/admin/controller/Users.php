@@ -94,13 +94,13 @@ class Users extends ApiCommon
     public function bind(){
         $param = $this->param;
         $userinfo=$GLOBALS['userInfo'];
-        Gateway::bindUid($param['client_id'],$userinfo['id']);
-        if(empty($userinfo['groups'])){
-            Gateway::joinGroup($param['client_id'], 'admin');
-        }else{
+        Gateway::bindUid($param['client_id'],'admin:'.$userinfo['id']);
+        if(!empty($userinfo['groups'])){
             foreach($userinfo['groups'] as $val){
                 Gateway::joinGroup($param['client_id'], $val['id']);
             }
+        }else{
+            Gateway::joinGroup($param['client_id'], 'admin');
         }
         return resultArray(['data' => 'success']);
     }

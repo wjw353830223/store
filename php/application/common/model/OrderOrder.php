@@ -31,8 +31,12 @@ class OrderOrder extends Common
     const STATUS_CANCEL = 8;
     const STATUS_DELETE = 9;
     const STATUS_PRESS = 1;
+    const TYPE_WAITER = 1;
     protected static function init()
     {
+        /**
+         * 下单成功发给厨师和后台
+         */
         self::afterInsert(function ($order) {
             $member = Member::get($order->member_id);
             $goods = json_decode($order->orderGoods,true);
@@ -59,10 +63,11 @@ class OrderOrder extends Common
                 ]
             ]);
             try{
+                Gateway::sendToGroup('admin', $message);
                 Gateway::sendToGroup(2, $message);
                 $list=Gateway::getUidListByGroup(2);
                 $data = [
-                    'sender_id' => $order->member_id,
+                    'sender_id' => $order->type==self::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
                     'message' => $message,
                     'communicate' => Message::COMMUNICATE_CUSTOMER_TO_CHIEF,
                     'type' => 'order'
@@ -78,7 +83,6 @@ class OrderOrder extends Common
         self::afterUpdate(function($order){
             $member = Member::get($order->member_id);
             $goods = json_decode($order->orderGoods,true);
-            $goods = json_decode($order->orderGoods,true);
             if(!empty($goods)){
                 foreach($goods as &$good){
                     $good['sku'] = [];
@@ -89,42 +93,105 @@ class OrderOrder extends Common
                 }
                 unset($good);
             }
-            $data = [
-                'type'=>$order->type,
-                'tid'=>$order->tid,
-                'member'=>[
-                    'id'=>$member->member_id,
-                    'mobile'=>$member->member_mobile
-                ],
-                'orderGoods' => $goods
-            ];
-            if($order->status==self::STATUS_CANCEL){
-                $message = json_encode([
-                    'type'=> 'cancel',
-                    'data'=> $data
-                ]);
-            }
-            if($order->press_status==self::STATUS_PRESS){
-                $message = json_encode([
-                    'type'=> 'press',
-                    'data'=> $data
-                ]);
-            }
-            try{
-                Gateway::sendToGroup(2, $message);
-                $list=Gateway::getUidListByGroup(2);
+            if(in_array($order->status,[self::STATUS_CANCEL,self::STATUS_EAT]) || $order->press_status==self::STATUS_PRESS){
                 $data = [
-                    'sender_id' => $order->member_id,
-                    'message' => $message,
-                    'communicate' => Message::COMMUNICATE_CUSTOMER_TO_CHIEF,
-                    'type' => 'order'
+                    'type'=>$order->type,
+                    'tid'=>$order->tid,
+                    'member'=>[
+                        'id'=>$member->member_id,
+                        'mobile'=>$member->member_mobile
+                    ],
+                    'orderGoods' => $goods
                 ];
-                foreach($list as $uid){
-                    $data['receiver_id'] = $uid;
-                    Message::create($data);
+                $type='';
+                $group = 0;
+                $communicate = 0;
+                //给厨师发消息 订单已取消
+                if($order->status==self::STATUS_CANCEL){
+                    $type='cancel';
+                    $group = 2;
+                    $communicate = Message::COMMUNICATE_CUSTOMER_TO_CHIEF;
                 }
-            }catch (\Exception $e){
-                return;
+                //给厨师发消息 用户催单了
+                if($order->press_status==self::STATUS_PRESS){
+                    $type='press';
+                    $group = 2;
+                    $communicate = Message::COMMUNICATE_CUSTOMER_TO_CHIEF;
+                }
+                //给服务员发消息 注意结账
+                if($order->status==self::STATUS_EAT){
+                    $type='check';
+                    $group = 3;
+                    $communicate = Message::COMMUNICATE_CHIEF_TO_WAITER;
+                }
+                $message = json_encode([
+                    'type'=> $type,
+                    'data'=> $data
+                ]);
+                try{
+                    Gateway::sendToGroup('admin', $message);
+                    Gateway::sendToGroup($group, $message);
+                    $list=Gateway::getUidListByGroup($group);
+                    $data = [
+                        'sender_id' => $order->type==self::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
+                        'message' => $message,
+                        'communicate' => $communicate
+                    ];
+                    foreach($list as $uid){
+                        $data['receiver_id'] = $uid;
+                        Message::create($data);
+                    }
+                }catch (\Exception $e){
+                    return;
+                }
+            }
+            if(in_array($order->status,[self::STATUS_MAKE, self::STATUS_GET])){
+                $data = [
+                    'type'=>$order->type,
+                    'tid'=>$order->tid,
+                    'orderGoods' => $goods
+                ];
+                if($order->type==self::TYPE_WAITER){
+                    $user = User::get($order->member_id);
+                    $data['waiter'] = [
+                        'id'=>$user->id,
+                        'username'=>$user->username
+                    ];
+                    $uid = 'admin:'.$user->id;
+                    $communicate = Message::COMMUNICATE_CHIEF_TO_WAITER;
+                }else{
+                    $data['member'] = [
+                        'id'=>$member->member_id,
+                        'mobile'=>$member->member_mobile
+                    ];
+                    $uid = $member->id;
+                    $communicate = Message::COMMUNICATE_CHIEF_TO_CUSTOMER;
+                }
+                //给用户/服务员发消息 订单开始烹制
+                if($order->status==self::STATUS_MAKE){
+                    $type='make';
+                }
+                //给用户/服务员发消息 通知取餐
+                if($order->status==self::STATUS_GET){
+                    $type='notice';
+                }
+                $message = json_encode([
+                    'type'=> $type,
+                    'data'=> $data
+                ]);
+                try{
+                    Gateway::sendToGroup('admin', $message);
+                    Gateway::sendToUid($uid, $message);
+                    $data = [
+                        'sender_id' => 'admin:'.$GLOBALS['userInfo']['id'],
+                        'message' => $message,
+                        'communicate' => $communicate,
+                        'receiver_id' => $uid
+                    ];
+                    Message::create($data);
+                }catch (\Exception $e){
+                    return;
+                }
             }
         });
     }

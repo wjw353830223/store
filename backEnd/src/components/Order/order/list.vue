@@ -75,8 +75,8 @@
       prop="type">
       </el-table-column>
 			<el-table-column
-			label="订单总额"
-      prop="order_amount">
+			label="订单总额(元)"
+      prop="orderAmount">
 			</el-table-column>
       <el-table-column
 			label="订单状态"
@@ -103,6 +103,7 @@
 
 <script>
 import http from '../../../assets/js/http'
+import socket from '../../../assets/js/socket'
 export default {
     data() {
       return {
@@ -197,6 +198,16 @@ export default {
 				}
 				this.getOrders(data)
 			},
+			getCurrentPage() {
+        let data = this.$route.query
+        if (data) {
+          if (data.page) {
+            this.currentPage = parseInt(data.page)
+          } else {
+            this.currentPage = 1
+          }
+        }
+			},
 			handleCurrentChange(page) {
 				//router.push({ path: this.$route.path, query: })
 				let data={
@@ -248,6 +259,7 @@ export default {
 									break;
 							}
 							item.createTime = new Date(parseInt(item.created_at) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
+							item.orderAmount = item.order_amount/100
 						})
 						this.tableData = data.list
 						this.accountsReceivable = data.accountsReceivable/100
@@ -255,7 +267,45 @@ export default {
 						this.dataCount = data.dataCount
           })
         })
-      }
+			},
+			bindUid(data){
+        let _self=this
+        if(data.type=='init'){
+          this.apiPost('admin/users/bind', {
+            client_id: data.client_id
+          }).then((res) => {
+            this.handelResponse(res, (data) => {
+              if(data!='success'){
+                _self.$message({
+                  type: 'warnning',
+                  message: 'socket网络故障！'
+                });
+              }
+            })
+          })
+        }
+			},
+			websocketonmessage(e) {
+        let data = JSON.parse(e.data)
+        let _self=this
+        if (this.callback != null && this.callback != "" && this.callback != undefined) {
+          this.callback(data)
+          this.callback = null
+          return
+        }
+        if(data.type=='backup' || data.type=='restore'){
+          this.percentage=data.percentage
+          if(data.percentage==100){
+            setTimeout(function(){
+              _self.loading = false
+              _self.isShow = false
+              _self.sureButton = '确 定'
+              _self.percentage = 0
+              _self.centerDialogVisible = false
+            },500)
+          }
+        }
+      },
 		},
 		created() {
 			this.getCurrentPage()
@@ -271,23 +321,21 @@ export default {
 					endTime:this.endTime
 				}
 			}
-      this.getOrders(data)
+			this.getOrders(data)
+			this.sendSock(
+        {
+          type: 'pong',
+          data: "heartbeat"
+        },
+        this.bindUid
+      )
     },
     computed: {
-			getCurrentPage() {
-        let data = this.$route.query
-        if (data) {
-          if (data.page) {
-            this.currentPage = parseInt(data.page)
-          } else {
-            this.currentPage = 1
-          }
-        }
-			}
+			
     },
     components: {
       
 		},
-    mixins: [http]
+    mixins: [http,socket]
 }
 </script>
