@@ -48,11 +48,20 @@
 			<el-table-column type="expand">
 				<template slot-scope="props">
 						<el-card :body-style="{ padding: '0px' }" v-for="(item,index) in props.row.partitions" :key="index">
-							<img :src="HOST + item.image " class="image">
+							<img :src="baseUrl + item.image " class="image">
 							<div style="padding: 14px;">
-								<span>好吃的汉堡</span>
+								<span>菜单名称：{{item.name}} </span>
+								<div  v-if="item.sku !== null"  class="bottom clearfix">
+									<span>规格：{{JSON.parse(item.sku.specValue)}} </span>
+								</div>
+								<div  class="bottom clearfix" v-if="item.message">
+									<span>留言：{{item.message}} </span>
+								</div>
 								<div class="bottom clearfix">
-									
+									<span>分订单号：{{ item.order_partition_sn }}</span>
+								</div>
+								<div class="bottom clearfix">
+									<span>分订单金额：{{ item.order_partition_amount/100 }}元</span>
 								</div>
 							</div>
 						</el-card>
@@ -107,6 +116,7 @@ import socket from '../../../assets/js/socket'
 export default {
     data() {
       return {
+				baseUrl:window.HOST,
         tableData: [],
         dataCount: null,
         currentPage: null,
@@ -293,17 +303,20 @@ export default {
           this.callback = null
           return
         }
-        if(data.type=='backup' || data.type=='restore'){
-          this.percentage=data.percentage
-          if(data.percentage==100){
-            setTimeout(function(){
-              _self.loading = false
-              _self.isShow = false
-              _self.sureButton = '确 定'
-              _self.percentage = 0
-              _self.centerDialogVisible = false
-            },500)
-          }
+        if(['press','order','notice','cancel','make','check'].indexOf(data.type)){
+					const data = {
+						params: {
+							page: this.currentPage,
+							limit: this.limit,
+							orderSn:this.orderSn,
+							status:this.currentStatus,
+							payStatus:this.currentPayStatus,
+							mod:this.mod?1:0,
+							startTime:this.startTime,
+							endTime:this.endTime
+						}
+					}
+					this.getOrders(data)
         }
       },
 		},
@@ -339,3 +352,21 @@ export default {
     mixins: [http,socket]
 }
 </script>
+<style>
+.el-card .image{
+	width: 6%;
+  display: block;
+}
+.el-card .bottom {
+	margin-top: 13px;
+	line-height: 12px;
+}
+.clearfix:before,.clearfix:after {
+		display: table;
+		content: "";
+}
+.clearfix:after {
+		clear: both
+}
+</style>
+

@@ -8,7 +8,7 @@
 namespace app\common\model;
 
 use GatewayClient\Gateway;
-use think\Db;
+use think\Exception;
 
 class OrderOrder extends Common
 {
@@ -65,18 +65,20 @@ class OrderOrder extends Common
             try{
                 Gateway::sendToGroup('admin', $message);
                 Gateway::sendToGroup(2, $message);
-                $list=Gateway::getUidListByGroup(2);
-                $data = [
-                    'sender_id' => $order->type==self::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
-                    'message' => $message,
-                    'communicate' => Message::COMMUNICATE_CUSTOMER_TO_CHIEF,
-                    'type' => 'order'
-                ];
-                foreach($list as $uid){
-                    $data['receiver_id'] = $uid;
-                    Message::create($data);
+                if(Gateway::getClientIdCountByGroup(2) > 0){
+                    $data = [
+                        'sender_id' => $order->type==self::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
+                        'message' => $message,
+                        'communicate' => Message::COMMUNICATE_CUSTOMER_TO_CHIEF,
+                        'type' => 'order'
+                    ];
+                    $list=Gateway::getClientSessionsByGroup(2);
+                    foreach($list as $client_id=>$session){
+                        $data['receiver_id'] = Gateway::getUidByClientId($client_id);
+                        Message::create($data);
+                    }
                 }
-            }catch (\Exception $e){
+            }catch(\Exception $e){
                 return;
             }
         });
@@ -130,18 +132,20 @@ class OrderOrder extends Common
                 ]);
                 try{
                     Gateway::sendToGroup('admin', $message);
-                    Gateway::sendToGroup($group, $message);
-                    $list=Gateway::getUidListByGroup($group);
-                    $data = [
-                        'sender_id' => $order->type==self::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
-                        'message' => $message,
-                        'communicate' => $communicate
-                    ];
-                    foreach($list as $uid){
-                        $data['receiver_id'] = $uid;
-                        Message::create($data);
+                    if(Gateway::getClientIdCountByGroup($group) > 0){
+                        Gateway::sendToGroup($group, $message);
+                        $list=Gateway::getClientSessionsByGroup($group);
+                        $data = [
+                            'sender_id' => $order->type==self::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
+                            'message' => $message,
+                            'communicate' => $communicate
+                        ];
+                        foreach($list as $client_id=>$session){
+                            $data['receiver_id'] = Gateway::getUidByClientId($client_id);
+                            Message::create($data);
+                        }
                     }
-                }catch (\Exception $e){
+                }catch(Exception $e){
                     return;
                 }
             }
@@ -189,7 +193,7 @@ class OrderOrder extends Common
                         'receiver_id' => $uid
                     ];
                     Message::create($data);
-                }catch (\Exception $e){
+                }catch(Exception $e){
                     return;
                 }
             }
