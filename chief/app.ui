@@ -3,8 +3,6 @@ export default {
   config: {
     "pages": [
       "pages/index",
-      "pages/menu/list",
-      "pages/menu/detail",
       "pages/order/list"
     ],
     "theme": {

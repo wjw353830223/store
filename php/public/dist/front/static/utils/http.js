@@ -1,6 +1,5 @@
 import { urlEncode } from './util'
 import { Api, baseUrl } from '../../api.js'
-import { fetch } from './http.js'
 import './jquery'
 import './jquery.sha1'
 //接口请求封装
@@ -84,42 +83,41 @@ function fetch(path, options) {
             data: newObj,
             header: header,
             success: function(res){
-                console.log(res)
-                if(res.data.code=='200'){
+                if(res.data.code=='200') {
                     resolve(res.data.data)
                 }else{
-                    ui.showConfirm({
-                        content: '登录已过期，请重新登录',
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        success (result) {
-                            if(result.confirm){
-                                ui.showPrompt({
-                                    title: '登录',
-                                    placeholder: '请输入您的电话',
-                                    confirmButtonText: '登录',
-                                    cancelButtonText: '取消',
-                                    success: (result) => {
-                                        login(result.value).then((response) => {
-                                            console.log(response)
-                                            if(response.code=='200'){
-                                                ui.showToast({
-                                                    title: '登录成功！'
-                                                })
-                                                ui.setStorageSync('token',response.data);
-                                            }else{
-                                                ui.showToast({
-                                                    title: '登录失败！'
-                                                })
-                                            }
-                                        }).catch((error)=>{
-                                            console.log(error)
-                                        })
-                                    }
-                                })
+                    if(path!=Api.table.path){
+                        ui.showConfirm({
+                            content: '登录已过期，请重新登录',
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            success (result) {
+                                if(result.confirm){
+                                    ui.showPrompt({
+                                        title: '登录',
+                                        placeholder: '请输入您的电话',
+                                        confirmButtonText: '登录',
+                                        cancelButtonText: '取消',
+                                        success: (result) => {
+                                            login(result.value).then((response) => {
+                                                if(response.code=='200'){
+                                                    ui.showToast({
+                                                        title: '登录成功！'
+                                                    })
+                                                }else{
+                                                    ui.showToast({
+                                                        title: '登录失败！'
+                                                    })
+                                                }
+                                            }).catch((error)=>{
+                                                console.log(error)
+                                            })
+                                        }
+                                    })
+                                }
                             }
-                        }
-                    })
+                        }) 
+                    }
                     resolve(res.data.error)
                 }
             },
@@ -127,7 +125,7 @@ function fetch(path, options) {
         })
     })
 }
-//登录弹框
+//登录接口
 function login(mobile){
     return new Promise((resolve,reject) => {
         ui.request({

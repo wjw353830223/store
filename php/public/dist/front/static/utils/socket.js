@@ -40,7 +40,6 @@ const webSocket = {
                             that.callback = null
                             return
                         }
-                        console.log(data)
                         //if(data.type=='backup' || data.type=='restore') { }
                     })
                 },
@@ -99,13 +98,10 @@ const webSocket = {
         bindUid(data){
             let that=this
             if(data.type=='init'){
-                this.fetch(Api.bind,  {
+                this.fetch(Api.bind.path,  {
                     method:'POST',
                     data: {
                         client_id: data.client_id 
-                    },
-                    header: {
-                          'content-type': 'application/x-www-form-urlencoded'
                     }
                 }).then(function(res){
                     if(res=='success'){
@@ -120,8 +116,8 @@ const webSocket = {
         },
     },
     created() {
-        let sessionId = ui.getStorageSync('sessionId')
-        if(sessionId){
+        let token = ui.getStorageSync('token')
+        if(token){
             clearInterval(window.timer)
             this.establish()
         }
