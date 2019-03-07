@@ -23,4 +23,14 @@ class Message extends Common
     const COMMUNICATE_WAITER_TO_CHIEF = 3;
     const COMMUNICATE_CHIEF_TO_CUSTOMER = 4;
     const COMMUNICATE_CHIEF_TO_WAITER = 5;
+    public function updateDataById($param, $id)
+    {
+        try {
+            $this->allowField(true)->save($param, [$this->getPk() => $id]);
+            return true;
+        } catch(\Exception $e) {
+            $this->error = '编辑失败';
+            return false;
+        }
+    }
 }

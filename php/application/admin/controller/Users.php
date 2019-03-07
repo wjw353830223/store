@@ -7,6 +7,7 @@
 
 namespace app\admin\controller;
 
+use app\common\model\Message;
 use GatewayClient\Gateway;
 
 class Users extends ApiCommon
@@ -95,12 +96,23 @@ class Users extends ApiCommon
         $param = $this->param;
         $userinfo=$GLOBALS['userInfo'];
         Gateway::bindUid($param['client_id'],'admin:'.$userinfo['id']);
+        Gateway::setSession($param['client_id'],['uid'=>'admin:'.$userinfo['id']]);
         if(!empty($userinfo['groups'])){
             foreach($userinfo['groups'] as $val){
                 Gateway::joinGroup($param['client_id'], $val['id']);
             }
         }else{
             Gateway::joinGroup($param['client_id'], 'admin');
+        }
+
+        $messages = Message::where([
+            'receiver_id'=>'admin:'.$userinfo['id'],
+            'status' => 0
+        ])->order('create_at','desc')->select();
+        if(!$messages->isEmpty()){
+           foreach($messages as $message){
+               Gateway::sendToUid('admin:'.$userinfo['id'],$message['message']);
+           }
         }
         return resultArray(['data' => 'success']);
     }

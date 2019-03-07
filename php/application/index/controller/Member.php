@@ -36,6 +36,7 @@ class Member extends ApiCommon
         $param = $this->param;
         $userinfo=$this->member_info;
         Gateway::bindUid($param['client_id'], $userinfo['member_id']);
+        Gateway::setSession($param['client_id'],['uid'=>$userinfo['member_id']]);
         Gateway::joinGroup($param['client_id'], 'member');
         return resultArray(['data' => 'success']);
     }

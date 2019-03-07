@@ -41,13 +41,13 @@ class ApiCommon extends Common
         }
         // 更新缓存
         cache('Auth_'.$authKey, $cache, config('LOGIN_SESSION_VALID'));
-        $authAdapter = new AuthAdapter($authKey);
-        $request = Request::instance();
-        $ruleName = $request->module().'-'.$request->controller() .'-'.$request->action(); 
-        if (!$authAdapter->checkLogin($ruleName, $cache['userInfo']['id'])) {
-            header('Content-Type:application/json; charset=utf-8');
-            exit(json_encode(['code'=>102,'error'=>'没有权限']));
-        }
+//        $authAdapter = new AuthAdapter($authKey);
+//        $request = Request::instance();
+//        $ruleName = $request->module().'-'.$request->controller() .'-'.$request->action();
+//        if (!$authAdapter->checkLogin($ruleName, $cache['userInfo']['id'])) {
+//            header('Content-Type:application/json; charset=utf-8');
+//            exit(json_encode(['code'=>102,'error'=>'没有权限']));
+//        }
         $GLOBALS['userInfo'] = $userInfo;
     }
 }

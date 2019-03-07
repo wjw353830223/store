@@ -40,8 +40,32 @@ const webSocket = {
                             that.callback = null
                             return
                         }
-                        console.log(data)
-                        //if(data.type=='backup' || data.type=='restore') { }
+                        if(data.type=='order') { 
+                            ui.showConfirm({
+                                content: data.data.desk.name + '手机尾号' + data.data.member.mobile.substr(7,4) + '用户下单了，请尽快准备食材！',
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                success (result) {
+                                    if(result.confirm){
+                                        that.fetch(Api.message + '/' + data.message_id, {
+                                            method:'PUT',
+                                            data: { status:1 },
+                                            header: {
+                                                'content-type': 'application/x-www-form-urlencoded'
+                                            }
+                                        }).then((response) => {
+                                            if(response == 'success'){
+                                                ui.showToast({
+                                                    title: '消息状态已接收！'
+                                                })
+                                            }
+                                        }).catch((error) => {
+                                            console.log(error)
+                                        })
+                                    }
+                                }
+                            })
+                        }
                     })
                 },
                 fail: function (res) {

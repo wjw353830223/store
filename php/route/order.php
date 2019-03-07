@@ -11,6 +11,7 @@
 Route::resource('order/tables','order/tables');
 Route::resource('order/category','order/category');
 Route::resource('order/menus','order/menus');
+Route::resource('order/message','order/message');
 Route::resource('order/orders','order/orders');
 Route::resource('order/positions','order/positions');
 Route::resource('order/advert','order/advert');
