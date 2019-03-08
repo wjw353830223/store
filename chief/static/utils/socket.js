@@ -3,7 +3,11 @@ const webSocket = {
     data() {
       return {
         socketOpen:false,
-        callback: null
+        socketMsgQueue: [],
+        socketMsgBuffer:{
+            'order':[],
+            'cancel':[]
+        }
       }
     },
     methods: {
@@ -12,20 +16,12 @@ const webSocket = {
             ui.connectSocket({
                 url: wsUrl,
                 success: function (res) {
-                    ui.showToast({
-                        title: 'WebSocket创建成功！'
-                    })
                     that.socketOpen = true
-            
                     ui.onSocketOpen(function (res) {
-                        ui.showToast({
-                            title: 'WebSocket连接已打开！'
-                        })
                         that.sendSocketMessage({
                             type: 'pong',
-                            data: "heartbeat"
-                        },
-                        that.bindUid)
+                            data: 'heartbeat'
+                        })
                         window.timer = setInterval(that.heartbeat, 130000)
                     })
                     ui.onSocketError(function (res) {
@@ -35,36 +31,31 @@ const webSocket = {
                     })
                     ui.onSocketMessage(function (res) {
                         let data = JSON.parse(res.data)
-                        if (that.callback != null && that.callback != "" && that.callback != undefined) {
-                            that.callback(data)
-                            that.callback = null
-                            return
-                        }
-                        if(data.type=='order') { 
-                            ui.showConfirm({
-                                content: data.data.desk.name + '手机尾号' + data.data.member.mobile.substr(7,4) + '用户下单了，请尽快准备食材！',
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                success (result) {
-                                    if(result.confirm){
-                                        that.fetch(Api.message + '/' + data.message_id, {
-                                            method:'PUT',
-                                            data: { status:1 },
-                                            header: {
-                                                'content-type': 'application/x-www-form-urlencoded'
-                                            }
-                                        }).then((response) => {
-                                            if(response == 'success'){
-                                                ui.showToast({
-                                                    title: '消息状态已接收！'
-                                                })
-                                            }
-                                        }).catch((error) => {
-                                            console.log(error)
-                                        })
-                                    }
+                        if(data.type=='init'){
+                            that.fetch(Api.bind,  {
+                                method:'POST',
+                                data: {
+                                    client_id: data.client_id 
+                                },
+                                header: {
+                                      'content-type': 'application/x-www-form-urlencoded'
                                 }
+                            }).then(function(res){
+                                if(res=='success'){
+                                    ui.showToast({
+                                        title: '用户通信调试成功！'
+                                    })
+                                }
+                            }).catch(function(error){
+                                console.log(error)
                             })
+                        }else{
+                            if(data.type=='ping'){
+                                return
+                            }
+                            if(data.type == 'order'){
+                                that.socketMsgBuffer.order.push(data)
+                            }
                         }
                     })
                 },
@@ -76,21 +67,21 @@ const webSocket = {
                 }
             })
         },
-        sendSocketMessage (data, callback) {
-            this.callback = callback
-            var that = this
-            if (that.socketOpen) {
+        sendSocketMessage (data) {
+            if (this.socketOpen) {
                 ui.sendSocketMessage({
                     data: JSON.stringify(data),
                     success: function (res) {
-                        console.log(res)
+                      console.log(res)
                     },
                     fail: function (res) {
-                        ui.showToast({
-                            title: '发送失败！'
-                        })
+                      ui.showToast({
+                        title: '发送失败！'
+                      })
                     }
                 })
+            } else {
+                this.socketMsgQueue.push(msg)
             }
         },
         close () {
@@ -116,32 +107,9 @@ const webSocket = {
                 {
                     type: 'pong',
                     data: "heartbeat"
-                },
-                null
+                }
             )
-        },
-        bindUid(data){
-            let that=this
-            if(data.type=='init'){
-                this.fetch(Api.bind,  {
-                    method:'POST',
-                    data: {
-                        client_id: data.client_id 
-                    },
-                    header: {
-                          'content-type': 'application/x-www-form-urlencoded'
-                    }
-                }).then(function(res){
-                    if(res=='success'){
-                        ui.showToast({
-                            title: '通信调试成功！'
-                        })
-                    }
-                }).catch(function(error){
-                    console.log(error)
-                })
-            }
-        },
+        }
     },
     created() {
         let sessionId = ui.getStorageSync('sessionId')
@@ -153,6 +121,41 @@ const webSocket = {
     destroyed: function() {
         clearInterval(window.timer)
         this.close()
+    },
+    watch: {
+        socketMsgBuffer: {
+            handler(newValue, oldValue){
+                let that=this; 
+                newValue.order.map((data,index)=>{
+                    ui.showConfirm({
+                        content: data.data.desk.name + '手机尾号' + data.data.member.mobile.substr(7,4) + '用户下单了，请尽快准备食材！',
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        success (result) {
+                            if(result.confirm){
+                                that.fetch(Api.message + '/' + data.message_id, {
+                                    method:'PUT',
+                                    data: { status:1 },
+                                    header: {
+                                        'content-type': 'application/x-www-form-urlencoded'
+                                    }
+                                }).then((response) => {
+                                    if(response == 'success'){
+                                        newValue.order.splice(index,1)
+                                        if(that.$route.path == '/pages/index' && that.hasOwnProperty("getOrdersData")){
+                                            that.getOrdersData(that.currentStatus)
+                                        }
+                                    }
+                                }).catch((error) => {
+                                    console.log(error)
+                                })
+                            }
+                        }
+                    })
+                })
+            },
+            deep: true
+        }
     }
   }
   export default webSocket

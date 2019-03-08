@@ -15,7 +15,7 @@ import { Api, baseUrl } from '#/api.js'
 import Vue from 'vue';
 import 'vant/lib/tree-select/style';
 import { TreeSelect  } from 'vant';
-
+import socket from '#/static/utils/socket'
 Vue.use(TreeSelect );
 export default {
   config: {
@@ -52,7 +52,8 @@ export default {
   },
   created() {
     
-  }
+  },
+  mixins: [ socket ]
 }
 
 </script>

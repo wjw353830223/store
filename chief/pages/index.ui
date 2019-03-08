@@ -162,6 +162,7 @@ import { Api, baseUrl } from '#/api.js'
 import { Card } from 'vant';
 import Vue from 'vue';
 import 'vant/lib/card/style';
+import socket from '#/static/utils/socket'
 Vue.use(Card)
 export default {
   config: {
@@ -169,6 +170,7 @@ export default {
     backgroundColor: '#F4F4F4',
     navigationBarTextStyle: 'black'
   },
+  name: 'indexComponent',
   data() {
     return {
       moreImg:false,
@@ -190,7 +192,7 @@ export default {
         items2:1,
         items3:1
       },
-      currentStatus:0,//订单状态 0:全部,1：已下单,5：已取餐,6：已支付,8：已取消,9：已删除,
+      currentStatus:1,//订单状态 1：已下单
       currentPartitions:[]
     }
   },
@@ -217,7 +219,7 @@ export default {
         this.state = 1
       }
     },
-    getData(status){
+    getOrdersData(status){
       let limit=50
       let that = this
       let page = this.currentPage['items'+status]
@@ -234,7 +236,7 @@ export default {
       })
     },
     handleActive () {
-      this.getData(this.currentStatus)
+      this.getOrdersData(this.currentStatus)
     },
     handleAfter (flag) {
       this.proportion = 0
@@ -247,7 +249,7 @@ export default {
     handleLoadMore () {
       window.setTimeout(() => {
         this.bottom += 10
-        this.getData(this.currentStatus)
+        this.getOrdersData(this.currentStatus)
       }, 1500)
     },
     getSpecValue(specValue){
@@ -256,19 +258,22 @@ export default {
       return str;
     }
   },
+  created() {
+    this.getOrdersData(1)
+    this.getOrdersData(2)
+    this.getOrdersData(3)
+  },
   mounted() {
      //首屏页面需要在mounted中延时才能调用框架api，其他页面不需要延时
     setTimeout(() => {
       //关闭app启动图
       ui.closeSplashscreen()
     }, 1000);
-    this.getData(1)
-    this.getData(2)
-    this.getData(3)
   },
   computed:{
     
-  }
+  },
+  mixins: [ socket ]
 }
 </script>
 
