@@ -158,7 +158,7 @@
 </template>
 
 <script>
-import { Api, baseUrl } from '#/api.js'
+import { Api, baseUrl, wsUrl } from '#/api.js'
 import { Card } from 'vant';
 import Vue from 'vue';
 import 'vant/lib/card/style';

@@ -53,7 +53,7 @@ const webSocket = {
                             if(data.type=='ping'){
                                 return
                             }
-                            if(data.type == 'order'){
+                            if(data.type=='order'){
                                 that.socketMsgBuffer.order.push(data)
                             }
                         }
@@ -142,9 +142,6 @@ const webSocket = {
                                 }).then((response) => {
                                     if(response == 'success'){
                                         newValue.order.splice(index,1)
-                                        if(that.$route.path == '/pages/index' && that.hasOwnProperty("getOrdersData")){
-                                            that.getOrdersData(that.currentStatus)
-                                        }
                                     }
                                 }).catch((error) => {
                                     console.log(error)
