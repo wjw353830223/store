@@ -46,7 +46,6 @@
 
 <script>
 import { Api, baseUrl } from '#/api.js'
-import socket from '#/static/utils/socket'
 export default {
   config: {
     navigationStyle: 'custom',
@@ -115,8 +114,7 @@ export default {
   },
   computed: {
     
-  },
-  mixins: [ socket ]
+  }
 }
 
 </script>

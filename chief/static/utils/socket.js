@@ -142,6 +142,9 @@ const webSocket = {
                                 }).then((response) => {
                                     if(response == 'success'){
                                         newValue.order.splice(index,1)
+                                        if(that.$route.path=='/pages/index'){
+                                            that.getOrdersData(that.currentStatus)
+                                        }
                                     }
                                 }).catch((error) => {
                                     console.log(error)
