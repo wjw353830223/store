@@ -19,10 +19,10 @@ class Common extends Controller
         $origin = isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:(isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'');
 
         /*防止跨域*/
-        header('Access-Control-Allow-Origin: '.$origin);//允许的请求域
-        header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头
+ //       header('Access-Control-Allow-Origin: '.$origin);//允许的请求域
+//        header('Access-Control-Allow-Credentials: true');//允许请求携带Cookies
+//        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');//支持的请求方法
+//        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, authKey, sessionId");//允许的请求头
         if(strtoupper($_SERVER['REQUEST_METHOD'])== 'OPTIONS'){
             exit;
         }
