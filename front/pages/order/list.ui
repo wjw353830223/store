@@ -45,10 +45,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -85,10 +85,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -125,10 +125,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -162,10 +162,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -199,10 +199,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -236,10 +236,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -268,10 +268,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -305,10 +305,10 @@
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
@@ -336,6 +336,9 @@
           :key = "index"
           :title="item.name"
           :thumb="apiUrl + item.image"
+          :num="item.nums"
+          :price="item.price/100"
+          :desc="getDesc(item.sku)"
         />
       </ui-view>
     </ui-popup>
@@ -388,6 +391,18 @@ export default {
     }
   },
   methods: {
+    getDesc(sku){
+      if(!sku){
+        return ''
+      }
+      let descArr=JSON.parse(sku.specValue)
+      let atrributionArr=JSON.parse(sku.specName)
+      let desc=''
+      descArr.map((item,index)=>{
+        desc += atrributionArr[index] + ':' + item + ' '
+      })
+      return desc
+    },
     getStatusName(status){
       let statusName = ''
       switch(status){
