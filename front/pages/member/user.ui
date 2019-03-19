@@ -55,7 +55,6 @@
 
 <script>
 import { Api, baseUrl } from '#/api.js'
-import socket from '#/static/utils/socket'
 export default {
   config: {
     navigationStyle: 'custom',
@@ -70,7 +69,6 @@ export default {
   },
   methods: {
     goOrders(){
-      console.log(11111111)
       ui.navigateTo({
         url: '/pages/order/list'
       })
@@ -97,7 +95,6 @@ export default {
                       ui.setStorageSync('token',res.data.data);
                       ui.setStorageSync('mobile',result.value);
                       _self.mobile=result.value
-                      _self.establish()
                       ui.showToast({ title: '登录成功！', icon: 'success' })
                   }
                   if(res.data.code=='400'){
@@ -114,8 +111,7 @@ export default {
   },
   computed: {
     
-  },
-  mixins: [ socket ]
+  }
 }
 
 </script>

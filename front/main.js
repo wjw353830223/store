@@ -1,5 +1,6 @@
 import app from './app.ui'
 import { fetch } from "./static/utils/http"
+import { establish, sendSocketMessage } from "./static/utils/socket"
 import { Api } from './api.js'
 let options = {
   app: app,
@@ -60,7 +61,10 @@ let options = {
     })
   }
 }
-ui.extend({
-  fetch:fetch
-})
+let token = ui.getStorageSync('token')
+if(token){
+    clearInterval(window.timer)
+    establish()
+}
+ui.extend({ fetch, sendSocketMessage })
 ui.start(options)

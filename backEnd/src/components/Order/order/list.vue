@@ -8,7 +8,8 @@
 					inactive-text="营业模式">
 				</el-switch>
 				<el-input
-					size="mini"
+					clearable
+				
 					placeholder="订单号"
 					v-model="orderSn">
 				</el-input>
@@ -302,8 +303,8 @@ export default {
           this.callback(data)
           this.callback = null
           return
-        }
-        if(['press','order','notice','cancel','make','check'].indexOf(data.type)){
+				}
+        if(['press','order','notice','cancel','make','check'].indexOf(data.type) > -1){
 					const data = {
 						params: {
 							page: this.currentPage,
@@ -367,6 +368,9 @@ export default {
 }
 .clearfix:after {
 		clear: both
+}
+.el-input {
+  width: 200px;
 }
 </style>
 

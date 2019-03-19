@@ -46,8 +46,8 @@ const Api = {
     order: {
         path:'index/order',
         auth:true
-    },
+    }
 }
 const baseUrl='http://www.vuethink.com/'
-const wsUrl='ws://127.0.0.1:7272'
+const wsUrl='ws://192.168.1.100:7272'
 export  { Api, baseUrl, wsUrl }

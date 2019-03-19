@@ -11,8 +11,11 @@
         <ui-col vertical-align="middle" align="center">
           <ui-view class="nav_title">我的菜谱</ui-view>
         </ui-col>
-        <ui-col vertical-align="middle" align="center" width="60" bindtap="editCar">
+        <ui-col vertical-align="middle" align="center" width="60" bindtap="editCar" v-if="goods.length>0">
           {{editText}}
+        </ui-col>
+        <ui-col vertical-align="middle" align="center" width="60" v-else>
+         
         </ui-col>
       </ui-row>
     </ui-nav-bar>
@@ -57,6 +60,7 @@
           </div>
       </van-checkbox-group>
       <van-submit-bar
+        v-if="goods.length>0"
         :price="totalPrice"
         :disabled="!checkedGoods.length"
         :button-text="submitBarText"
@@ -145,36 +149,52 @@ export default {
       orderGoods = JSON.stringify(orderGoods);
       let tid = ui.getStorageSync('tid')
       let type = 0
+      let from_car = 1
       let order_amount=this.totalPrice
       this.fetch(Api.order.path, {
         method:'POST',
-        data: { orderGoods, tid, type, order_amount }
+        data: { orderGoods, tid, type, order_amount, from_car }
       }).then((response)=>{
         if(response =='success'){
-          Toast.success('点餐成功！');
+          this.getList()
+          ui.showConfirm({
+            content: '点餐成功！',
+            confirmButtonText: '查看订单',
+            cancelButtonText: '取消',
+            success (result) {
+              if(result.confirm){
+                ui.redirectTo({
+                  url: '/pages/order/list'
+                })
+              }
+            }
+          })
         }
       }).catch((error)=>{
+        console.log(error)
+      })
+    },
+    getList(){
+      let that=this
+      this.fetch(Api.car.path, {
+        method:'GET',
+        data: {
+        }
+      }).then((response) => {
+        response.list.map((item)=>{
+          item.thumb = baseUrl + item.image
+          if(item.is_check){
+            that.checkedGoods.push(item.id)
+          }
+        })
+        that.goods = response.list
+      }).catch((error) => {
         console.log(error)
       })
     }
   },
   created(){
-    let that=this
-    this.fetch(Api.car.path, {
-      method:'GET',
-      data: {
-      }
-    }).then((response) => {
-      response.list.map((item)=>{
-        item.thumb = baseUrl + item.image
-        if(item.is_check){
-          that.checkedGoods.push(item.id)
-        }
-      })
-      that.goods = response.list
-    }).catch((error) => {
-      console.log(error)
-    })
+    this.getList();
   },
   computed: {
     submitBarText() {

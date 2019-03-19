@@ -25,7 +25,7 @@ axios.defaults.withCredentials = true
 axios.defaults.headers['Content-Type'] = 'application/json'
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: __dirname,
   routes
 })
@@ -59,7 +59,7 @@ window.pageSize = 15
 
 const bus = new Vue()
 window.bus = bus
-window.wsUrl = 'ws://127.0.0.1:7272'
+window.wsUrl = 'ws://192.168.1.100:7272'
 new Vue({
   el: '#app',
   template: '<App/>',

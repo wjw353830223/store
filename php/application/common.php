@@ -29,6 +29,10 @@ function resultArray($array)
     } elseif (isset($array['error'])) {
         $code = 400;
         $array['data'] = '';
+    } elseif (isset($array['socketError'])) {
+        $code = 500;
+        $array['data'] = '';
+        $array['error'] = $array['socketError'];
     }
     return [
         'code'  => $code,

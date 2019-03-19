@@ -351,4 +351,10 @@ body {
 .router-view {
   width: 100%;
 }
+.ui-mask{
+  z-index: 3000 !important;
+}
+.ui-toast{
+  z-index: 4000 !important;
+}
 </style>

@@ -28,6 +28,7 @@ import menuCategoriesAdd from './components/Order/menu/category/add.vue'
 import menuCategoriesEdit from './components/Order/menu/category/edit.vue'
 import menusList from './components/Order/menu/menu/list.vue'
 import menusAdd from './components/Order/menu/menu/add.vue'
+import addMenu from './components/Order/menu/menu/addMenu.vue'
 import menusEdit from './components/Order/menu/menu/edit.vue'
 import backupRestore from './components/Administrative/system/backup/restore.vue'
 import adPositionList from './components/Order/advert/positions/list.vue'
@@ -122,7 +123,7 @@ const routes = [
     ]
   },
   {
-    path: '/order',
+    path: '/backend',
     component: Home,
     children: [
       { path: 'tables/list', component: tablesList, name: 'tablesList', meta: { hideLeft: false, module: 'Order', menu: 'tables' }},
@@ -131,7 +132,7 @@ const routes = [
     ]
   },
   {
-    path: '/order',
+    path: '/backend',
     component: Home,
     children: [
       { path: 'menuCategory/list', component: menuCategoriesList, name: 'menuCategoriesList', meta: { hideLeft: false, module: 'Order', menu: 'menuCategories' }},
@@ -140,16 +141,17 @@ const routes = [
     ]
   },
   {
-    path: '/order',
+    path: '/backend',
     component: Home,
     children: [
       { path: 'menus/list', component: menusList, name: 'menusList', meta: { hideLeft: false, module: 'Order', menu: 'menus' }},
       { path: 'menus/add', component: menusAdd, name: 'menusAdd', meta: { hideLeft: false, module: 'Order', menu: 'menus' }},
+      { path: 'menus/addMenu', component: addMenu, name: 'addMenu', meta: { hideLeft: false, module: 'Order', menu: 'menus' }},
       { path: 'menus/edit/:id', component: menusEdit, name: 'menusEdit', meta: { hideLeft: false, module: 'Order', menu: 'menus' }}
     ]
   },
   {
-    path: '/order',
+    path: '/backend',
     component: Home,
     children: [
       { path: 'adPosition/list', component: adPositionList, name: 'adPositionList', meta: { hideLeft: false, module: 'Order', menu: 'adPosition' }},
@@ -158,7 +160,7 @@ const routes = [
     ]
   },
   {
-    path: '/order',
+    path: '/backend',
     component: Home,
     children: [
       { path: 'advert/list', component: advertList, name: 'advertList', meta: { hideLeft: false, module: 'Order', menu: 'advert' }},
@@ -167,7 +169,7 @@ const routes = [
     ]
   },
   {
-    path: '/order',
+    path: '/backend',
     component: Home,
     children: [
       { path: 'orders/list', component: orderList, name: 'orderList', meta: { hideLeft: false, module: 'Order', menu: 'order' }}

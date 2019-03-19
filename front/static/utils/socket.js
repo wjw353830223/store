@@ -1,131 +1,110 @@
 import { wsUrl, Api } from '../../api.js'
-const webSocket = {
-    data() {
-      return {
-        socketOpen:false,
-        callback: null
-      }
-    },
-    methods: {
-        establish () {
-            var that = this
-            ui.connectSocket({
-                url: wsUrl,
-                success: function (res) {
-                    ui.showToast({
-                        title: 'WebSocket创建成功！'
-                    })
-                    that.socketOpen = true
-            
-                    ui.onSocketOpen(function (res) {
-                        ui.showToast({
-                            title: 'WebSocket连接已打开！'
-                        })
-                        that.sendSocketMessage({
-                            type: 'pong',
-                            data: "heartbeat"
-                        },
-                        that.bindUid)
-                        window.timer = setInterval(that.heartbeat, 130000)
-                    })
-                    ui.onSocketError(function (res) {
-                        ui.showToast({
-                            title: 'WebSocket连接打开失败，请检查！'
-                        })
-                    })
-                    ui.onSocketMessage(function (res) {
-                        let data = JSON.parse(res.data)
-                        if (that.callback != null && that.callback != "" && that.callback != undefined) {
-                            that.callback(data)
-                            that.callback = null
-                            return
-                        }
-                        //if(data.type=='backup' || data.type=='restore') { }
-                    })
-                },
-                fail: function (res) {
-                    ui.showToast({
-                        title: 'WebSocket创建失败！'
-                    })
-                    that.socketOpen = false
-                }
+import { fetch } from "./http"
+var socketOpen=false
+var callback=null
+function establish () {
+    ui.connectSocket({
+        url: wsUrl,
+        success: function (res) {
+            ui.showToast({
+                title: 'WebSocket创建成功！'
             })
-        },
-        sendSocketMessage (data, callback) {
-            this.callback = callback
-            var that = this
-            if (that.socketOpen) {
-                ui.sendSocketMessage({
-                    data: JSON.stringify(data),
-                    success: function (res) {
-                        console.log(res)
-                    },
-                    fail: function (res) {
-                        ui.showToast({
-                            title: '发送失败！'
-                        })
-                    }
+            socketOpen = true
+            ui.onSocketOpen(function (res) {
+                ui.showToast({
+                    title: 'WebSocket连接已打开！'
                 })
-            }
-        },
-        close () {
-            var that = this
-            ui.closeSocket({
-                success: function (res) {
-                    that.socketOpen = false
-                    ui.onSocketClose(function (res) {
-                        ui.showToast({
-                            title: 'WebSocket 已关闭！'
-                        })
-                    })
-                },
-                fail: function () {
-                    ui.showToast({
-                        title: 'WebSocket 关闭失败'
-                    })
-                }
-            })
-        },
-        heartbeat() {
-            this.sendSocketMessage(
-                {
+                sendSocketMessage({
                     type: 'pong',
                     data: "heartbeat"
                 },
-                null
-            )
+                bindUid)
+                window.timer = setInterval(heartbeat, 130000)
+            })
+            ui.onSocketError(function (res) {
+                ui.showToast({
+                    title: 'WebSocket连接打开失败，请检查！'
+                })
+            })
+            ui.onSocketMessage(function (res) {
+                let data = JSON.parse(res.data)
+                if (callback != null && callback != "" && callback != undefined) {
+                    callback(data)
+                    callback = null
+                    return
+                }
+                if(data.type=='chiefoffline') {
+                    ui.showToast({ title: data.data.message, icon: 'error' })
+                }
+            })
         },
-        bindUid(data){
-            let that=this
-            if(data.type=='init'){
-                this.fetch(Api.bind.path,  {
-                    method:'POST',
-                    data: {
-                        client_id: data.client_id 
-                    }
-                }).then(function(res){
-                    if(res=='success'){
-                        ui.showToast({
-                            title: '通信调试成功！'
-                        })
-                    }
-                }).catch(function(error){
-                    console.log(error)
+        fail: function (res) {
+            ui.showToast({
+                title: 'WebSocket创建失败！'
+            })
+            socketOpen = false
+        }
+    })
+}
+function sendSocketMessage (data, call) {
+    callback = call
+    if (socketOpen) {
+        ui.sendSocketMessage({
+            data: JSON.stringify(data),
+            success: function (res) {
+                console.log(res)
+            },
+            fail: function (res) {
+                ui.showToast({
+                    title: '发送失败！'
                 })
             }
-        },
-    },
-    created() {
-        let token = ui.getStorageSync('token')
-        if(token){
-            clearInterval(window.timer)
-            this.establish()
-        }
-    },
-    destroyed: function() {
-        clearInterval(window.timer)
-        this.close()
+        })
     }
-  }
-  export default webSocket
+}
+function close () {
+    ui.closeSocket({
+        success: function (res) {
+            socketOpen = false
+            ui.onSocketClose(function (res) {
+                ui.showToast({
+                    title: 'WebSocket 已关闭！'
+                })
+            })
+        },
+        fail: function () {
+            ui.showToast({
+                title: 'WebSocket 关闭失败'
+            })
+        }
+    })
+}
+function heartbeat() {
+    sendSocketMessage(
+        {
+            type: 'pong',
+            data: "heartbeat"
+        },
+        null
+    )
+}
+function bindUid(data){
+    if(data.type=='init'){
+        fetch(Api.bind.path,  {
+            method:'POST',
+            data: {
+                client_id: data.client_id 
+            }
+        }).then(function(res){
+            if(res=='success'){
+                ui.showToast({
+                    title: '通信调试成功！'
+                })
+            }
+        }).catch(function(error){
+            console.log(error)
+        })
+    }
+}
+export { establish, sendSocketMessage,  close }
   

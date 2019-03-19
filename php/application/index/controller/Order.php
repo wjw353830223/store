@@ -7,6 +7,8 @@
 
 namespace app\index\controller;
 
+use app\common\event\OrderOrder;
+
 class Order extends ApiCommon
 {
 
@@ -29,7 +31,11 @@ class Order extends ApiCommon
         $param['member_id']=$this->member_info['member_id'];
         $data = $orderModel->createData($param);
         if (!$data) {
-            return resultArray(['error' => $orderModel->getError()]);
+            if(!is_null(OrderOrder::$error)){
+                return resultArray(['socketError' => OrderOrder::$error]);
+            }else{
+                return resultArray(['error' => $orderModel->getError()]);
+            }
         }
 
         return resultArray(['data' => 'success']);
@@ -41,7 +47,11 @@ class Order extends ApiCommon
         $param = $this->request->param();
         $data = $orderModel->updateDataById($param, $param['id']);
         if (!$data) {
-            return resultArray(['error' => $orderModel->getError()]);
+            if(!is_null(OrderOrder::$error)){
+                return resultArray(['socketError' => OrderOrder::$error]);
+            }else{
+                return resultArray(['error' => $orderModel->getError()]);
+            }
         }
         return resultArray(['data' => 'success']);
     }
