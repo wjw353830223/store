@@ -72,7 +72,18 @@ class OrderOrder extends Common
         if ($page && $limit) {
             $list = $list->limit(0,$page*$limit);
         }
-        $list = $list->with('partitions')->select();
+        $list = $list->with([
+            'partitions'=>function($query){
+                $query->with([
+                    'sku'=>function($query){
+                        $query->field('id,image,specName,specValue');
+                    },
+                    'menu'=>function($query){
+                        $query->field('name,id,image');
+                    }
+                ]);
+            }
+        ])->select();
         $data['list'] = $list;
         $data['dataCount'] = $dataCount;
         return $data;
