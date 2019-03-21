@@ -23,12 +23,7 @@ export default {
         {
           "pagePath": "pages/index",
           "iconName": "home",
-          "text": "订单"
-        },
-        {
-          "pagePath": "pages/menu/category",
-          "iconName": "airudiantubiaohuizhi-zhuanqu_meishicaipu",
-          "text": "统计"
+          "text": "实时订单"
         },
         {
           "pagePath": "pages/member/user",

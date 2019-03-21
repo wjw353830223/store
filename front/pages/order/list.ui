@@ -23,7 +23,7 @@
         <ui-tab-view-header>已下单</ui-tab-view-header>
         <ui-tab-view-header>烹饪中</ui-tab-view-header>
         <ui-tab-view-header>已通知</ui-tab-view-header>
-        <ui-tab-view-header>已取餐</ui-tab-view-header>
+        <ui-tab-view-header>取餐完毕</ui-tab-view-header>
         <ui-tab-view-header>已完成</ui-tab-view-header>
         <ui-tab-view-header>已取消</ui-tab-view-header>
         <ui-tab-view-header>已删除</ui-tab-view-header>
@@ -58,7 +58,7 @@
                     </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="default" size="mini" plain="true" v-if="item.status==1" bindtap='cancel(item)'>取消</ui-button>
+                        <ui-button type="default" size="mini" plain="true" v-if="item.payed_at==0 && item.status==1" bindtap='cancel(item)'>取消</ui-button>
                         <ui-button type="primary" size="mini" plain="true" v-if="item.status==1" bindtap='press(item)'>催单</ui-button>
                         <ui-button type="warn" size="mini" plain="true" v-if="item.status==8" bindtap='deleteOrder(item)'>删除</ui-button>
                         <ui-button type="default" size="mini" plain="true" v-if="item.payed_at==0 && item.status!=8 && item.status!=9" bindtap='check(item)'>结账</ui-button>
@@ -98,7 +98,7 @@
                     </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="default" size="mini" plain="true" v-if="item.status==1" bindtap='cancel(item)'>取消</ui-button>
+                        <ui-button type="default" size="mini" plain="true" v-if="item.payed_at==0 && item.status==1" bindtap='cancel(item)'>取消</ui-button>
                         <ui-button type="primary" size="mini" plain="true" v-if="item.status==1" bindtap='press(item)'>催单</ui-button>
                         <ui-button type="warn" size="mini" plain="true" v-if="item.status==8" bindtap='deleteOrder(item)'>删除</ui-button>
                         <ui-button type="default" size="mini" plain="true" v-if="item.payed_at==0 && item.status!=8 && item.status!=9" bindtap='check(item)'>结账</ui-button>
@@ -416,7 +416,7 @@ export default {
           statusName = '已通知'
           break;
         case '5':
-          statusName = '已取餐'
+          statusName = '取餐完毕'
           break;
         case '6':
           statusName = '已完成'
@@ -457,15 +457,21 @@ export default {
           this.currentStatus = 1
           break;
         case 2:
-          this.currentStatus = 5
+          this.currentStatus = 2
           break;
         case 3:
-          this.currentStatus = 6
+          this.currentStatus = 3
           break;
         case 4:
-          this.currentStatus = 8
+          this.currentStatus = 5
           break;
         case 5:
+          this.currentStatus = 6
+          break;
+        case 6:
+          this.currentStatus = 8
+          break;
+        case 6:
           this.currentStatus = 9
           break;
         default:

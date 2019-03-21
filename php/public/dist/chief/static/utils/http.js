@@ -21,7 +21,7 @@ function fetch(path, options) {
                 if(res.data.code=='200') {
                     resolve(res.data.data)
                 }else{
-                    resolve(res.data.error)
+                    resolve(res.data)
                 }
             },
             fail: reject

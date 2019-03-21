@@ -9,7 +9,6 @@
 				</el-switch>
 				<el-input
 					clearable
-				
 					placeholder="订单号"
 					v-model="orderSn">
 				</el-input>
@@ -64,6 +63,8 @@
 								<div class="bottom clearfix">
 									<span>分订单金额：{{ item.order_partition_amount/100 }}元</span>
 								</div>
+								<el-button v-if="item.status==5" type="text" class="button">已取餐</el-button>
+								<el-button v-if="item.status==3" type="text" class="button" @click="orderGet(item)">确认取餐</el-button>
 							</div>
 						</el-card>
 				</template>
@@ -92,9 +93,24 @@
 			label="订单状态"
       prop="statusText">
 			</el-table-column>
+			<el-table-column
+			label="支付状态"
+      prop="payStatusText">
+			</el-table-column>
       <el-table-column
 			label="下单时间"
       prop="createTime">
+			</el-table-column>
+			<el-table-column label="操作"  width="220">
+				<template slot-scope="scope">
+					<el-button
+						size="mini"
+						type="danger"
+						@click="check(scope.row)" v-if="scope.row.payed_at==0">收款确认</el-button>
+					<el-button
+						size="mini"
+						@click="finish(scope.row)" v-if="scope.row.payed_at > 0 && scope.row.status==5">订单完成</el-button>
+				</template>
 			</el-table-column>
     </el-table>
 		<div class="pos-rel p-t-20">
@@ -138,7 +154,7 @@ export default {
 					},
 					{
 						value:3,
-						label:'用户取餐中'
+						label:'通知取餐'
 					},
 					{
 						value:4,
@@ -146,14 +162,10 @@ export default {
 					},
 					{
 						value:5,
-						label:'用户进食中'
+						label:'用户已取餐'
 					},
 					{
 						value:6,
-						label:'用户已支付'
-					},
-					{
-						value:7,
 						label:'订单已完成'
 					},
 					{
@@ -190,8 +202,36 @@ export default {
       }
     },
 		methods: {
+			orderGet(item){
+				let taht=this
+				this.apiPut('order/orders/', item.order_id, {
+					partition_id:item.id,
+					status:5
+				}).then((res) => {
+          this.handelResponse(res, (data) => {
+						if(data=='success'){
+							taht.search();
+						}
+          })
+        })
+			},
+			check(order){
+				let taht=this
+				this.apiPut('order/orders/', order.id, {
+					confirmPay:1
+				}).then((res) => {
+          this.handelResponse(res, (data) => {
+						if(data=='success'){
+							taht.search();
+						}
+          })
+        })
+			},
+			finish(order){
+
+			},
 			search(){
-				if(this.dateArray){
+				if(this.dateArray.length>0){
 					this.startTime=this.dateArray[0].getTime()/1000
 					this.endTime=this.dateArray[1].getTime()/1000
 				}
@@ -269,6 +309,10 @@ export default {
 									item.statusText='已删除'
 									break;
 							}
+							item.payStatusText='未支付'
+							if(item.payed_at > 0){
+								item.payStatusText='已支付'
+							}
 							item.createTime = new Date(parseInt(item.created_at) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
 							item.orderAmount = item.order_amount/100
 						})
@@ -297,14 +341,15 @@ export default {
         }
 			},
 			websocketonmessage(e) {
-        let data = JSON.parse(e.data)
+				let data = JSON.parse(e.data)
+				console.log(data)
         let _self=this
         if (this.callback != null && this.callback != "" && this.callback != undefined) {
           this.callback(data)
           this.callback = null
           return
 				}
-        if(['press','order','notice','cancel','make','check'].indexOf(data.type) > -1){
+        if(['press','order','notice','cancel','make','check','get','eat'].indexOf(data.type) > -1){
 					const data = {
 						params: {
 							page: this.currentPage,

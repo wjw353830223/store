@@ -20,7 +20,7 @@
 
       <template slot="header">
         <ui-tab-view-header>已下单</ui-tab-view-header>
-        <ui-tab-view-header>制作中</ui-tab-view-header>
+        <ui-tab-view-header>烹制中</ui-tab-view-header>
         <ui-tab-view-header>取餐中</ui-tab-view-header>
       </template>
       <template slot="body">
@@ -29,32 +29,28 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items1 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>桌号： {{item.desk.name}}</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">桌号： {{item.desk.name}}</ui-text>
+                    <ui-col space="20">
+                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">用户电话： {{item.member.member_mobile}}</ui-text>
-                    </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
-                    </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
+                    <ui-col lign="left" space-left="10">
+                      <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
+                    </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="primary" size="mini" plain="true">开始烹制</ui-button>
+                        <ui-button type="primary" size="mini" plain="true" bindtap='makeOrder(item)'>开始烹制</ui-button>
                       </ui-view>
                     </ui-col>
                   </ui-row>
@@ -67,32 +63,28 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items2 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>桌号： {{item.desk.name}}</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">桌号： {{item.desk.name}}</ui-text>
+                    <ui-col space="20">
+                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">用户电话： {{item.member.member_mobile}}</ui-text>
-                    </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
-                    </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
+                    <ui-col lign="left" space-left="10">
+                      <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
+                    </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="primary" size="mini" plain="true">通知取餐</ui-button>
+                        <ui-button type="primary" size="mini" plain="true" bindtap='noticeOrder(item)'>通知取餐</ui-button>
                       </ui-view>
                     </ui-col>
                   </ui-row>
@@ -105,26 +97,29 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items3 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>桌号： {{item.desk.name}}</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">桌号： {{item.desk.name}}</ui-text>
+                    <ui-col space="20">
+                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">用户电话： {{item.member.member_mobile}}</ui-text>
-                    </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
-                    </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col lign="left" space-left="10">
+                      <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
+                    </ui-col>
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="primary" size="mini" plain="true" bindtap='noticeOrder(item)'>再次通知</ui-button>
+                      </ui-view>
                     </ui-col>
                   </ui-row>
               </ui-view>
@@ -144,8 +139,12 @@
         <van-card
           v-for="(item, index) in currentPartitions" 
           :key = "index"
+          :tag="getNotice(item.status)"
           :title="item.name"
           :thumb="apiUrl + item.image"
+          :num="item.nums"
+          :price="item.price/100"
+          :desc="getDesc(item.sku)"
         >
         <div slot="desc">
           <ui-text block v-if="item.sku">{{ getSpecValue(item.sku.specValue) }}</ui-text>
@@ -197,6 +196,85 @@ export default {
     }
   },
   methods: {
+    makeOrder(item){
+      let that=this
+      this.fetch(Api.order+'/'+item.id, {
+        method:'PUT',
+        data: { 
+          status:2,
+        },
+        header: {
+          'content-type': 'application/x-www-form-urlencoded'
+        }
+      }).then((response) => {
+        if(response.code=='500'){
+          ui.showToast({ title: '订单已过期！', icon: 'success', duration: 3000 })
+          that.frushData(that.currentStatus)
+        }
+        if(response=='success'){
+          ui.showToast({ title: '已通知用户！', icon: 'success', duration: 3000 })
+          that.frushData(that.currentStatus)
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    getNotice(status){
+      let noticeText=''
+      if(status==3){
+        noticeText='待取餐'
+      }
+      if(status==5){
+        noticeText='取餐完毕'
+      }
+      return noticeText;
+    },
+    noticeOrder(item){
+      let itemList=[]
+      let partition_id=null
+      let that=this;
+      item.partitions.map((it) => {
+        if(it.status==3 || it.status==2){
+          itemList.push(it.name)
+        }
+      })
+      ui.showActionSheet({
+        itemList: itemList,
+        showCancel: false,
+        success: (index) => {
+          partition_id = item.partitions[index].id
+          that.fetch(Api.order+'/'+item.id, {
+            method:'PUT',
+            data: { 
+              status:3,
+              partition_id:partition_id
+            },
+            header: {
+              'content-type': 'application/x-www-form-urlencoded'
+            }
+          }).then((response) => {
+            if(response=='success'){
+              ui.showToast({ title: '已通知用户取餐！', icon: 'success', duration: 3000 })
+              that.frushData(that.index + 1)
+            }
+          }).catch((error) => {
+            console.log(error)
+          })
+        }
+      })
+    },
+    getDesc(sku){
+      if(!sku){
+        return ''
+      }
+      let descArr=JSON.parse(sku.specValue)
+      let atrributionArr=JSON.parse(sku.specName)
+      let desc=''
+      descArr.map((item,index)=>{
+        desc += atrributionArr[index] + ':' + item + ' '
+      })
+      return desc
+    },
     showMore(partitions){
       this.moreImg=true
       this.currentPartitions=partitions
@@ -206,6 +284,8 @@ export default {
     },
     handleChange (index) {
       this.index = index
+      let status=index+1
+      this.frushData(status)
     },
     handleBegin ({ distance, direction }) {
       this.proportion = distance / 94
@@ -231,6 +311,20 @@ export default {
         that.state = 3
         that['items'+status] = response.list
         ++that.currentPage['items'+status]
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    frushData(status){
+      let limit=50
+      let that = this
+      let page = this.currentPage['items'+status]
+      let mod = 0
+      this.fetch(Api.order, {
+        method:'GET',
+        data: { page, limit, status }
+      }).then((response) => {
+        that['items'+status] = response.list
       }).catch((error) => {
         console.log(error)
       })
@@ -370,6 +464,9 @@ export default {
   }
   .ui-button-mini{
     line-height: 1.6
+  }
+  .ui-view{
+    .mix-1px(0, 0, 1, 0, #ccc);
   }
 }
 .popup5{

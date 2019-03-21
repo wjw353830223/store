@@ -61,12 +61,17 @@ class OrderOrder extends Common
         $map[] = ['member_id', 'eq', $param['member_id']];
         $map[] = ['type', 'eq', $param['type']];
         if($param['status'] != 0){
-            $map[] = ['status', 'eq', $param['status']];
+
+            if($param['status']==OrderOrder::STATUS_MAKE){
+                $map[] = ['status', 'in', [OrderOrder::STATUS_MAKE, OrderOrder::STATUS_GET]];
+            }else{
+                $map[] = ['status', 'eq', $param['status']];
+            }
         }
+
         $page = isset($param['page'])?$param['page']:0;
         $limit = isset($param['limit'])?$param['limit']:0;
-
-	    $dataCount = $this->where($map)->count('id');
+        $dataCount = $this->where($map)->count('id');
         $list = $this->where($map)->order('created_at','desc');
         // 若有分页
         if ($page && $limit) {
@@ -84,6 +89,23 @@ class OrderOrder extends Common
                 ]);
             }
         ])->select();
+        if($param['status']==OrderOrder::STATUS_MAKE){
+            foreach($list as $key=>$val){
+                if($val->status==OrderOrder::STATUS_GET){
+                    $makeStatus=false;
+                    foreach($val->partitions as $vv){
+                        if($vv->status==OrderOrder::STATUS_MAKE){
+                            $makeStatus=true;
+                            break;
+                        }
+                    }
+                    if(!$makeStatus){
+                        unset($list[$key]);
+                        --$dataCount;
+                    }
+                }
+            }
+        }
         $data['list'] = $list;
         $data['dataCount'] = $dataCount;
         return $data;
@@ -112,7 +134,14 @@ class OrderOrder extends Common
             $map[] = ['order_sn', 'eq', $orderSn];
         }
         if($status){
-            $map[] = ['status', 'eq', $status];
+            if($status==OrderOrder::STATUS_MAKE){
+                $map[] = ['status', 'in', [OrderOrder::STATUS_MAKE, OrderOrder::STATUS_GET]];
+            }else{
+                $map[] = ['status', 'eq', $status];
+                if($status==OrderOrder::STATUS_ORDER){
+                    $map[] = ['created_at', '>= time', time() - \app\common\event\OrderOrder::EXPIRE_LIMIT];
+                }
+            }
         }
         if($pay_status==1){
             $map[] = ['payed_at', 'eq', 0];
@@ -122,7 +151,24 @@ class OrderOrder extends Common
         }
         $dataCount = $this->where($map)->count('id');
         $list = $this->where($map);
-        $accountList = $list->select()->toArray();
+        $accountList = $list->with('partitions')->select()->toArray();
+        if($status==OrderOrder::STATUS_MAKE){
+            foreach($accountList as $key=>$val){
+                if($val['status']==OrderOrder::STATUS_GET){
+                    $makeStatus=false;
+                    foreach($val['partitions'] as $vv){
+                        if($vv['status']==OrderOrder::STATUS_MAKE){
+                            $makeStatus=true;
+                            break;
+                        }
+                    }
+                    if(!$makeStatus){
+                        unset($accountList[$key]);
+                        --$dataCount;
+                    }
+                }
+            }
+        }
         $accountsReceivable = array_reduce($accountList, function($carry, $item){
             $carry += $item['order_amount'];
             return $carry;
@@ -158,6 +204,22 @@ class OrderOrder extends Common
                 $query->field('name,id');
             },
         ])->select();
+        if($status==OrderOrder::STATUS_MAKE){
+            foreach($list as $key=>$val){
+                if($val['status']==OrderOrder::STATUS_GET){
+                    $makeStatus=false;
+                    foreach($val['partitions'] as $vv){
+                        if($vv['status']==OrderOrder::STATUS_MAKE){
+                            $makeStatus=true;
+                            break;
+                        }
+                    }
+                    if(!$makeStatus){
+                        unset($list[$key]);
+                    }
+                }
+            }
+        }
         $data['list'] = $list;
         $data['dataCount'] = $dataCount;
         $data['accountsReceivable'] = $accountsReceivable;
@@ -247,6 +309,8 @@ class OrderOrder extends Common
             if($this->data($param)->allowField(true)->save()===false){
                 return false;
             }
+            $pay->order_id = $this->id;
+            $pay->save();
             foreach($orderGoods as &$good){
                 $good['order_partition_sn'] = $this->make_ordersn($pay->id);
                 $good['order_partition_amount'] = $good['price'] * $good['nums'];
@@ -323,20 +387,66 @@ class OrderOrder extends Common
                 $messageModel->message = json_encode($message);
                 $messageModel->save();
                 Gateway::sendToClient($client_id, json_encode($message));
+                return true;
+            }
+            if(isset($param['confirmPay'])){
                 $param['payed_at'] = time();
-
+            }
+            if(isset($param['status']) && $param['status']==self::STATUS_GET){
+                if(!isset($param['partition_id'])){
+                    return false;
+                }
+                $partition = new OrderOrderPartition();
+                $partition->save([
+                    'status'  => self::STATUS_GET,
+                    $partition->getPk() => $param['partition_id']
+                ],[$partition->getPk() => $param['partition_id']]);
+                if($this->allowField(true)->save($param, [$this->getPk() => $id])===false){
+                    return false;
+                }
+                return true;
+            }
+            if(isset($param['status']) && $param['status']==self::STATUS_EAT){
+                if(!isset($param['partition_id'])){
+                    return false;
+                }
+                $partition = new OrderOrderPartition();
+                $partition->save([
+                    'status'  => self::STATUS_EAT,
+                    $partition->getPk() => $param['partition_id']
+                ],[$partition->getPk() => $param['partition_id']]);
+                $count1=model('OrderOrderPartition')->where([
+                    ['order_id','=',$id]
+                ])->count();
+                $count=model('OrderOrderPartition')->where([
+                    ['order_id','=',$id],
+                    ['status', '=', self::STATUS_EAT]
+                ])->count();
+                $count==$count1 && $param['status']=self::STATUS_EAT;
+                if($this->allowField(true)->save($param, [$this->getPk() => $id])===false){
+                    return false;
+                }
+                return true;
             }
             if($this->allowField(true)->save($param, [$this->getPk() => $id])===false){
                 return false;
             }
+            if(isset($param['confirmPay'])){
+                $order = self::get($id);
+                $pay=new OrderPay();
+                $pay->pay_amount = $order->order_amount;
+                $pay->pay_time = time();
+                $pay->save();
+            }
             if(isset($param['status'])){
                 $partition = new OrderOrderPartition();
                 $partition->save([
-                    'status'  => $param['status']
+                    'status'  => $param['status'],
                 ],['order_id' => $id]);
             }
             return true;
         } catch(\Exception $e) {
+            echo $e->getMessage();
             $this->error = '编辑失败';
             return false;
         }

@@ -11,48 +11,70 @@ use think\Exception;
 class OrderOrder
 {
     public static $error = null;
+    const EXPIRE_LIMIT = 5 * 3600;
     public function beforeInsert($order){
         //下单时厨师都不在线
-//        if(Gateway::getClientIdCountByGroup(2) <= 0){
-//            $member = Member::get($order->member_id);
-//            if($order['type']==Order::TYPE_WAITER){
-//                $user = User::get($order->member_id);
-//                $uid = 'admin:'.$user->id;
-//            }else{
-//                $uid = $member->member_id;
-//            }
-//            $message = '厨师都未上线，请线下点餐！';
-//            Gateway::sendToUid($uid, json_encode([
-//                'type'=>'chiefoffline',
-//                'data'=> [
-//                    'message'=>$message
-//                ]
-//            ]));
-//            self::$error = '厨师都不在线，请线下点餐！';
-//            return false;
-//        }
+        if(Gateway::getClientIdCountByGroup(2) <= 0){
+            $member = Member::get($order->member_id);
+            if($order['type']==Order::TYPE_WAITER){
+                $user = User::get($order->member_id);
+                $uid = 'admin:'.$user->id;
+            }else{
+                $uid = $member->member_id;
+            }
+            $message = '厨师都未上线，请线下点餐！';
+            Gateway::sendToUid($uid, json_encode([
+                'type'=>'chiefoffline',
+                'data'=> [
+                    'message'=>$message
+                ]
+            ]));
+            self::$error = '厨师都不在线，请线下点餐！';
+            return false;
+        }
     }
     public function beforeUpdate($order){
+        $press_status = isset($order->press_status)?$order->press_status:null;
+        $status = isset($order->status)?$order->status:null;
+        $order = Order::get($order->id);
+        if(is_null($press_status)){
+            $press_status=$order->press_status;
+        }
+        if(is_null($status)){
+            $status=$order->status;
+        }
+        $member = Member::get($order->member_id);
+        if ($order['type'] == Order::TYPE_WAITER) {
+            $user = User::get($order->member_id);
+            $uid = 'admin:' . $user->id;
+        } else {
+            $uid = $member->member_id;
+        }
+        //订单过期了
+        $expire = $order->created_at + self::EXPIRE_LIMIT;
+        if($status == Order::STATUS_MAKE && $expire < time()){
+            $message = '订单已过期，请重新下单！';
+            Gateway::sendToUid($uid, json_encode([
+                'type' => 'orderexpire',
+                'data' => [
+                    'message' => $message
+                ]
+            ]));
+            self::$error = $message;
+            return false;
+        }
         //催单时厨师都不在线
-//        if($order['press_status']==1 && Gateway::getClientIdCountByGroup(2) <= 0) {
-//            $order = Order::get($order->id);
-//            $member = Member::get($order->member_id);
-//            if ($order['type'] == Order::TYPE_WAITER) {
-//                $user = User::get($order->member_id);
-//                $uid = 'admin:' . $user->id;
-//            } else {
-//                $uid = $member->member_id;
-//            }
-//            $message = '厨师都不在线，请联系商家！';
-//            Gateway::sendToUid($uid, json_encode([
-//                'type' => 'chiefoffline',
-//                'data' => [
-//                    'message' => $message
-//                ]
-//            ]));
-//            self::$error = $message;
-//            return false;
-//        }
+        if($press_status==Order::STATUS_PRESS && Gateway::getClientIdCountByGroup(2) <= 0) {
+            $message = '厨师都不在线，请联系商家！';
+            Gateway::sendToUid($uid, json_encode([
+                'type' => 'chiefoffline',
+                'data' => [
+                    'message' => $message
+                ]
+            ]));
+            self::$error = $message;
+            return false;
+        }
     }
 
     /**
@@ -119,7 +141,16 @@ class OrderOrder
         }
     }
     public function afterUpdate($order){
+        $partition_id = isset($order['partition_id'])?$order['partition_id']:null;
+        $status = isset($order->status)?$order->status:null;
+        $press_status=isset($order->press_status)?$order->press_status:null;
         $order = Order::get($order->id);
+        if(is_null($status)){
+            $status=$order->status;
+        }
+        if(is_null($press_status)){
+            $press_status=$order->press_status;
+        }
         $goods = $order->partitions->toArray();
         $member = Member::get($order->member_id);
         $table = Desk::get($order->tid);
@@ -134,9 +165,9 @@ class OrderOrder
             unset($good);
         }
         //给服务员(随机)发消息 订单注意结账
-        if($order->status==Order::STATUS_EAT && $order->payed_at==0){
+        if($status==Order::STATUS_EAT && $order->payed_at==0){
             $message = [
-                'type'=> 'check',
+                'type'=> 'eat',
                 'data'=> [
                     'type'=>$order['type'],
                     'tid'=>$order->tid,
@@ -156,7 +187,8 @@ class OrderOrder
                 Gateway::sendToGroup('admin', json_encode($message));
                 if(Gateway::getClientIdCountByGroup($group) > 0){
                     $data = [
-                        'sender_id' => 'admin:'.$GLOBALS['userInfo']['id'],
+                        'type'=> 'eat',
+                        'sender_id' => 'admin:'.$GLOBALS['userInfo']->id,
                         'message' => $message,
                         'communicate' => Message::COMMUNICATE_CHIEF_TO_WAITER
                     ];
@@ -174,7 +206,7 @@ class OrderOrder
                 return;
             }
         }
-        if($order->status == Order::STATUS_CANCEL || $order->press_status==Order::STATUS_PRESS){
+        if($status == Order::STATUS_CANCEL || $press_status==Order::STATUS_PRESS){
             $data = [
                 'type'=>$order['type'],
                 'tid'=>$order->tid,
@@ -191,13 +223,13 @@ class OrderOrder
             $group = 0;
             $communicate = 0;
             //给厨师发消息 订单已取消
-            if($order->status==Order::STATUS_CANCEL){
+            if($status==Order::STATUS_CANCEL){
                 $type='cancel';
                 $group = 2;
                 $communicate = $order['type']==Order::TYPE_WAITER?Message::COMMUNICATE_WAITER_TO_CHIEF:Message::COMMUNICATE_CUSTOMER_TO_CHIEF;
             }
             //给厨师发消息 用户催单了
-            if($order->press_status==Order::STATUS_PRESS){
+            if($press_status==Order::STATUS_PRESS){
                 $type='press';
                 $group = 2;
                 $communicate = $order['type']==Order::TYPE_WAITER?Message::COMMUNICATE_WAITER_TO_CHIEF:Message::COMMUNICATE_CUSTOMER_TO_CHIEF;
@@ -210,6 +242,7 @@ class OrderOrder
                 Gateway::sendToGroup('admin', json_encode($message));
                 if(Gateway::getClientIdCountByGroup($group) > 0){
                     $data = [
+                        'type'=> $type,
                         'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
                         'message' => '',
                         'communicate' => $communicate
@@ -228,7 +261,7 @@ class OrderOrder
                 return;
             }
         }
-        if(in_array($order->status,[Order::STATUS_MAKE, Order::STATUS_GET])){
+        if(in_array($status,[Order::STATUS_MAKE, Order::STATUS_EAT])){
             $data = [
                 'type'=>$order['type'],
                 'tid'=>$order->tid,
@@ -238,6 +271,9 @@ class OrderOrder
                     'name'=>$table->name
                 ],
             ];
+            if(!is_null($partition_id)){
+                $data['current_partition_id']=$partition_id;
+            }
             if($order['type']==Order::TYPE_WAITER){
                 $user = User::get($order->member_id);
                 $data['waiter'] = [
@@ -255,12 +291,12 @@ class OrderOrder
                 $communicate = Message::COMMUNICATE_CHIEF_TO_CUSTOMER;
             }
             //给用户/服务员发消息 订单开始烹制
-            if($order->status==Order::STATUS_MAKE){
+            if($status==Order::STATUS_MAKE){
                 $type='make';
             }
-            //给用户/服务员发消息 通知取餐
-            if($order->status==Order::STATUS_GET){
-                $type='notice';
+            //给用户/服务员发消息 取餐完毕
+            if($status==Order::STATUS_EAT){
+                $type='eat';
             }
             $message = [
                 'type'=> $type,
@@ -269,7 +305,8 @@ class OrderOrder
             try{
                 Gateway::sendToGroup('admin', json_encode($message));
                 $data = [
-                    'sender_id' => 'admin:'.$GLOBALS['userInfo']['id'],
+                    'type'=>$type,
+                    'sender_id' => 'admin:'.$GLOBALS['userInfo']->id,
                     'message' => '',
                     'communicate' => $communicate,
                     'receiver_id' => $uid

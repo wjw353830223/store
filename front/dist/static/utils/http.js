@@ -1,14 +1,20 @@
 import { urlEncode } from './util'
 import { Api, baseUrl } from '../../api.js'
+import { establish } from "./socket"
 import './jquery'
 import './jquery.sha1'
 //接口请求封装
 function fetch(path, options) {
     return new Promise((resolve, reject) => {
+        let method=options.method.toUpperCase() || 'GET'
         let auth=null
         let arr =  Object.keys(Api)
         for(let i=0; i< arr.length; i++){
             if(Api[arr[i]].path==path){
+                auth = Api[arr[i]].auth
+                break;
+            }
+            if(method == 'PUT' && path.indexOf(Api[arr[i]].path)>-1){
                 auth = Api[arr[i]].auth
                 break;
             }
@@ -32,7 +38,6 @@ function fetch(path, options) {
                                 cancelButtonText: '取消',
                                 success: (result) => {
                                     login(result.value).then((response) => {
-                                        console.log(response)
                                         if(response.code=='200'){
                                             ui.showToast({
                                                 title: '登录成功！'
@@ -70,9 +75,8 @@ function fetch(path, options) {
                 path: path
             });
         }
-        let method=options.method.toUpperCase() || 'GET'
         let header = {}
-        if(method=='POST'){
+        if(method=='POST' || method=='PUT'){
             header = Object.assign({
                 'content-type': 'application/x-www-form-urlencoded'
             }, options.header)
@@ -85,6 +89,8 @@ function fetch(path, options) {
             success: function(res){
                 if(res.data.code=='200') {
                     resolve(res.data.data)
+                } else if(res.data.code=='500'){
+                    ui.showToast({ title: res.data.error, icon: 'loading', duration: 3000 })
                 }else{
                     if(path!=Api.table.path){
                         ui.showConfirm({
@@ -140,6 +146,7 @@ function login(mobile){
             success: function(res){
                 if(res.data.code=='200'){
                     ui.setStorageSync('token',res.data.data);
+                    establish()
                     resolve(res.data)
                 }
                 if(res.data.code=='400'){

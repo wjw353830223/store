@@ -20,6 +20,10 @@ class OrderOrderPartition extends Common
      * 我们约定每个模块的数据表都加上相同的前缀，比如微信模块用weixin作为数据表前缀
      */
     protected $name = 'order_order_partition';
+    protected static function init()
+    {
+        self::observe(\app\common\event\OrderOrderPartition::class);
+    }
     /**
      * [createData 新建]
      * @linchuangbin

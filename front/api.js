@@ -46,6 +46,10 @@ const Api = {
     order: {
         path:'index/order',
         auth:true
+    },
+    message: {
+        path:'index/message',
+        auth:true
     }
 }
 const baseUrl='http://www.vuethink.com/'
