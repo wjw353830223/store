@@ -231,18 +231,20 @@ export default {
     },
     noticeOrder(item){
       let itemList=[]
+      let partitionIdList=[]
       let partition_id=null
       let that=this;
       item.partitions.map((it) => {
         if(it.status==3 || it.status==2){
           itemList.push(it.name)
+          partitionIdList.push(it.id)
         }
       })
       ui.showActionSheet({
         itemList: itemList,
         showCancel: false,
         success: (index) => {
-          partition_id = item.partitions[index].id
+          partition_id = partitionIdList[index]
           that.fetch(Api.order+'/'+item.id, {
             method:'PUT',
             data: { 

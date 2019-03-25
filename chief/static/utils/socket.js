@@ -6,7 +6,9 @@ const webSocket = {
         socketMsgQueue: [],
         socketMsgBuffer:{
             'order':[],
-            'cancel':[]
+            'cancel':[],
+            'press':[],
+            'eat':[]
         }
       }
     },
@@ -55,6 +57,15 @@ const webSocket = {
                             }
                             if(data.type=='order'){
                                 that.socketMsgBuffer.order.push(data)
+                            }
+                            if(data.type=='press'){
+                                that.socketMsgBuffer.press.push(data)
+                            }
+                            if(data.type=='cancel'){
+                                that.socketMsgBuffer.cancel.push(data)
+                            }
+                            if(data.type=='eat'){
+                                that.socketMsgBuffer.eat.push(data)
                             }
                         }
                     })
@@ -142,6 +153,87 @@ const webSocket = {
                                 }).then((response) => {
                                     if(response == 'success'){
                                         newValue.order.splice(index,1)
+                                        if(that.$route.path=='/pages/index'){
+                                            that.getOrdersData(that.currentStatus)
+                                        }
+                                    }
+                                }).catch((error) => {
+                                    console.log(error)
+                                })
+                            }
+                        }
+                    })
+                })
+                newValue.press.map((data,index)=>{
+                    ui.showConfirm({
+                        content: data.data.desk.name +'用户催单了，请尽快烹制！',
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        success (result) {
+                            if(result.confirm){
+                                that.fetch(Api.message + '/' + data.message_id, {
+                                    method:'PUT',
+                                    data: { status:1 },
+                                    header: {
+                                        'content-type': 'application/x-www-form-urlencoded'
+                                    }
+                                }).then((response) => {
+                                    if(response == 'success'){
+                                        newValue.press.splice(index,1)
+                                        if(that.$route.path=='/pages/index'){
+                                            that.getOrdersData(that.currentStatus)
+                                        }
+                                    }
+                                }).catch((error) => {
+                                    console.log(error)
+                                })
+                            }
+                        }
+                    })
+                })
+                newValue.cancel.map((data,index)=>{
+                    ui.showConfirm({
+                        content: data.data.desk.name +'用户取消订单了！',
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        success (result) {
+                            if(result.confirm){
+                                that.fetch(Api.message + '/' + data.message_id, {
+                                    method:'PUT',
+                                    data: { status:1 },
+                                    header: {
+                                        'content-type': 'application/x-www-form-urlencoded'
+                                    }
+                                }).then((response) => {
+                                    if(response == 'success'){
+                                        newValue.cancel.splice(index,1)
+                                        if(that.$route.path=='/pages/index'){
+                                            that.getOrdersData(that.currentStatus)
+                                        }
+                                    }
+                                }).catch((error) => {
+                                    console.log(error)
+                                })
+                            }
+                        }
+                    })
+                })
+                newValue.eat.map((data,index)=>{
+                    ui.showConfirm({
+                        content: data.data.desk.name +'取餐结束！',
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        success (result) {
+                            if(result.confirm){
+                                that.fetch(Api.message + '/' + data.message_id, {
+                                    method:'PUT',
+                                    data: { status:1 },
+                                    header: {
+                                        'content-type': 'application/x-www-form-urlencoded'
+                                    }
+                                }).then((response) => {
+                                    if(response == 'success'){
+                                        newValue.eat.splice(index,1)
                                         if(that.$route.path=='/pages/index'){
                                             that.getOrdersData(that.currentStatus)
                                         }

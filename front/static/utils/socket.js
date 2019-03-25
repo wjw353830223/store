@@ -62,7 +62,7 @@ function establish () {
                 }
                 if(data.type=='notice') {
                     ui.showConfirm({
-                      content: '取餐',
+                      content: '您点的菜 '+data.data.good.name+' 已经做好了，请到餐台取餐！',
                       confirmButtonText: '确定',
                       cancelButtonText: '取消',
                       success (result) {

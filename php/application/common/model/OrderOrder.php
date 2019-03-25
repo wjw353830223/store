@@ -422,6 +422,7 @@ class OrderOrder extends Common
                     ['order_id','=',$id],
                     ['status', '=', self::STATUS_EAT]
                 ])->count();
+                $param['status']=self::STATUS_GET;
                 $count==$count1 && $param['status']=self::STATUS_EAT;
                 if($this->allowField(true)->save($param, [$this->getPk() => $id])===false){
                     return false;

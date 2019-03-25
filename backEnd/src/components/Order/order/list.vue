@@ -106,7 +106,7 @@
 					<el-button
 						size="mini"
 						type="danger"
-						@click="check(scope.row)" v-if="scope.row.payed_at==0">收款确认</el-button>
+						@click="check(scope.row)" v-if="scope.row.payed_at==0 && !isCancel(scope.row.status)">收款确认</el-button>
 					<el-button
 						size="mini"
 						@click="finish(scope.row)" v-if="scope.row.payed_at > 0 && scope.row.status==5">订单完成</el-button>
@@ -202,6 +202,12 @@ export default {
       }
     },
 		methods: {
+		isCancel(status){
+			if(status==8 || status==9){
+				return true
+			}
+			return false
+		},
 			orderGet(item){
 				let taht=this
 				this.apiPut('order/orders/', item.order_id, {
@@ -210,7 +216,7 @@ export default {
 				}).then((res) => {
           this.handelResponse(res, (data) => {
 						if(data=='success'){
-							taht.search();
+							that.search();
 						}
           })
         })

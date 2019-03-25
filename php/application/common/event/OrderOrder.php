@@ -145,12 +145,7 @@ class OrderOrder
         $status = isset($order->status)?$order->status:null;
         $press_status=isset($order->press_status)?$order->press_status:null;
         $order = Order::get($order->id);
-        if(is_null($status)){
-            $status=$order->status;
-        }
-        if(is_null($press_status)){
-            $press_status=$order->press_status;
-        }
+
         $goods = $order->partitions->toArray();
         $member = Member::get($order->member_id);
         $table = Desk::get($order->tid);
@@ -164,51 +159,151 @@ class OrderOrder
             }
             unset($good);
         }
-        //给服务员(随机)发消息 订单注意结账
-        if($status==Order::STATUS_EAT && $order->payed_at==0){
+        if($status == Order::STATUS_MAKE){
+            $type = 'make';
+            $data = [
+                'type'=>$type,
+                'tid'=>$order->tid,
+                'orderGoods' => $goods,
+                'desk'=>[
+                    'id'=>$table->id,
+                    'name'=>$table->name
+                ],
+            ];
+            if(!is_null($partition_id)){
+                $data['current_partition_id']=$partition_id;
+            }
+            if($order['type']==Order::TYPE_WAITER){
+                $user = User::get($order->member_id);
+                $data['waiter'] = [
+                    'id'=>$user->id,
+                    'username'=>$user->username
+                ];
+                $uid = 'admin:'.$user->id;
+                $communicate = Message::COMMUNICATE_CHIEF_TO_WAITER;
+            }else{
+                $data['member'] = [
+                    'id'=>$member->member_id,
+                    'mobile'=>$member->member_mobile
+                ];
+                $uid = $member->member_id;
+                $communicate = Message::COMMUNICATE_CHIEF_TO_CUSTOMER;
+            }
             $message = [
-                'type'=> 'eat',
-                'data'=> [
-                    'type'=>$order['type'],
-                    'tid'=>$order->tid,
-                    'member'=>[
-                        'id'=>$member->member_id,
-                        'mobile'=>$member->member_mobile
-                    ],
-                    'desk'=>[
-                        'id'=>$table->id,
-                        'name'=>$table->name
-                    ],
-                    'orderGoods' => $goods
-                ]
+                'type'=> $type,
+                'data'=> $data
             ];
             try{
-                $group = 3;
                 Gateway::sendToGroup('admin', json_encode($message));
-                if(Gateway::getClientIdCountByGroup($group) > 0){
+                $data = [
+                    'type'=>$type,
+                    'sender_id' => 'admin:'.$GLOBALS['userInfo']->id,
+                    'message' => '',
+                    'communicate' => $communicate,
+                    'receiver_id' => $uid
+                ];
+                $messageModel = Message::create($data);
+                $message['message_id'] = $messageModel->id;
+                $messageModel->message = json_encode($message);
+                $messageModel->save();
+                Gateway::sendToUid($uid, json_encode($message));
+            }catch(Exception $e){
+                return;
+            }
+        }
+        if($status == Order::STATUS_EAT){
+            $type='eat';
+            $data = [
+                'type'=>$type,
+                'tid'=>$order->tid,
+                'orderGoods' => $goods,
+                'desk'=>[
+                    'id'=>$table->id,
+                    'name'=>$table->name
+                ],
+            ];
+            if(!is_null($partition_id)){
+                $data['current_partition_id']=$partition_id;
+            }
+            if($order['type']==Order::TYPE_WAITER){
+                $user = User::get($order->member_id);
+                $data['waiter'] = [
+                    'id'=>$user->id,
+                    'username'=>$user->username
+                ];
+                $uid = 'admin:'.$user->id;
+                $communicate = Message::COMMUNICATE_SYSTEM_TO_WAITER;
+            }else{
+                $data['member'] = [
+                    'id'=>$member->member_id,
+                    'mobile'=>$member->member_mobile
+                ];
+                $uid = $member->member_id;
+                $communicate = Message::COMMUNICATE_SYSTEM_TO_CUSTOMER;
+            }
+            $message1 = $message2 = $message = [
+                'type'=> $type,
+                'data'=> $data
+            ];
+            try{
+                Gateway::sendToGroup('admin', json_encode($message));
+                $data = [
+                    'type'=>$type,
+                    'sender_id' => 'admin:'.$GLOBALS['userInfo']->id,
+                    'message' => '',
+                    'communicate' => $communicate,
+                    'receiver_id' => $uid
+                ];
+                $messageModel = Message::create($data);
+                $message['message_id'] = $messageModel->id;
+                $messageModel->message = json_encode($message);
+                $messageModel->save();
+                Gateway::sendToUid($uid, json_encode($message));
+                //通知服务员(随机)注意结账
+                if(Gateway::getClientIdCountByGroup(3) > 0 && $order->payed_at==0){
                     $data = [
                         'type'=> 'eat',
                         'sender_id' => 'admin:'.$GLOBALS['userInfo']->id,
-                        'message' => $message,
-                        'communicate' => Message::COMMUNICATE_CHIEF_TO_WAITER
+                        'message' => '',
+                        'communicate' => Message::COMMUNICATE_SYSTEM_TO_WAITER
                     ];
-                    $list=Gateway::getClientSessionsByGroup($group);
+                    $list=Gateway::getClientSessionsByGroup(3);
                     $client_id = array_rand($list);
                     $session = $list[$client_id];
                     $data['receiver_id'] = $session['uid'];
                     $messageModel = Message::create($data);
                     $message['message_id']=$messageModel->id;
-                    $messageModel->message = json_encode($message);
+                    $messageModel->message = json_encode($message1);
                     $messageModel->save();
-                    Gateway::sendToClient($client_id, json_encode($message));
+                    Gateway::sendToClient($client_id, json_encode($message1));
+                }
+                //通知厨师取餐完成
+                if(Gateway::getClientIdCountByGroup(2) > 0){
+                    $data = [
+                        'type'=> 'eat',
+                        'sender_id' => 'admin:'.$GLOBALS['userInfo']->id,
+                        'message' => '',
+                        'communicate' => Message::COMMUNICATE_SYSTEM_TO_CHIEF
+                    ];
+                    $list=Gateway::getClientSessionsByGroup(2);
+                    foreach($list as $client_id=>$session){
+                        $data['receiver_id'] = $session['uid'];
+                        $messageModel = Message::create($data);
+                        $message['message_id'] = $messageModel->id;
+                        $messageModel->message = json_encode($message2);
+                        $messageModel->save();
+                        Gateway::sendToUid($session['uid'],json_encode($message));
+                    }
+
                 }
             }catch(Exception $e){
                 return;
             }
         }
-        if($status == Order::STATUS_CANCEL || $press_status==Order::STATUS_PRESS){
+        if($status == Order::STATUS_CANCEL){
+            $type='cancel';
             $data = [
-                'type'=>$order['type'],
+                'type'=>$type,
                 'tid'=>$order->tid,
                 'member'=>[
                     'id'=>$member->member_id,
@@ -224,13 +319,6 @@ class OrderOrder
             $communicate = 0;
             //给厨师发消息 订单已取消
             if($status==Order::STATUS_CANCEL){
-                $type='cancel';
-                $group = 2;
-                $communicate = $order['type']==Order::TYPE_WAITER?Message::COMMUNICATE_WAITER_TO_CHIEF:Message::COMMUNICATE_CUSTOMER_TO_CHIEF;
-            }
-            //给厨师发消息 用户催单了
-            if($press_status==Order::STATUS_PRESS){
-                $type='press';
                 $group = 2;
                 $communicate = $order['type']==Order::TYPE_WAITER?Message::COMMUNICATE_WAITER_TO_CHIEF:Message::COMMUNICATE_CUSTOMER_TO_CHIEF;
             }
@@ -261,42 +349,27 @@ class OrderOrder
                 return;
             }
         }
-        if(in_array($status,[Order::STATUS_MAKE, Order::STATUS_EAT])){
+        if($press_status==Order::STATUS_PRESS){
+            $type='press';
             $data = [
-                'type'=>$order['type'],
+                'type'=>$type,
                 'tid'=>$order->tid,
-                'orderGoods' => $goods,
+                'member'=>[
+                    'id'=>$member->member_id,
+                    'mobile'=>$member->member_mobile
+                ],
                 'desk'=>[
                     'id'=>$table->id,
                     'name'=>$table->name
                 ],
+                'orderGoods' => $goods
             ];
-            if(!is_null($partition_id)){
-                $data['current_partition_id']=$partition_id;
-            }
-            if($order['type']==Order::TYPE_WAITER){
-                $user = User::get($order->member_id);
-                $data['waiter'] = [
-                    'id'=>$user->id,
-                    'username'=>$user->username
-                ];
-                $uid = 'admin:'.$user->id;
-                $communicate = Message::COMMUNICATE_CHIEF_TO_WAITER;
-            }else{
-                $data['member'] = [
-                    'id'=>$member->member_id,
-                    'mobile'=>$member->member_mobile
-                ];
-                $uid = $member->member_id;
-                $communicate = Message::COMMUNICATE_CHIEF_TO_CUSTOMER;
-            }
-            //给用户/服务员发消息 订单开始烹制
-            if($status==Order::STATUS_MAKE){
-                $type='make';
-            }
-            //给用户/服务员发消息 取餐完毕
-            if($status==Order::STATUS_EAT){
-                $type='eat';
+            $group = 0;
+            $communicate = 0;
+            //给厨师发消息 用户催单了
+            if($press_status==Order::STATUS_PRESS){
+                $group = 2;
+                $communicate = $order['type']==Order::TYPE_WAITER?Message::COMMUNICATE_WAITER_TO_CHIEF:Message::COMMUNICATE_CUSTOMER_TO_CHIEF;
             }
             $message = [
                 'type'=> $type,
@@ -304,18 +377,23 @@ class OrderOrder
             ];
             try{
                 Gateway::sendToGroup('admin', json_encode($message));
-                $data = [
-                    'type'=>$type,
-                    'sender_id' => 'admin:'.$GLOBALS['userInfo']->id,
-                    'message' => '',
-                    'communicate' => $communicate,
-                    'receiver_id' => $uid
-                ];
-                $messageModel = Message::create($data);
-                $message['message_id'] = $messageModel->id;
-                $messageModel->message = json_encode($message);
-                $messageModel->save();
-                Gateway::sendToUid($uid, json_encode($message));
+                if(Gateway::getClientIdCountByGroup($group) > 0){
+                    $data = [
+                        'type'=> $type,
+                        'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
+                        'message' => '',
+                        'communicate' => $communicate
+                    ];
+                    $list=Gateway::getClientSessionsByGroup($group);
+                    foreach($list as $client_id=>$session){
+                        $data['receiver_id'] = $session['uid'];
+                        $messageModel = Message::create($data);
+                        $message['message_id'] = $messageModel->id;
+                        $messageModel->message = json_encode($message);
+                        $messageModel->save();
+                        Gateway::sendToUid($session['uid'],json_encode($message));
+                    }
+                }
             }catch(Exception $e){
                 return;
             }

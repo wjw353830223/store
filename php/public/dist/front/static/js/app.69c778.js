@@ -76,6 +76,10 @@ var Api = {
     order: {
         path: 'index/order',
         auth: true
+    },
+    message: {
+        path: 'index/message',
+        auth: true
     }
 };
 var baseUrl = 'http://www.vuethink.com/';
@@ -703,6 +707,69 @@ function establish () {
                 }
                 if(data.type=='orderexpire') {
                     ui.showToast({ title: data.data.message, icon: 'error' })
+                }
+                if(data.type=='make') {
+                    ui.showConfirm({
+                      content: '您点的菜'+data.data.orderGoods[0].name+' 等菜已经开始制作了，请耐心等待！',
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      success (result) {
+                        if(result.confirm){
+                            fetch(api["a" /* Api */].message.path + '/' + data.message_id, {
+                                method:'PUT',
+                                data: { status:1 }
+                            }).then((response) => {
+                                if(response == 'success'){
+                                    
+                                }
+                            }).catch((error) => {
+                                console.log(error)
+                            })
+                        }
+                      }
+                    })
+                }
+                if(data.type=='notice') {
+                    ui.showConfirm({
+                      content: '您点的菜 '+data.data.good.name+' 已经做好了，请到餐台取餐！',
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      success (result) {
+                        if(result.confirm){
+                            fetch(api["a" /* Api */].message.path + '/' + data.message_id, {
+                                method:'PUT',
+                                data: { status:1 }
+                            }).then((response) => {
+                                if(response == 'success'){
+                                    
+                                }
+                            }).catch((error) => {
+                                console.log(error)
+                            })
+                        }
+                      }
+                    })
+                }
+                if(data.type=='eat') {
+                    ui.showConfirm({
+                      content: '取餐结束',
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      success (result) {
+                        if(result.confirm){
+                            fetch(api["a" /* Api */].message.path + '/' + data.message_id, {
+                                method:'PUT',
+                                data: { status:1 }
+                            }).then((response) => {
+                                if(response == 'success'){
+                                    
+                                }
+                            }).catch((error) => {
+                                console.log(error)
+                            })
+                        }
+                      }
+                    })
                 }
             })
         },

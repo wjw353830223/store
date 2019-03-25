@@ -23,6 +23,9 @@ class Message extends Common
     const COMMUNICATE_WAITER_TO_CHIEF = 3;
     const COMMUNICATE_CHIEF_TO_CUSTOMER = 4;
     const COMMUNICATE_CHIEF_TO_WAITER = 5;
+    const COMMUNICATE_SYSTEM_TO_CHIEF = 6;
+    const COMMUNICATE_SYSTEM_TO_CUSTOMER = 7;
+    const COMMUNICATE_SYSTEM_TO_WAITER = 8;
     public function updateDataById($param, $id)
     {
         try {
