@@ -15,12 +15,12 @@ class OrderOrder
     public function beforeInsert($order){
         //下单时厨师都不在线
         if(Gateway::getClientIdCountByGroup(2) <= 0){
-            $member = Member::get($order->member_id);
+            $member = Member::get($order['member_id']);
             if($order['type']==Order::TYPE_WAITER){
-                $user = User::get($order->member_id);
+                $user = User::get($order['member_id']);
                 $uid = 'admin:'.$user->id;
             }else{
-                $uid = $member->member_id;
+                $uid = $member['member_id'];
             }
             $message = '厨师都未上线，请线下点餐！';
             Gateway::sendToUid($uid, json_encode([
@@ -43,12 +43,12 @@ class OrderOrder
         if(is_null($status)){
             $status=$order->status;
         }
-        $member = Member::get($order->member_id);
+        $member = Member::get($order['member_id']);
         if ($order['type'] == Order::TYPE_WAITER) {
-            $user = User::get($order->member_id);
+            $user = User::get($order['member_id']);
             $uid = 'admin:' . $user->id;
         } else {
-            $uid = $member->member_id;
+            $uid = $member['member_id'];
         }
         //订单过期了
         $expire = $order->created_at + self::EXPIRE_LIMIT;
@@ -88,7 +88,14 @@ class OrderOrder
             $order = Order::get($order->id);
             $goods = $order->partitions->toArray();
         }
-        $member = Member::get($order->member_id);
+        $member = Member::get($order['member_id']);
+        if($order['type']==Order::TYPE_WAITER){
+            $user = User::get($order['member_id']);
+            $member = [
+                'member_id'=>$user->id,
+                'member_mobile'=>$user->mobile
+            ];
+        }
         $table = Desk::get($order->tid);
         if(!empty($goods)){
             foreach($goods as &$good){
@@ -106,8 +113,8 @@ class OrderOrder
                 'type'=>$order['type'],
                 'tid'=>$order->tid,
                 'member'=>[
-                    'id'=>$member->member_id,
-                    'mobile'=>$member->member_mobile
+                    'id'=>$member['member_id'],
+                    'mobile'=>$member['member_mobile']
                 ],
                 'desk'=>[
                     'id'=>$table->id,
@@ -120,7 +127,7 @@ class OrderOrder
             Gateway::sendToGroup('admin', json_encode($message));
             if(Gateway::getClientIdCountByGroup(2) > 0){
                 $data = [
-                    'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
+                    'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order['member_id']:$order['member_id'],
                     'message' => '',
                     'communicate' => $order['type']==Order::TYPE_WAITER?Message::COMMUNICATE_WAITER_TO_CHIEF:Message::COMMUNICATE_CUSTOMER_TO_CHIEF,
                     'type' => 'order'
@@ -147,7 +154,14 @@ class OrderOrder
         $order = Order::get($order->id);
 
         $goods = $order->partitions->toArray();
-        $member = Member::get($order->member_id);
+        $member = Member::get($order['member_id']);
+        if($order['type']==Order::TYPE_WAITER){
+            $user = User::get($order['member_id']);
+            $member = [
+                'member_id'=>$user->id,
+                'member_mobile'=>$user->mobile
+            ];
+        }
         $table = Desk::get($order->tid);
         if(!empty($goods)){
             foreach($goods as &$good){
@@ -174,7 +188,7 @@ class OrderOrder
                 $data['current_partition_id']=$partition_id;
             }
             if($order['type']==Order::TYPE_WAITER){
-                $user = User::get($order->member_id);
+                $user = User::get($order['member_id']);
                 $data['waiter'] = [
                     'id'=>$user->id,
                     'username'=>$user->username
@@ -183,10 +197,10 @@ class OrderOrder
                 $communicate = Message::COMMUNICATE_CHIEF_TO_WAITER;
             }else{
                 $data['member'] = [
-                    'id'=>$member->member_id,
-                    'mobile'=>$member->member_mobile
+                    'id'=>$member['member_id'],
+                    'mobile'=>$member['member_mobile']
                 ];
-                $uid = $member->member_id;
+                $uid = $member['member_id'];
                 $communicate = Message::COMMUNICATE_CHIEF_TO_CUSTOMER;
             }
             $message = [
@@ -226,7 +240,7 @@ class OrderOrder
                 $data['current_partition_id']=$partition_id;
             }
             if($order['type']==Order::TYPE_WAITER){
-                $user = User::get($order->member_id);
+                $user = User::get($order['member_id']);
                 $data['waiter'] = [
                     'id'=>$user->id,
                     'username'=>$user->username
@@ -235,10 +249,10 @@ class OrderOrder
                 $communicate = Message::COMMUNICATE_SYSTEM_TO_WAITER;
             }else{
                 $data['member'] = [
-                    'id'=>$member->member_id,
-                    'mobile'=>$member->member_mobile
+                    'id'=>$member['member_id'],
+                    'mobile'=>$member['member_mobile']
                 ];
-                $uid = $member->member_id;
+                $uid = $member['member_id'];
                 $communicate = Message::COMMUNICATE_SYSTEM_TO_CUSTOMER;
             }
             $message1 = $message2 = $message = [
@@ -306,8 +320,8 @@ class OrderOrder
                 'type'=>$type,
                 'tid'=>$order->tid,
                 'member'=>[
-                    'id'=>$member->member_id,
-                    'mobile'=>$member->member_mobile
+                    'id'=>$member['member_id'],
+                    'mobile'=>$member['member_mobile']
                 ],
                 'desk'=>[
                     'id'=>$table->id,
@@ -331,7 +345,7 @@ class OrderOrder
                 if(Gateway::getClientIdCountByGroup($group) > 0){
                     $data = [
                         'type'=> $type,
-                        'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
+                        'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order['member_id']:$order['member_id'],
                         'message' => '',
                         'communicate' => $communicate
                     ];
@@ -355,8 +369,8 @@ class OrderOrder
                 'type'=>$type,
                 'tid'=>$order->tid,
                 'member'=>[
-                    'id'=>$member->member_id,
-                    'mobile'=>$member->member_mobile
+                    'id'=>$member['member_id'],
+                    'mobile'=>$member['member_mobile']
                 ],
                 'desk'=>[
                     'id'=>$table->id,
@@ -380,7 +394,7 @@ class OrderOrder
                 if(Gateway::getClientIdCountByGroup($group) > 0){
                     $data = [
                         'type'=> $type,
-                        'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order->member_id:$order->member_id,
+                        'sender_id' => $order['type']==Order::TYPE_WAITER?'admin:'.$order['member_id']:$order['member_id'],
                         'message' => '',
                         'communicate' => $communicate
                     ];

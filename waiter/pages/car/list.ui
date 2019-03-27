@@ -11,8 +11,11 @@
         <ui-col vertical-align="middle" align="center">
           <ui-view class="nav_title">我的菜谱</ui-view>
         </ui-col>
-        <ui-col vertical-align="middle" align="center" width="60" bindtap="editCar">
+        <ui-col vertical-align="middle" align="center" width="60" bindtap="editCar" v-if="goods.length>0">
           {{editText}}
+        </ui-col>
+        <ui-col vertical-align="middle" align="center" width="60" v-else>
+         
         </ui-col>
       </ui-row>
     </ui-nav-bar>
@@ -57,6 +60,7 @@
           </div>
       </van-checkbox-group>
       <van-submit-bar
+        v-if="goods.length>0"
         :price="totalPrice"
         :disabled="!checkedGoods.length"
         :button-text="submitBarText"
@@ -93,7 +97,12 @@ export default {
       editText:'编辑',
       value:1,
       checkedGoods: [],
-      goods: []
+      goods: [],
+      itemList:[],
+      itemIndex: [
+        2,
+        5
+      ]
     }
   },
   methods: {
@@ -115,8 +124,11 @@ export default {
         this.editText='保存'
       }else{
         let goods = JSON.stringify(this.goods)
-        this.fetch(Api.carUpdates.path, {
+        this.fetch(Api.carUpdates, {
           method:'POST',
+          header:{
+            'content-type': 'application/x-www-form-urlencoded'
+          },
           data: { goods }
         }).then((response)=>{
           if(response =='success'){
@@ -143,38 +155,83 @@ export default {
         }
       })
       orderGoods = JSON.stringify(orderGoods);
-      let tid = ui.getStorageSync('tid')
-      let type = 0
+      let type = 1
+      let from_car = 1
       let order_amount=this.totalPrice
-      this.fetch(Api.order.path, {
-        method:'POST',
-        data: { orderGoods, tid, type, order_amount }
-      }).then((response)=>{
-        if(response =='success'){
-          Toast.success('点餐成功！');
+      let that=this
+      ui.showActionSheet({
+        header: '<p>选择用户所在餐桌</p>',
+        itemList: that.itemList,
+        success: (index) => {
+          if(index < 0){
+            return false;
+          }
+          let tid = that.itemIndex[index]
+          that.fetch(Api.indexOrder, {
+            method:'POST',
+            header:{
+              'content-type': 'application/x-www-form-urlencoded'
+            },
+            data: { orderGoods, tid, type, order_amount, from_car }
+          }).then((response)=>{
+            if(response =='success'){
+              that.getList()
+              ui.showConfirm({
+                content: '点餐成功！',
+                confirmButtonText: '查看订单',
+                cancelButtonText: '取消',
+                success (result) {
+                  if(result.confirm){
+                    ui.redirectTo({
+                      url: '/pages/order/list'
+                    })
+                  }
+                }
+              })
+            }
+          }).catch((error)=>{
+            console.log(error)
+          })
         }
-      }).catch((error)=>{
+      })
+    },
+    getList(){
+      let that=this
+      this.fetch(Api.car, {
+        method:'GET',
+        data: {
+        }
+      }).then((response) => {
+        response.list.map((item)=>{
+          item.thumb = baseUrl + item.image
+          if(item.is_check){
+            that.checkedGoods.push(item.id)
+          }
+        })
+        that.goods = response.list
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    getTables(){
+      let that=this
+      this.fetch(Api.table, {
+        method:'GET',
+        data: {
+        }
+      }).then((response) => {
+        response.list.map((item,index)=>{
+          that.itemList.push(item.name)
+          that.itemIndex.push(item.id)
+        })
+      }).catch((error) => {
         console.log(error)
       })
     }
   },
   created(){
-    let that=this
-    this.fetch(Api.car.path, {
-      method:'GET',
-      data: {
-      }
-    }).then((response) => {
-      response.list.map((item)=>{
-        item.thumb = baseUrl + item.image
-        if(item.is_check){
-          that.checkedGoods.push(item.id)
-        }
-      })
-      that.goods = response.list
-    }).catch((error) => {
-      console.log(error)
-    })
+    this.getList();
+    this.getTables();
   },
   computed: {
     submitBarText() {
@@ -234,6 +291,7 @@ export default {
   }
 }
 .van-submit-bar{
-  bottom:-100px;
+  
+  position: relative;
 }
 </style>

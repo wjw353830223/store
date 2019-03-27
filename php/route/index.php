@@ -16,15 +16,16 @@ Route::post('index/open/table','index/open/table');
 Route::get('index/position/index','index/position/index');
 
 Route::get('index/menus/index','index/menus/index');
-Route::get('index/menus/read','index/menus/read');
+Route::get('index/menus/:id','index/menus/read');
 
 Route::get('index/category/index','index/category/index');
-Route::get('index/category/read','index/category/read');
+Route::get('index/category/:id','index/category/read');
 
 Route::Post('index/member/bind','index/member/bind');
 
 Route::resource('index/car','index/car');
 Route::Post('index/car/updates','index/car/updates');
+
 Route::resource('index/order','index/order');
 Route::resource('index/message','index/message');
 return [

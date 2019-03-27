@@ -43,6 +43,9 @@ class OrderOrder extends Common
     public function member(){
         return $this->hasOne('Member','member_id', 'member_id');
     }
+    public function user(){
+        return $this->hasOne('User','member_id', 'id');
+    }
     public function desk(){
         return $this->hasOne('Desk','id', 'tid');
     }
@@ -186,7 +189,7 @@ class OrderOrder extends Common
         }else{
             $list = $list->limit(0,$page*$limit);
         }
-        $list = $list->with([
+        $with=[
             'partitions'=>function($query){
                 $query->with([
                     'sku'=>function($query){
@@ -203,7 +206,8 @@ class OrderOrder extends Common
             'desk'=>function($query){
                 $query->field('name,id');
             },
-        ])->select();
+        ];
+        $list = $list->with($with)->select();
         if($status==OrderOrder::STATUS_MAKE){
             foreach($list as $key=>$val){
                 if($val['status']==OrderOrder::STATUS_GET){
@@ -219,6 +223,18 @@ class OrderOrder extends Common
                     }
                 }
             }
+        }
+        if(!empty($list)){
+            foreach($list as $key=>&$val){
+                if($val['type'] && empty($val['member'])){
+                    $user = model('User')->get($val['member_id']);
+                    $val['member'] = (object)[
+                        'member_id'=>$user->id,
+                        'member_mobile'=>$user->mobile
+                    ];
+                }
+            }
+            unset($val);
         }
         $data['list'] = $list;
         $data['dataCount'] = $dataCount;
@@ -264,7 +280,7 @@ class OrderOrder extends Common
      */
     public function createData($param)
     {
-        if($param['from_car']){
+        if(isset($param['from_car']) && $param['from_car']){
             $orderGoods=json_decode($param['orderGoods'],true);
         }else{
             $menu = model('OrderMenu')->get($param['menu_id']);

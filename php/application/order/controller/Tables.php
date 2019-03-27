@@ -16,7 +16,10 @@ class Tables extends ApiCommon
     {
         $tableModel = model('Desk');
         $param = $this->param;
-        $data = $tableModel->getDataList($param['keywords'], $param['page'], $param['limit']);
+        $keywords = isset($param['keywords'])?$param['keywords']:null;
+        $page = isset($param['page'])?$param['page']:null;
+        $limit = isset($param['limit'])?$param['limit']:null;
+        $data = $tableModel->getDataList($keywords, $page, $limit);
         return resultArray(['data' => $data]);
     }
 

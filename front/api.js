@@ -16,7 +16,7 @@ const Api = {
         auth:false
     },
     menusRead: {
-        path:'index/menus/read',
+        path:'index/menus/',
         auth:false
     },
     categoryIndex: {

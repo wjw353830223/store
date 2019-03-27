@@ -205,10 +205,10 @@ export default {
       ]
       let that=this
       that.skuShow=true
-      that.fetch(Api.menusRead.path, {
+      that.fetch(Api.menusRead.path+item.id, {
         method:'GET',
         data: {
-          mid: item.id
+          
         }
       }).then((response) => {
         that.goodsId = response.id

@@ -1,129 +1,483 @@
+<!--订单列表-->
 <template>
   <ui-page>
-      <ui-view class='index-swiper'>
-        <ui-ex-swiper pagination loop autoplay="{{ autoplay }}">
-          <ui-ex-swiper-item ui:for="{{swiperFirst}}" ui:for-item="item">
-            <ui-image src="{{ item.image }}" mode="simple"></ui-image>
-            <ui-text class="slide-title">{{ item.title }}</ui-text>
-          </ui-ex-swiper-item>
-        </ui-ex-swiper>
+    <ui-tab-view bindchange="handleChange"
+      ink-bar
+      on-begin="{{ handleBegin }}" 
+      on-active="{{ handleActive }}"
+      on-after="{{ handleAfter }}"
+      pull-down-distance="94"
+      >
+      <ui-view slot="pull-down" class="pull-down-content" ui:show="{{proportion}}">
+        <ui-view class="img-layer" ui:if="{{proportion < 1}}">
+          <ui-view class="img_content" style="{{{ height : proportion * 100+'px' }}}"></ui-view>
+        </ui-view>
+        <ui-view class="img-layer" ui:else>
+          <ui-view class="mt-ready" ui:if="{{state === 2}}"></ui-view>
+          <ui-view class="mt-loading" ui:show="{{state === 3 || state === 4}}"></ui-view>
+        </ui-view>
       </ui-view>
-      <ui-view class='search'>
-        <ui-text class="eat">今天吃点什么？</ui-text>
-        <ui-input type="search" name="search" placeholder="搜索" show-clear></ui-input>
+
+      <template slot="header">
+        <ui-tab-view-header>已下单</ui-tab-view-header>
+        <ui-tab-view-header>烹制中</ui-tab-view-header>
+        <ui-tab-view-header>取餐中</ui-tab-view-header>
+      </template>
+      <template slot="body">
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items1 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>桌号： {{item.desk.name}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20">
+                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col lign="left" space-left="10">
+                      <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
+                    </ui-col>
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="primary" size="mini" plain="true" bindtap='makeOrder(item)'>开始烹制</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items2 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>桌号： {{item.desk.name}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20">
+                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col lign="left" space-left="10">
+                      <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
+                    </ui-col>
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="primary" size="mini" plain="true" bindtap='noticeOrder(item)'>通知取餐</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items3 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>桌号： {{item.desk.name}}</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20">
+                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col lign="left" space-left="10">
+                      <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
+                    </ui-col>
+                    <ui-col vertical-align="bottom" align="right" space-right="10">
+                      <ui-view>
+                        <ui-button type="primary" size="mini" plain="true" bindtap='noticeOrder(item)'>再次通知</ui-button>
+                      </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+      </template>
+    </ui-tab-view>
+    <ui-popup ui:model="{{ moreImg }}" position='bottom' background="transparent">
+      <ui-view class="popup5">
+        <ui-row height="40" border-bottom>
+          <ui-col vertical-align="middle" space-left="20">菜单</ui-col>
+          <ui-col width="40" vertical-align="middle" align="center" bindtap="handleShow('moreImg')">
+            <ui-icon name="close" type='close' size="18" color="#FC8950"></ui-icon>
+          </ui-col>
+        </ui-row>
+        <van-card
+          v-for="(item, index) in currentPartitions" 
+          :key = "index"
+          :tag="getNotice(item.status)"
+          :title="item.name"
+          :thumb="apiUrl + item.image"
+          :num="item.nums"
+          :price="item.price/100"
+          :desc="getDesc(item.sku)"
+        >
+        <div slot="desc">
+          <ui-text block v-if="item.sku">{{ getSpecValue(item.sku.specValue) }}</ui-text>
+          <ui-text block>{{ item.message }}</ui-text>
+        </div>
+        </van-card>
       </ui-view>
+    </ui-popup>
   </ui-page>
 </template>
 
 <script>
-import { Api, baseUrl } from '#/api.js'
+import { Api, baseUrl, wsUrl } from '#/api.js'
+import { Card } from 'vant';
 import Vue from 'vue';
-import 'vant/lib/button/style';
-import { Button } from 'vant';
-
-Vue.use(Button);
+import 'vant/lib/card/style';
+import socket from '#/static/utils/socket'
+Vue.use(Card)
 export default {
   config: {
     navigationBarTitleText: '首页',
     backgroundColor: '#F4F4F4',
     navigationBarTextStyle: 'black'
   },
-  data () {
+  name: 'indexComponent',
+  data() {
     return {
-      buttonText: '界面跳转',
-      isShow:false,
-      autoplay: {
-        delay: 3000
+      moreImg:false,
+      height:ui.DEFAULT_CONTENT_HEIGHT,
+      apiUrl: baseUrl,
+      items1: [],
+      items2: [],
+      items3: [],
+      top: 0,
+      index: 0,
+      bottom: 30,
+      proportion: 0,
+      // 下拉刷新（初始状态）
+      state: 1,
+      showLoading: false,
+      imgSrc: require('#/static/img/frush.gif'),
+      currentPage:{
+        items1:1,
+        items2:1,
+        items3:1
       },
-      swiperFirst:[{
-        image:''
-      }],
-      swiperSecond:[],
+      currentStatus:1,//订单状态 1：已下单
+      currentPartitions:[]
     }
   },
   methods: {
+    makeOrder(item){
+      let that=this
+      this.fetch(Api.order+'/'+item.id, {
+        method:'PUT',
+        data: { 
+          status:2,
+        },
+        header: {
+          'content-type': 'application/x-www-form-urlencoded'
+        }
+      }).then((response) => {
+        if(response.code=='500'){
+          ui.showToast({ title: '订单已过期！', icon: 'success', duration: 3000 })
+          that.frushData(that.currentStatus)
+        }
+        if(response=='success'){
+          ui.showToast({ title: '已通知用户！', icon: 'success', duration: 3000 })
+          that.frushData(that.currentStatus)
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    getNotice(status){
+      let noticeText=''
+      if(status==3){
+        noticeText='待取餐'
+      }
+      if(status==5){
+        noticeText='取餐完毕'
+      }
+      return noticeText;
+    },
+    noticeOrder(item){
+      let itemList=[]
+      let partitionIdList=[]
+      let partition_id=null
+      let that=this;
+      item.partitions.map((it) => {
+        if(it.status==3 || it.status==2){
+          itemList.push(it.name)
+          partitionIdList.push(it.id)
+        }
+      })
+      ui.showActionSheet({
+        itemList: itemList,
+        showCancel: false,
+        success: (index) => {
+          partition_id = partitionIdList[index]
+          that.fetch(Api.order+'/'+item.id, {
+            method:'PUT',
+            data: { 
+              status:3,
+              partition_id:partition_id
+            },
+            header: {
+              'content-type': 'application/x-www-form-urlencoded'
+            }
+          }).then((response) => {
+            if(response=='success'){
+              ui.showToast({ title: '已通知用户取餐！', icon: 'success', duration: 3000 })
+              that.frushData(that.index + 1)
+            }
+          }).catch((error) => {
+            console.log(error)
+          })
+        }
+      })
+    },
+    getDesc(sku){
+      if(!sku){
+        return ''
+      }
+      let descArr=JSON.parse(sku.specValue)
+      let atrributionArr=JSON.parse(sku.specName)
+      let desc=''
+      descArr.map((item,index)=>{
+        desc += atrributionArr[index] + ':' + item + ' '
+      })
+      return desc
+    },
+    showMore(partitions){
+      this.moreImg=true
+      this.currentPartitions=partitions
+    },
+    handleShow (key) {
+      this[key] = false
+    },
     handleChange (index) {
-      ui.showToast({
-        title: `切换到第${index + 1}项`
+      this.index = index
+      let status=index+1
+      this.frushData(status)
+    },
+    handleBegin ({ distance, direction }) {
+      this.proportion = distance / 94
+      // 拉满94px
+      if (this.proportion >= 1) {
+        if (this.state === 1 && direction === 'down') {
+          // 释放刷新
+          this.state = 2
+        }
+      } else {
+        this.state = 1
+      }
+    },
+    getOrdersData(status){
+      let limit=50
+      let that = this
+      let page = this.currentPage['items'+status]
+      let mod = 0
+      this.fetch(Api.order, {
+        method:'GET',
+        data: { page, limit, status }
+      }).then((response) => {
+        that.state = 3
+        that['items'+status] = response.list
+        ++that.currentPage['items'+status]
+      }).catch((error) => {
+        console.log(error)
       })
     },
-    sliderShow() {
-      this.isShow=true
-    },
-    navHandle () {
-      ui.navigateTo({
-        url: '/pages/detail'
+    frushData(status){
+      let limit=50
+      let that = this
+      let page = this.currentPage['items'+status]
+      let mod = 0
+      this.fetch(Api.order, {
+        method:'GET',
+        data: { page, limit, status }
+      }).then((response) => {
+        that['items'+status] = response.list
+      }).catch((error) => {
+        console.log(error)
       })
+    },
+    handleActive () {
+      this.getOrdersData(this.currentStatus)
+    },
+    handleAfter (flag) {
+      this.proportion = 0
+      if (flag) {
+        // 刷新成功...
+        this.state = 4
+        this.top -= 10
+      }
+    },
+    handleLoadMore () {
+      window.setTimeout(() => {
+        this.bottom += 10
+        this.getOrdersData(this.currentStatus)
+      }, 1500)
+    },
+    getSpecValue(specValue){
+      let spec = JSON.parse(specValue);
+      let str = spec.join(' ')
+      return str;
     }
   },
+  created() {
+    this.getOrdersData(1)
+    this.getOrdersData(2)
+    this.getOrdersData(3)
+  },
   mounted() {
-    //首屏页面需要在mounted中延时才能调用框架api，其他页面不需要延时
+     //首屏页面需要在mounted中延时才能调用框架api，其他页面不需要延时
     setTimeout(() => {
       //关闭app启动图
       ui.closeSplashscreen()
     }, 1000);
   },
-  created() {
-    let that=this
-    this.fetch(Api.position.path, {
-      method:'GET'
-    }).then((response) => {
-      response[0].adverts.map((item) => {
-        item.image=baseUrl+item.image
-      })
-      response[1].adverts.map((item) => {
-        item.image=baseUrl+item.image
-      })
-      that.swiperFirst = response[0].adverts
-      that.swiperSecond = response[1].adverts
-    }).catch((error) => {
-      console.log(error)
-    })
-  }
+  computed:{
+    
+  },
+  mixins: [ socket ]
 }
-
 </script>
 
 <style lang="less">
-.content{
-  .mix-flex-center();
+.pull-down-content {
+  height: 60px;
+  margin-top: -60px;
+  display: flex;
+  align-items:flex-end;
+  padding-bottom: 8px;
 }
-.sliderContent{
-  padding:50px 50px 0px 50px;
-}
-.buttonContent{
-  padding:50px;
-}
-.swiper-slide {
-    .ui-image {
-      width: 100%;
-      height:175px;
+
+.img-layer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .img_content{
+    width: 272px;
+    background: url('/static/img/frush.gif') no-repeat;
+    background-position: -2px center;
+    background-size: 1149px 100%;
+    zoom: 1;
   }
 }
-.index-swiper{
-  .swiper-pagination {
-    bottom: 30px;
+
+.mt-ready {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 272px;
+  height: 94px;
+  background: url('/static/img/frush.gif') no-repeat;
+  animation: mt-ready steps(5, end) 3000ms;
+  zoom: 1;
+}
+
+.mt-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 272px;
+  height: 94px;
+  background: url('/static/img/frush.gif') no-repeat;
+  animation: mt-loading steps(1, end) 3000ms infinite;
+  zoom: 1;
+}
+
+@keyframes mt-ready {
+
+  100% {
+    background-position: -410px center;
   }
-  .swiper-lazy-preloader {
-      width: 24px;
-      height: 24px;
-      margin-left: -12px;
-      margin-top: -12px;
-    }
-  .swiper-slide {
-    position: relative;
-    .slide-title {
-      color:#fff;
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      text-align: center;
-      height: 24px;
-      line-height: 24px;
-      font-size: 14px;
-      background-color: rgba(51, 51, 51, .2);
-    }
+}
+
+@keyframes mt-loading {
+  0%{
+    background-position: -495px center;
+  }
+
+  20%{
+    background-position: -576px center;
+  }
+
+  40%{
+    background-position: -658px center;
+  }
+  50%{
+    background-position: -740px center;
+  }
+  60%{
+    background-position: -823px center;
+  }
+  80%{
+    background-position: -905px center;
+  }
+  90%{
+    background-position: -986px center;
+  }
+
+  100% {
+    background-position: -1068px center;
+  }
+}
+.content_list{
+  .imgbox{
+    width:60px;
+    height:60px;
+  }
+  .more{
+    height:60px;
+    text-align: center;
+    line-height: 60px;
+  }
+  .ui-button-mini{
+    line-height: 1.6
+  }
+  .ui-view{
+    .mix-1px(0, 0, 1, 0, #ccc);
+  }
+}
+.popup5{
+  background-color:#fff;
+  height:450px;
+  margin:0 auto;
+  .ui-view{
+    line-height: 30px;
+    padding: 10px 20px;
   }
 }
 </style>

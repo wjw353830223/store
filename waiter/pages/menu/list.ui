@@ -122,22 +122,71 @@ export default {
   },
   methods: {
     onBuyClicked(skuData) {
-      console.log(skuData)
+      let order_amount=skuData.selectedSkuComb.price*skuData.selectedNum
+      this.fetch(Api.indexOrder, {
+        method:'POST',
+        header:{
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        data: { 
+          menu_id: skuData.goodsId,
+          sku_id: skuData.selectedSkuComb.id==skuData.goodsId?0:skuData.selectedSkuComb.id,
+          nums:skuData.selectedNum,
+          message:skuData.messages.message_0,
+          price:skuData.selectedSkuComb.price,
+          tid:ui.getStorageSync('tid'),
+          type:1,
+          from_car:0,
+          order_amount:order_amount
+        }
+      }).then((response)=>{
+        if(response =='success'){
+          ui.showConfirm({
+            content: '点餐成功！',
+            confirmButtonText: '查看订单',
+            cancelButtonText: '继续点餐',
+            success (result) {
+              if(result.confirm){
+                ui.navigateTo({
+                  url: '/pages/order/list'
+                })
+              }
+            }
+          })
+        }
+      }).catch((error)=>{
+        console.log(error)
+      })
     },
     onAddCartClicked(skuData) {
-      this.fetch(Api.car.path, {
+      this.fetch(Api.car, {
         method:'POST',
+        header:{
+          'content-type': 'application/x-www-form-urlencoded'
+        },
         data: {
           menu_id: skuData.goodsId,
           sku_id: skuData.selectedSkuComb.id==skuData.goodsId?0:skuData.selectedSkuComb.id,
           nums:skuData.selectedNum,
           message:skuData.messages.message_0,
           price:skuData.selectedSkuComb.price,
-          is_check:1
+          is_check:1,
+          type:1
         }
       }).then((response) => {
           if(response =='success'){
-            Toast.success('加入菜谱成功');
+            ui.showConfirm({
+              content: '加入菜谱成功!去菜谱下单吗？',
+              confirmButtonText: '去下单',
+              cancelButtonText: '继续添加',
+              success (result) {
+                if(result.confirm){
+                  ui.redirectTo({
+                    url: '/pages/car/list'
+                  })
+                }
+              }
+            })
           }
       }).catch((error) => {
         console.log(error)
@@ -163,11 +212,8 @@ export default {
       ]
       let that=this
       that.skuShow=true
-      that.fetch(Api.menusRead.path, {
+      that.fetch(Api.menu+'/'+item.id, {
         method:'GET',
-        data: {
-          mid: item.id
-        }
       }).then((response) => {
         that.goodsId = response.id
         that.goods = {
@@ -232,7 +278,7 @@ export default {
   created() {
     let query = ui.getQuery()
     let that=this
-    this.fetch(Api.menusIndex.path, {
+    this.fetch(Api.menu, {
       method:'GET',
       data: {
         cid: query.cid

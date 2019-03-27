@@ -28,6 +28,7 @@ class Car extends ApiCommon
         $carModel = model('OrderCar');
         $param = $this->request->param();
         $param['member_id']=$this->member_info['member_id'];
+
         $data = $carModel->createData($param);
         if (!$data) {
             return resultArray(['error' => $carModel->getError()]);

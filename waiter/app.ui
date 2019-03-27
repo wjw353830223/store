@@ -3,9 +3,9 @@ export default {
   config: {
     "pages": [
       "pages/index",
+      "pages/order/list",
       "pages/menu/list",
-      "pages/menu/detail",
-      "pages/order/list"
+      "pages/menu/detail"
     ],
     "theme": {
       "theme-color": "#3399ff"
@@ -25,12 +25,12 @@ export default {
         {
           "pagePath": "pages/index",
           "iconName": "home",
-          "text": "首页"
+          "text": "结账订单"
         },
         {
           "pagePath": "pages/menu/category",
           "iconName": "airudiantubiaohuizhi-zhuanqu_meishicaipu",
-          "text": "码上点餐"
+          "text": "辅助点餐"
         },
         {
           "pagePath": "pages/car/list",
@@ -50,7 +50,7 @@ export default {
     return {
       //全局变量
       globalData: {
-       
+        
       },
       WIN_WIDTH:ui.WIN_WIDTH,
       tabIndex: 0,
@@ -350,5 +350,11 @@ body {
 
 .router-view {
   width: 100%;
+}
+.ui-mask{
+  z-index: 3000 !important;
+}
+.ui-toast{
+  z-index: 4000 !important;
 }
 </style>

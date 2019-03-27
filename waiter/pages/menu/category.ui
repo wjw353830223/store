@@ -52,7 +52,7 @@ export default {
   },
   created() {
     let that=this
-    this.fetch(Api.categoryIndex.path, {
+    this.fetch(Api.category, {
       method:'GET'
     }).then((response) => {
       that.items = response

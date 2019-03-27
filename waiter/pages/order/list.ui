@@ -21,8 +21,10 @@
       <template slot="header">
         <ui-tab-view-header>全部</ui-tab-view-header>
         <ui-tab-view-header>已下单</ui-tab-view-header>
-        <ui-tab-view-header>已取餐</ui-tab-view-header>
-        <ui-tab-view-header>已支付</ui-tab-view-header>
+        <ui-tab-view-header>烹饪中</ui-tab-view-header>
+        <ui-tab-view-header>已通知</ui-tab-view-header>
+        <ui-tab-view-header>取餐完毕</ui-tab-view-header>
+        <ui-tab-view-header>已完成</ui-tab-view-header>
         <ui-tab-view-header>已取消</ui-tab-view-header>
         <ui-tab-view-header>已删除</ui-tab-view-header>
       </template>
@@ -32,24 +34,33 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items0 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
-                  <ui-row space="20">
+                  <ui-row space="20" class='order-bottom'>
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
+                    </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
-                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
-                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                        <ui-button type="default" size="mini" plain="true" v-if="item.payed_at==0 && item.status==1" bindtap='cancel(item)'>取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true" v-if="item.status==1" bindtap='press(item)'>催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true" v-if="item.status==8" bindtap='deleteOrder(item)'>删除</ui-button>
                       </ui-view>
                     </ui-col>
                   </ui-row>
@@ -62,25 +73,98 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items1 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
+                    </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
-                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
-                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                        <ui-button type="default" size="mini" plain="true" v-if="item.payed_at==0 && item.status==1" bindtap='cancel(item)'>取消</ui-button>
+                        <ui-button type="primary" size="mini" plain="true" v-if="item.status==1" bindtap='press(item)'>催单</ui-button>
+                        <ui-button type="warn" size="mini" plain="true" v-if="item.status==8" bindtap='deleteOrder(item)'>删除</ui-button>
                       </ui-view>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items2 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
+                    </ui-col>
+                  </ui-row>
+              </ui-view>
+            </ui-view>
+          </ui-view>
+        </ui-tab-view-body>
+        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
+          <ui-view>
+            <ui-view class="content_list">
+              <ui-view ui:for="{{ items3 }}" :class="{'grey-bg': index % 2 == 0}">
+                  <ui-row space="20">
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
+                    </ui-col>
+                    <ui-col space="20">
+                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
+                    </ui-col>
+                  </ui-row>
+                  <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
                     </ui-col>
                   </ui-row>
               </ui-view>
@@ -92,25 +176,27 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items5 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col vertical-align="bottom" align="right" space-right="10">
-                      <ui-view>
-                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
-                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
-                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
-                      </ui-view>
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
                     </ui-col>
                   </ui-row>
               </ui-view>
@@ -122,25 +208,27 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items6 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col vertical-align="bottom" align="right" space-right="10">
-                      <ui-view>
-                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
-                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
-                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
-                      </ui-view>
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
                     </ui-col>
                   </ui-row>
               </ui-view>
@@ -152,24 +240,31 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items8 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
+                    </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
-                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
-                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
+                        <ui-button type="warn" size="mini" plain="true" v-if="item.status==8" bindtap='deleteOrder(item)'>删除</ui-button>
                       </ui-view>
                     </ui-col>
                   </ui-row>
@@ -182,25 +277,27 @@
             <ui-view class="content_list">
               <ui-view ui:for="{{ items9 }}" :class="{'grey-bg': index % 2 == 0}">
                   <ui-row space="20">
-                    <ui-col>
-                      <ui-text class="titlename">订单编号： {{item.order_sn}}</ui-text>
+                    <ui-col align="left" space-left="10">
+                      <ui-text>订单编号： {{item.order_sn}} </ui-text>
+                    </ui-col>
+                    <ui-col align="center" space-left="50">
+                      <ui-text >{{getPayName(item.payed_at)}}</ui-text>
+                    </ui-col>
+                    <ui-col align="right" space-right="10">
+                      <ui-text>{{getStatusName(item.status)}} </ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col space="20" v-for="(item1,index1) in item.partitions" :key='index1' class="imgbox" v-if="index1<=2">
-                      <ui-image width="100%" height="100%"  :src="apiUrl + item1.image"  mode="scaleToFill" ></ui-image>
+                    <ui-col space="20">
+                      <ui-image width="100%" height="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
                     </ui-col>
-                    <ui-col space="20" v-if="item.partitions.length>3">
+                    <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
                     </ui-col>
                   </ui-row>
                   <ui-row space="20">
-                    <ui-col vertical-align="bottom" align="right" space-right="10">
-                      <ui-view>
-                        <ui-button type="default" size="mini" plain="true">取消</ui-button>
-                        <ui-button type="primary" size="mini" plain="true">催单</ui-button>
-                        <ui-button type="warn" size="mini" plain="true">删除</ui-button>
-                      </ui-view>
+                    <ui-col vertical-align="bottom" align="left" space-left="10">
+                      <ui-text class="titlename">订单总价： {{item.order_amount/100}}元</ui-text>
                     </ui-col>
                   </ui-row>
               </ui-view>
@@ -222,6 +319,9 @@
           :key = "index"
           :title="item.name"
           :thumb="apiUrl + item.image"
+          :num="item.nums"
+          :price="item.price/100"
+          :desc="getDesc(item.sku)"
         />
       </ui-view>
     </ui-popup>
@@ -245,6 +345,8 @@ export default {
       apiUrl: baseUrl,
       items0: [],
       items1: [],
+      items2: [],
+      items3: [],
       items5: [],
       items6: [],
       items8: [],
@@ -260,16 +362,67 @@ export default {
       currentPage:{
         items0:1,
         items1:1,
+        items2:1,
+        items3:1,
         items5:1,
         items6:1,
         items8:1,
         items9:1
       },
-      currentStatus:0,//订单状态 0:全部,1：已下单,5：已取餐,6：已支付,8：已取消,9：已删除,
+      currentStatus:0,//订单状态 0:全部,1：已下单,5：已取餐,6：已完成,8：已取消,9：已删除,
       currentPartitions:[]
     }
   },
   methods: {
+    getDesc(sku){
+      if(!sku){
+        return ''
+      }
+      let descArr=JSON.parse(sku.specValue)
+      let atrributionArr=JSON.parse(sku.specName)
+      let desc=''
+      descArr.map((item,index)=>{
+        desc += atrributionArr[index] + ':' + item + ' '
+      })
+      return desc
+    },
+    getStatusName(status){
+      let statusName = ''
+      switch(status){
+        case '1':
+          statusName = '已下单'
+          break;
+        case '2':
+          statusName = '烹饪中'
+          break;
+        case '3':
+          statusName = '已通知'
+          break;
+        case '5':
+          statusName = '取餐完毕'
+          break;
+        case '6':
+          statusName = '已完成'
+          break;
+        case '8':
+          statusName = '已取消'
+          break;
+        case '9':
+          statusName = '已删除'
+          break;
+        default:
+          statusName = ''
+          break;
+      }
+      return statusName
+    },
+    getPayName(payed_at){
+      let payName = '未支付'
+      if(payed_at > 0){
+        payName = '已支付'
+      }
+      return payName
+    },
     showMore(partitions){
       this.moreImg=true
       this.currentPartitions=partitions
@@ -279,7 +432,37 @@ export default {
       this[key] = false
     },
     handleChange (index) {
+      switch(index){
+        case 0:
+          this.currentStatus = 0
+          break;
+        case 1:
+          this.currentStatus = 1
+          break;
+        case 2:
+          this.currentStatus = 2
+          break;
+        case 3:
+          this.currentStatus = 3
+          break;
+        case 4:
+          this.currentStatus = 5
+          break;
+        case 5:
+          this.currentStatus = 6
+          break;
+        case 6:
+          this.currentStatus = 8
+          break;
+        case 6:
+          this.currentStatus = 9
+          break;
+        default:
+          this.currentStatus = 0
+          break;
+      }
       this.index = index
+      this.frushData(this.currentStatus)
     },
     handleBegin ({ distance, direction }) {
       this.proportion = distance / 94
@@ -295,16 +478,30 @@ export default {
     },
     getData(status){
       let limit=10
-      let type=0
+      let type=1
       let that = this
       let page = this.currentPage['items'+status]
-      this.fetch(Api.order.path, {
+      this.fetch(Api.indexOrder, {
         method:'GET',
         data: { page, limit, status, type }
       }).then((response) => {
         that.state = 3
         that['items'+status] = response.list
         ++that.currentPage['items'+status]
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    frushData(status){
+      let limit=10
+      let type=1
+      let that = this
+      let page = this.currentPage['items'+status]
+      this.fetch(Api.indexOrder, {
+        method:'GET',
+        data: { page, limit, status, type }
+      }).then((response) => {
+        that['items'+status] = response.list
       }).catch((error) => {
         console.log(error)
       })
@@ -325,15 +522,65 @@ export default {
         this.bottom += 10
         this.getData(this.currentStatus)
       }, 1500)
+    },
+    cancel(item){
+      let that = this
+      this.fetch(Api.indexOrder+'/'+item.id, {
+        method:'PUT',
+        header:{
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        data: { status: 8 }
+      }).then((response) => {
+        if(response=='success'){
+          ui.showToast({ title: '订单取消成功！', icon: 'success' })
+          that.frushData(that.currentStatus)
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    deleteOrder(item){
+      let that = this
+      this.fetch(Api.indexOrder+'/'+item.id, {
+        method:'PUT',
+        header:{
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        data: { status: 9 }
+      }).then((response) => {
+        if(response=='success'){
+          ui.showToast({ title: '订单删除成功！', icon: 'success' })
+          that.frushData(that.currentStatus)
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    press(item){
+      let that = this
+      this.fetch(Api.indexOrder+'/'+item.id, {
+        method:'PUT',
+        header:{
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        data: { press_status: 1 }
+      }).then((response) => {
+        if(response=='success'){
+          ui.showToast({ title: '已通知厨师！请您耐心等待！', icon: 'success' })
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
     }
   },
   mounted() {
     let limit=10
-    let type=0
+    let type=1
     let status = 0
     let that = this
     let page = this.currentPage.items0
-    this.fetch(Api.order.path, {
+    this.fetch(Api.indexOrder, {
       method:'GET',
       data: { page, limit, status, type }
     }).then((response) => {
@@ -345,6 +592,9 @@ export default {
     }).catch((error) => {
       console.log(error)
     })
+  },
+  watch: {
+    
   }
 }
 </script>
@@ -442,6 +692,9 @@ export default {
   }
   .ui-button-mini{
     line-height: 1.6
+  }
+  .ui-view{
+    .mix-1px(0, 0, 1, 0, #ccc);
   }
 }
 .popup5{
