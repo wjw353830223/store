@@ -1036,6 +1036,7 @@ var main_options = {
     var accessTime = dist_ui["a" /* default */].getStorageSync('accessTime') || null;
     var nowTime = Date.parse(new Date()) / 1000;
     if (!accessTime) {
+      accessTime = nowTime;
       dist_ui["a" /* default */].setStorageSync('accessTime', nowTime);
     }
     //设置系统访问3小时过时 主要目的是让用户重新扫码访问 防止用户用历史记录访问系统 造成桌号对应不上
@@ -1043,7 +1044,9 @@ var main_options = {
       dist_ui["a" /* default */].showAlert({
         title: '访问提示',
         content: '访问已过时，请重新扫描餐桌二维码！',
-        success: function success() {}
+        success: function success() {
+          dist_ui["a" /* default */].removeStorageSync('accessTime');
+        }
       });
       return;
     }

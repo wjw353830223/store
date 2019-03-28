@@ -8,7 +8,8 @@ const webSocket = {
             'order':[],
             'cancel':[],
             'press':[],
-            'eat':[]
+            'eat':[],
+            'make':[]
         }
       }
     },
@@ -57,6 +58,9 @@ const webSocket = {
                             }
                             if(data.type=='order'){
                                 that.socketMsgBuffer.order.push(data)
+                            }
+                            if(data.type=='make'){
+                                that.socketMsgBuffer.make.push(data)
                             }
                             if(data.type=='press'){
                                 that.socketMsgBuffer.press.push(data)
@@ -153,6 +157,33 @@ const webSocket = {
                                 }).then((response) => {
                                     if(response == 'success'){
                                         newValue.order.splice(index,1)
+                                        if(that.$route.path=='/pages/index'){
+                                            that.getOrdersData(that.currentStatus)
+                                        }
+                                    }
+                                }).catch((error) => {
+                                    console.log(error)
+                                })
+                            }
+                        }
+                    })
+                })
+                newValue.make.map((data,index)=>{
+                    ui.showConfirm({
+                        content: '您点的菜'+data.data.orderGoods[0].name+' 等菜已经开始制作了，请耐心等待！',
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        success (result) {
+                            if(result.confirm){
+                                that.fetch(Api.message + '/' + data.message_id, {
+                                    method:'PUT',
+                                    data: { status:1 },
+                                    header: {
+                                        'content-type': 'application/x-www-form-urlencoded'
+                                    }
+                                }).then((response) => {
+                                    if(response == 'success'){
+                                        newValue.make.splice(index,1)
                                         if(that.$route.path=='/pages/index'){
                                             that.getOrdersData(that.currentStatus)
                                         }

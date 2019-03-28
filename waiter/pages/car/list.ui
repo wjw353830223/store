@@ -99,10 +99,7 @@ export default {
       checkedGoods: [],
       goods: [],
       itemList:[],
-      itemIndex: [
-        2,
-        5
-      ]
+      itemIndex: []
     }
   },
   methods: {
@@ -174,6 +171,10 @@ export default {
             },
             data: { orderGoods, tid, type, order_amount, from_car }
           }).then((response)=>{
+            if(response.code=='500'){
+              ui.showToast({ title: response.error, icon: 'loading' })
+              return;
+            }
             if(response =='success'){
               that.getList()
               ui.showConfirm({

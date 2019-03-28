@@ -7,7 +7,16 @@ function fetch(path, options) {
             let authKey = ui.getStorageSync('authKey');
             let sessionId = ui.getStorageSync('sessionId');
             if(!authKey || !sessionId){
-                ui.showToast({ title: '请求错误！请重新登录！'})
+                ui.showAlert({
+                    content: '登录超时！请重新登录！',
+                    buttonText: '去登录',
+                    success () {
+                        console.log(1111)
+                        ui.navigateTo({
+                            url: '/pages/member/user'
+                        })
+                    }
+                })
                 return;
             }
             header = Object.assign({ authKey, sessionId }, options.header)

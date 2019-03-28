@@ -117,45 +117,61 @@ export default {
         placeholderMap: {
           text: '输入点餐留言',
         }
-      }
+      },
+      itemList:[],
+      itemIndex: [
+        2,
+        5
+      ]
     }
   },
   methods: {
     onBuyClicked(skuData) {
-      let order_amount=skuData.selectedSkuComb.price*skuData.selectedNum
-      this.fetch(Api.indexOrder, {
-        method:'POST',
-        header:{
-          'content-type': 'application/x-www-form-urlencoded'
-        },
-        data: { 
-          menu_id: skuData.goodsId,
-          sku_id: skuData.selectedSkuComb.id==skuData.goodsId?0:skuData.selectedSkuComb.id,
-          nums:skuData.selectedNum,
-          message:skuData.messages.message_0,
-          price:skuData.selectedSkuComb.price,
-          tid:ui.getStorageSync('tid'),
-          type:1,
-          from_car:0,
-          order_amount:order_amount
-        }
-      }).then((response)=>{
-        if(response =='success'){
-          ui.showConfirm({
-            content: '点餐成功！',
-            confirmButtonText: '查看订单',
-            cancelButtonText: '继续点餐',
-            success (result) {
-              if(result.confirm){
-                ui.navigateTo({
-                  url: '/pages/order/list'
-                })
-              }
+      let that=this
+      ui.showActionSheet({
+        header: '<p>选择用户所在餐桌</p>',
+        itemList: that.itemList,
+        success: (index) => {
+          if(index < 0){
+            return false;
+          }
+          let tid = that.itemIndex[index]
+          let order_amount=skuData.selectedSkuComb.price*skuData.selectedNum
+          that.fetch(Api.indexOrder, {
+            method:'POST',
+            header:{
+              'content-type': 'application/x-www-form-urlencoded'
+            },
+            data: { 
+              menu_id: skuData.goodsId,
+              sku_id: skuData.selectedSkuComb.id==skuData.goodsId?0:skuData.selectedSkuComb.id,
+              nums:skuData.selectedNum,
+              message:skuData.messages.message_0,
+              price:skuData.selectedSkuComb.price,
+              tid:tid,
+              type:1,
+              from_car:0,
+              order_amount:order_amount
             }
+          }).then((response)=>{
+            if(response =='success'){
+              ui.showConfirm({
+                content: '点餐成功！',
+                confirmButtonText: '查看订单',
+                cancelButtonText: '继续点餐',
+                success (result) {
+                  if(result.confirm){
+                    ui.navigateTo({
+                      url: '/pages/order/list'
+                    })
+                  }
+                }
+              })
+            }
+          }).catch((error)=>{
+            console.log(error)
           })
         }
-      }).catch((error)=>{
-        console.log(error)
       })
     },
     onAddCartClicked(skuData) {
@@ -273,6 +289,21 @@ export default {
       }).catch((error) => {
         console.log(error)
       })
+    },
+    getTables(){
+      let that=this
+      this.fetch(Api.table, {
+        method:'GET',
+        data: {
+        }
+      }).then((response) => {
+        response.list.map((item,index)=>{
+          that.itemList.push(item.name)
+          that.itemIndex.push(item.id)
+        })
+      }).catch((error) => {
+        console.log(error)
+      })
     }
   },
   created() {
@@ -291,6 +322,7 @@ export default {
     }).catch((error) => {
       console.log(error)
     })
+    this.getTables();
   }
 }
 

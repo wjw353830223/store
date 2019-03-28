@@ -22,6 +22,7 @@ let options = {
     let accessTime = ui.getStorageSync('accessTime') || null
     let nowTime = Date.parse(new Date()) / 1000
     if(!accessTime){
+      accessTime = nowTime
       ui.setStorageSync('accessTime',nowTime)
     }
     //设置系统访问3小时过时 主要目的是让用户重新扫码访问 防止用户用历史记录访问系统 造成桌号对应不上
@@ -30,7 +31,7 @@ let options = {
         title: '访问提示',
         content:  '访问已过时，请重新扫描餐桌二维码！',
         success(){
-
+          ui.removeStorageSync('accessTime')
         },
       })
       return
