@@ -286,7 +286,7 @@ class OrderOrder
                     $session = $list[$client_id];
                     $data['receiver_id'] = $session['uid'];
                     $messageModel = Message::create($data);
-                    $message['message_id']=$messageModel->id;
+                    $message1['message_id']=$messageModel->id;
                     $messageModel->message = json_encode($message1);
                     $messageModel->save();
                     Gateway::sendToClient($client_id, json_encode($message1));
@@ -303,7 +303,7 @@ class OrderOrder
                     foreach($list as $client_id=>$session){
                         $data['receiver_id'] = $session['uid'];
                         $messageModel = Message::create($data);
-                        $message['message_id'] = $messageModel->id;
+                        $message2['message_id'] = $messageModel->id;
                         $messageModel->message = json_encode($message2);
                         $messageModel->save();
                         Gateway::sendToUid($session['uid'],json_encode($message));

@@ -96,6 +96,7 @@ class HonrayAuth{
      */
     protected function getAuthList($uid) {
         $temp = cache('Auth_'.$this->auth_key);
+
         $authList = $temp['_AUTH_LIST_'];
         if( $this->_config['AUTH_TYPE'] == 2 && isset($authList)){
             return $authList;

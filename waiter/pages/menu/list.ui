@@ -120,8 +120,6 @@ export default {
       },
       itemList:[],
       itemIndex: [
-        2,
-        5
       ]
     }
   },
@@ -166,6 +164,10 @@ export default {
                     })
                   }
                 }
+              })
+            }else{
+              ui.showToast({
+                title:response.error
               })
             }
           }).catch((error)=>{

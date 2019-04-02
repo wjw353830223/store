@@ -19,9 +19,8 @@
       </ui-view>
 
       <template slot="header">
-        <ui-tab-view-header>已下单</ui-tab-view-header>
-        <ui-tab-view-header>烹制中</ui-tab-view-header>
-        <ui-tab-view-header>取餐中</ui-tab-view-header>
+        <ui-tab-view-header>未结账</ui-tab-view-header>
+        <ui-tab-view-header>已结账</ui-tab-view-header>
       </template>
       <template slot="body">
         <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
@@ -50,7 +49,7 @@
                     </ui-col>
                     <ui-col vertical-align="bottom" align="right" space-right="10">
                       <ui-view>
-                        <ui-button type="primary" size="mini" plain="true" bindtap='makeOrder(item)'>开始烹制</ui-button>
+                        <ui-button type="primary" size="mini" plain="true" bindtap='confirmCheck(item)'>确认结账</ui-button>
                       </ui-view>
                     </ui-col>
                   </ui-row>
@@ -81,45 +80,6 @@
                   <ui-row space="20">
                     <ui-col lign="left" space-left="10">
                       <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
-                    </ui-col>
-                    <ui-col vertical-align="bottom" align="right" space-right="10">
-                      <ui-view>
-                        <ui-button type="primary" size="mini" plain="true" bindtap='noticeOrder(item)'>通知取餐</ui-button>
-                      </ui-view>
-                    </ui-col>
-                  </ui-row>
-              </ui-view>
-            </ui-view>
-          </ui-view>
-        </ui-tab-view-body>
-        <ui-tab-view-body height="{{height-40}}" enable-pull-down-refresh enable-reach-bottom-load on-load-more="{{ handleLoadMore }}">
-          <ui-view>
-            <ui-view class="content_list">
-              <ui-view ui:for="{{ items3 }}" :class="{'grey-bg': index % 2 == 0}">
-                  <ui-row space="20">
-                    <ui-col align="left" space-left="10">
-                      <ui-text>订单编号： {{item.order_sn}}</ui-text>
-                    </ui-col>
-                    <ui-col align="right" space-right="10">
-                      <ui-text>桌号： {{item.desk.name}}</ui-text>
-                    </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col space="20">
-                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
-                    </ui-col>
-                    <ui-col space="20">
-                      <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
-                    </ui-col>
-                  </ui-row>
-                  <ui-row space="20">
-                    <ui-col lign="left" space-left="10">
-                      <ui-text>用户电话： {{item.member.member_mobile.substr(0,3)+'****'+item.member.member_mobile.substr(7,4)}}</ui-text>
-                    </ui-col>
-                    <ui-col vertical-align="bottom" align="right" space-right="10">
-                      <ui-view>
-                        <ui-button type="primary" size="mini" plain="true" bindtap='noticeOrder(item)'>再次通知</ui-button>
-                      </ui-view>
                     </ui-col>
                   </ui-row>
               </ui-view>
@@ -177,7 +137,6 @@ export default {
       apiUrl: baseUrl,
       items1: [],
       items2: [],
-      items3: [],
       top: 0,
       index: 0,
       bottom: 30,
@@ -189,36 +148,12 @@ export default {
       currentPage:{
         items1:1,
         items2:1,
-        items3:1
       },
-      currentStatus:1,//订单状态 1：已下单
+      currentStatus:1,//订单支付状态 1：未支付 2 已支付
       currentPartitions:[]
     }
   },
   methods: {
-    makeOrder(item){
-      let that=this
-      this.fetch(Api.order+'/'+item.id, {
-        method:'PUT',
-        data: { 
-          status:2,
-        },
-        header: {
-          'content-type': 'application/x-www-form-urlencoded'
-        }
-      }).then((response) => {
-        if(response.code=='500'){
-          ui.showToast({ title: '订单已过期！', icon: 'success', duration: 3000 })
-          that.frushData(that.currentStatus)
-        }
-        if(response=='success'){
-          ui.showToast({ title: '已通知用户！', icon: 'success', duration: 3000 })
-          that.frushData(that.currentStatus)
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
-    },
     getNotice(status){
       let noticeText=''
       if(status==3){
@@ -229,39 +164,29 @@ export default {
       }
       return noticeText;
     },
-    noticeOrder(item){
-      let itemList=[]
-      let partitionIdList=[]
-      let partition_id=null
-      let that=this;
-      item.partitions.map((it) => {
-        if(it.status==3 || it.status==2){
-          itemList.push(it.name)
-          partitionIdList.push(it.id)
-        }
-      })
-      ui.showActionSheet({
-        itemList: itemList,
-        showCancel: false,
-        success: (index) => {
-          partition_id = partitionIdList[index]
-          that.fetch(Api.order+'/'+item.id, {
-            method:'PUT',
-            data: { 
-              status:3,
-              partition_id:partition_id
-            },
-            header: {
-              'content-type': 'application/x-www-form-urlencoded'
-            }
-          }).then((response) => {
-            if(response=='success'){
-              ui.showToast({ title: '已通知用户取餐！', icon: 'success', duration: 3000 })
-              that.frushData(that.index + 1)
-            }
-          }).catch((error) => {
-            console.log(error)
-          })
+    confirmCheck(item){
+      let that=this
+      ui.showConfirm({
+        content: '确定'+item.desk.name+' 手机尾号'+item.member.member_mobile.substr(7,4)+'用户已付款吗?',
+        confirmButtonText: '确定',
+         cancelButtonText: '取消',
+        success (result) {
+          if(result.confirm){
+            that.fetch(Api.order+'/'+item.id, {
+              method:'PUT',
+              data: { confirmPay:1 },
+              header:{
+                'content-type': 'application/x-www-form-urlencoded'
+              },
+            }).then((response) => {
+              if(response=='success'){
+                that.frushData(that.currentStatus)
+              }
+            }).catch((error) => {
+              console.log(error)
+          
+            })
+          }
         }
       })
     },
@@ -286,8 +211,7 @@ export default {
     },
     handleChange (index) {
       this.index = index
-      let status=index+1
-      this.frushData(status)
+      this.frushData(index+1)
     },
     handleBegin ({ distance, direction }) {
       this.proportion = distance / 94
@@ -301,32 +225,32 @@ export default {
         this.state = 1
       }
     },
-    getOrdersData(status){
+    getOrdersData(payStatus){
       let limit=50
       let that = this
-      let page = this.currentPage['items'+status]
+      let page = this.currentPage['items'+payStatus]
       let mod = 0
       this.fetch(Api.order, {
         method:'GET',
-        data: { page, limit, status }
+        data: { page, limit, payStatus }
       }).then((response) => {
         that.state = 3
-        that['items'+status] = response.list
-        ++that.currentPage['items'+status]
+        that['items'+payStatus] = response.list
+        ++that.currentPage['items'+payStatus]
       }).catch((error) => {
         console.log(error)
       })
     },
-    frushData(status){
+    frushData(payStatus){
       let limit=50
       let that = this
-      let page = this.currentPage['items'+status]
+      let page = this.currentPage['items'+payStatus]
       let mod = 0
       this.fetch(Api.order, {
         method:'GET',
-        data: { page, limit, status }
+        data: { page, limit, payStatus }
       }).then((response) => {
-        that['items'+status] = response.list
+        that['items'+payStatus] = response.list
       }).catch((error) => {
         console.log(error)
       })
@@ -357,7 +281,6 @@ export default {
   created() {
     this.getOrdersData(1)
     this.getOrdersData(2)
-    this.getOrdersData(3)
   },
   mounted() {
      //首屏页面需要在mounted中延时才能调用框架api，其他页面不需要延时

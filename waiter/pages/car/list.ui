@@ -189,6 +189,10 @@ export default {
                   }
                 }
               })
+            }else{
+              ui.showToast({
+                title:response.error
+              })
             }
           }).catch((error)=>{
             console.log(error)

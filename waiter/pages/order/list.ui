@@ -330,6 +330,7 @@
 
 <script>
 import { Api, baseUrl } from '#/api.js'
+import socket from '#/static/utils/socket'
 import { Card } from 'vant';
 import Vue from 'vue';
 import 'vant/lib/card/style';
@@ -595,7 +596,8 @@ export default {
   },
   watch: {
     
-  }
+  },
+  mixins: [ socket ]
 }
 </script>
 
