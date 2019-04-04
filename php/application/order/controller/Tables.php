@@ -94,8 +94,9 @@ class Tables extends ApiCommon
         $host_ip = gethostbyname($host_name); //获取本机的局域网IP
         $param = $this->param;
         $table = $tableModel->getDataById($param['id']);
+        //http://192.168.1.100/dist/front/#/pages/index?tid=2&tableHash=d87150bac16f70a398a4ec88fe74b66d
         //$url = $url = url('/dist/#/pages/index','tid='.$table->id.'&tableName='.$table->name,'', $host_ip);
-        $url = $host_ip . '/dist/#/pages/index?tid='.$table->id.'&tableHash='.$table->hash;
+        $url = $host_ip . '/dist/front/#/pages/index?tid='.$table->id.'&tableHash='.$table->hash;
         $qrcode = new Qrcode();
         $qrcode->content = $url;
         $qrcode->is_save = true;

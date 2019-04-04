@@ -37,7 +37,7 @@
                   </ui-row>
                   <ui-row space="20">
                     <ui-col space="20">
-                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
+                      <ui-image width="100%"  :src="getImage(item)"  mode="scaleToFill" ></ui-image>
                     </ui-col>
                     <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
@@ -71,7 +71,7 @@
                   </ui-row>
                   <ui-row space="20">
                     <ui-col space="20">
-                      <ui-image width="100%"  :src="apiUrl + item.partitions[0].image"  mode="scaleToFill" ></ui-image>
+                      <ui-image width="100%"  :src="getImage(item)"  mode="scaleToFill" ></ui-image>
                     </ui-col>
                     <ui-col space="20">
                       <ui-text block class='more' bindtap='showMore(item.partitions)'>...</ui-text>
@@ -154,6 +154,13 @@ export default {
     }
   },
   methods: {
+    getImage(item){
+      let img=''
+      if(item.partitions.length>0){
+        img=this.apiUrl + item.partitions[0].image
+      }
+      return img;
+    },
     getNotice(status){
       let noticeText=''
       if(status==3){

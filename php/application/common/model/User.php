@@ -70,6 +70,24 @@ class User extends Common
 				->field('user.*,structure.name as s_name, post.name as p_name')
                 ->with('groups')
 				->select();
+		if(!empty($list)){
+            $host_name = exec("hostname");
+            $host_ip = gethostbyname($host_name); //获取本机的局域网IP
+		    foreach($list as &$val){
+                if(!empty($val->groups)){
+                    foreach($val->groups as $vv){
+                        $url='';
+                        if($vv->id==2){
+                            $url=$host_ip . '/dist/chief/';
+                        }
+                        if($vv->id==3){
+                            $url=$host_ip . '/dist/waiter/';
+                        }
+                        $vv->url=$url;
+                    }
+                }
+            }
+        }
 		$data['list'] = $list;
 		$data['dataCount'] = $dataCount;
 

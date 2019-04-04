@@ -10,8 +10,8 @@ const Api = {
     menu:'index/menus',
     carUpdates: 'index/car/updates'
 }
-// const baseUrl='http://192.168.1.100/'
-// const wsUrl='ws://192.168.1.100:7272'
-const baseUrl='http://www.vuethink.com/'
+const baseUrl='http://192.168.1.100/'
 const wsUrl='ws://192.168.1.100:7272'
+// const baseUrl='http://www.vuethink.com/'
+// const wsUrl='ws://192.168.1.100:7272'
 export  { Api, baseUrl, wsUrl }

@@ -2,19 +2,19 @@
 namespace app\common\event;
 use GatewayClient\Gateway;
 use app\common\model\Member;
-use app\common\model\OrderOrder;
+use app\common\model\OrderOrder as OrderModel;
 use app\common\model\User;
 use app\common\model\Desk;
 use app\common\model\OrderMenuAttribution;
 use app\common\model\Message;
 use think\Exception;
-use app\common\model\OrderOrderPartition as Partition;
+use app\common\model\OrderOrderPartition as OrderPartition;
 class OrderOrderPartition
 {
     public function afterUpdate($partition){
         $status = isset($partition->status)?$partition->status:null;
-        if($status==OrderOrder::STATUS_GET){
-            $partition = Partition::get($partition->id);
+        if($status==OrderModel::STATUS_GET){
+            $partition = OrderPartition::get($partition->id);
             $member = Member::get($partition->order->member_id);
             $table = Desk::get($partition->order->tid);
             $data = [
@@ -26,7 +26,7 @@ class OrderOrderPartition
                     'name'=>$table->name
                 ],
             ];
-            if($partition->order->type==OrderOrder::TYPE_WAITER){
+            if($partition->order->type==OrderModel::TYPE_WAITER){
                 $user = User::get($partition->order->member_id);
                 $data['waiter'] = [
                     'id'=>$user->id,
@@ -43,7 +43,7 @@ class OrderOrderPartition
                 $communicate = Message::COMMUNICATE_CHIEF_TO_CUSTOMER;
             }
             //给用户/服务员发消息 通知取餐
-            if($status==OrderOrder::STATUS_GET){
+            if($status==OrderModel::STATUS_GET){
                 $type='notice';
             }
             $message = [

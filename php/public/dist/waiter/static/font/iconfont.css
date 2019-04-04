@@ -1,0 +1,89 @@
+@font-face {
+    font-family: "ui-icon";
+    src: url('iconfont.ttf?t=1502549776894') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+    url('iconfont.svg?t=1502549776894#ui-icon') format('svg');
+    /* iOS 4.1- */
+}
+
+.ui-icon {
+    font-family: "ui-icon" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.icon-user:before {
+    content: "\e622";
+}
+.icon-fuwu:before {
+content: "\e636";
+}
+
+.icon-information:before {
+content: "\e6aa";
+}
+
+.icon-gerenzhongxin:before {
+content: "\e651";
+}
+
+.icon-dingdan:before {
+content: "\e669";
+}
+
+.icon-chushi:before {
+content: "\e642";
+}
+
+.icon-xiaoxi:before {
+content: "\e600";
+}
+
+.icon-search:before {
+content: "\e602";
+}
+
+.icon-jiezhang:before {
+content: "\e601";
+}
+
+.icon-arrow-left:before {
+content: "\e643";
+}
+
+.icon-navicon-xtcp:before {
+content: "\e640";
+}
+
+.icon-huabanfuben:before {
+content: "\e649";
+}
+
+.icon-close:before {
+content: "\e604";
+}
+
+.icon-cailan:before {
+content: "\e64e";
+}
+
+.icon-airudiantubiaohuizhi-zhuanqu_meishicaipu:before {
+content: "\e6a2";
+}
+
+.icon-home:before {
+content: "\e603";
+}
+
+.icon-xiaoxi:before {
+content: "\e605";
+}
+
+.icon-shezhi:before {
+content: "\e8fa";
+}
+
+.icon-previewright:before {
+content: "\e75c";
+}
+    

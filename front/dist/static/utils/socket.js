@@ -51,7 +51,10 @@ function establish () {
                                 data: { status:1 }
                             }).then((response) => {
                                 if(response == 'success'){
-                                    
+                                    let orderListComponent=ui.getApp().$children[0].$children[2]
+                                    if(typeof(orderListComponent) != "undefined" && typeof(orderListComponent.frushData) != 'undefined'){
+                                        orderListComponent.frushData(orderListComponent.currentStatus)
+                                    }
                                 }
                             }).catch((error) => {
                                 console.log(error)
@@ -72,7 +75,10 @@ function establish () {
                                 data: { status:1 }
                             }).then((response) => {
                                 if(response == 'success'){
-                                    
+                                    let orderListComponent=ui.getApp().$children[0].$children[2]
+                                    if(typeof(orderListComponent) != "undefined" && typeof(orderListComponent.frushData) != 'undefined'){
+                                        orderListComponent.frushData(orderListComponent.currentStatus)
+                                    }
                                 }
                             }).catch((error) => {
                                 console.log(error)
@@ -83,7 +89,7 @@ function establish () {
                 }
                 if(data.type=='eat') {
                     ui.showConfirm({
-                      content: '取餐结束',
+                      content: '您已经取餐结束，请不要忘记结账哦！',
                       confirmButtonText: '确定',
                       cancelButtonText: '取消',
                       success (result) {
@@ -93,7 +99,10 @@ function establish () {
                                 data: { status:1 }
                             }).then((response) => {
                                 if(response == 'success'){
-                                    
+                                    let orderListComponent=ui.getApp().$children[0].$children[2]
+                                    if(typeof(orderListComponent) != "undefined" && typeof(orderListComponent.frushData) != 'undefined'){
+                                        orderListComponent.frushData(orderListComponent.currentStatus)
+                                    }
                                 }
                             }).catch((error) => {
                                 console.log(error)

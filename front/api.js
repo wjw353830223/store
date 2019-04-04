@@ -52,6 +52,7 @@ const Api = {
         auth:true
     }
 }
-const baseUrl='http://www.vuethink.com/'
+//const baseUrl='http://www.vuethink.com/'
+const baseUrl='http://192.168.1.100/'
 const wsUrl='ws://192.168.1.100:7272'
 export  { Api, baseUrl, wsUrl }

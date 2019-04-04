@@ -348,14 +348,13 @@ export default {
 			},
 			websocketonmessage(e) {
 				let data = JSON.parse(e.data)
-				console.log(data)
         let _self=this
         if (this.callback != null && this.callback != "" && this.callback != undefined) {
           this.callback(data)
           this.callback = null
           return
 				}
-        if(['press','order','notice','cancel','make','check','get','eat'].indexOf(data.type) > -1){
+        if(['press','order','notice','cancel','make','check','get','eat','checked'].indexOf(data.type) > -1){
 					const data = {
 						params: {
 							page: this.currentPage,

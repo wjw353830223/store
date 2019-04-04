@@ -1,5 +1,5 @@
 <!--订单列表-->
-<template>
+<template ref="orderList">
   <ui-page>
     <ui-tab-view bindchange="handleChange"
       ink-bar
@@ -335,6 +335,7 @@
           v-for="(item, index) in currentPartitions" 
           :key = "index"
           :title="item.name"
+          :tag="getNotice(item.status)"
           :thumb="apiUrl + item.image"
           :num="item.nums"
           :price="item.price/100"
@@ -593,6 +594,28 @@ export default {
       }).catch((error) => {
         console.log(error)
       })
+    },
+    getNotice(status){
+      let noticeText=''
+      if(status==3){
+        noticeText='待取餐'
+      }
+      if(status==5){
+        noticeText='取餐完毕'
+      }
+      return noticeText;
+    },
+    getDesc(sku){
+      if(!sku){
+        return ''
+      }
+      let descArr=JSON.parse(sku.specValue)
+      let atrributionArr=JSON.parse(sku.specName)
+      let desc=''
+      descArr.map((item,index)=>{
+        desc += atrributionArr[index] + ':' + item + ' '
+      })
+      return desc
     }
   },
   mounted() {

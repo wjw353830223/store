@@ -78,7 +78,7 @@ class OrderOrder
     }
 
     /**
-     * 下单成功发给厨师和后台
+     * 下单成功发给厨师和后台 服务员
      * @param $order
      */
     public function afterInsert($order) {
@@ -142,17 +142,52 @@ class OrderOrder
                     Gateway::sendToUid($session['uid'], json_encode($message));
                 }
             }
+            if(Gateway::getClientIdCountByGroup(3) > 0){
+                $list=Gateway::getClientSessionsByGroup(3);
+                foreach($list as $client_id=>$session){
+                    Gateway::sendToUid($session['uid'], json_encode($message));
+                }
+            }
         }catch(\Exception $e){
-            echo $e->getMessage();
             return;
         }
     }
     public function afterUpdate($order){
+        //确认结账完成  通知系统和所有服务员
+        if(isset($order['confirmPay']) && $order['payed_at']>0){
+            $order = Order::get($order->id);
+            $goods = $order->partitions->toArray();
+            $table = Desk::get($order->tid);
+            $data = [
+                'type'=>'checked',
+                'tid'=>$order->tid,
+                'orderGoods' => $goods,
+                'desk'=>[
+                    'id'=>$table->id,
+                    'name'=>$table->name
+                ]
+            ];
+            $message = [
+                'type'=> 'checked',
+                'data'=> $data
+            ];
+            try{
+                Gateway::sendToGroup('admin', json_encode($message));
+                if(Gateway::getClientIdCountByGroup(3) > 0){
+                    $list=Gateway::getClientSessionsByGroup(3);
+                    foreach($list as $client_id=>$session){
+                        Gateway::sendToUid($session['uid'],json_encode($message));
+                    }
+                }
+            }catch(Exception $e){
+                return;
+            }
+            return;
+        }
         $partition_id = isset($order['partition_id'])?$order['partition_id']:null;
         $status = isset($order->status)?$order->status:null;
         $press_status=isset($order->press_status)?$order->press_status:null;
         $order = Order::get($order->id);
-
         $goods = $order->partitions->toArray();
         $member = Member::get($order['member_id']);
         if($order['type']==Order::TYPE_WAITER){
@@ -273,7 +308,7 @@ class OrderOrder
                 $messageModel->message = json_encode($message);
                 $messageModel->save();
                 Gateway::sendToUid($uid, json_encode($message));
-                //通知服务员(随机)注意结账
+                //通知所有服务员注意结账
                 if(Gateway::getClientIdCountByGroup(3) > 0 && $order->payed_at==0){
                     $data = [
                         'type'=> 'eat',
@@ -282,14 +317,15 @@ class OrderOrder
                         'communicate' => Message::COMMUNICATE_SYSTEM_TO_WAITER
                     ];
                     $list=Gateway::getClientSessionsByGroup(3);
-                    $client_id = array_rand($list);
-                    $session = $list[$client_id];
-                    $data['receiver_id'] = $session['uid'];
-                    $messageModel = Message::create($data);
-                    $message1['message_id']=$messageModel->id;
-                    $messageModel->message = json_encode($message1);
-                    $messageModel->save();
-                    Gateway::sendToClient($client_id, json_encode($message1));
+                    foreach($list as $client_id=>$session){
+                        $data['receiver_id'] = $session['uid'];
+                        $messageModel = Message::create($data);
+                        $message1['message_id'] = $messageModel->id;
+                        $messageModel->message = json_encode($message1);
+                        $messageModel->save();
+                        Gateway::sendToUid($session['uid'],json_encode($message1));
+                    }
+
                 }
                 //通知厨师取餐完成
                 if(Gateway::getClientIdCountByGroup(2) > 0){
@@ -306,7 +342,7 @@ class OrderOrder
                         $message2['message_id'] = $messageModel->id;
                         $messageModel->message = json_encode($message2);
                         $messageModel->save();
-                        Gateway::sendToUid($session['uid'],json_encode($message));
+                        Gateway::sendToUid($session['uid'],json_encode($message2));
                     }
 
                 }
@@ -356,6 +392,12 @@ class OrderOrder
                         $message['message_id'] = $messageModel->id;
                         $messageModel->message = json_encode($message);
                         $messageModel->save();
+                        Gateway::sendToUid($session['uid'],json_encode($message));
+                    }
+                }
+                if(Gateway::getClientIdCountByGroup(3) > 0){
+                    $list=Gateway::getClientSessionsByGroup(3);
+                    foreach($list as $client_id=>$session){
                         Gateway::sendToUid($session['uid'],json_encode($message));
                     }
                 }

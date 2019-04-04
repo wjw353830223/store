@@ -37,6 +37,10 @@
 			prop="s_group"
 			label="用户组">
 			</el-table-column>
+      <el-table-column
+			prop="s_url"
+			label="访问地址">
+			</el-table-column>
 			<el-table-column
 			label="备注"
 			prop="remark"
@@ -140,8 +144,10 @@
           this.handelResponse(res, (data) => {
             data.list.map((item) =>{
               item.s_group = ''
+              item.s_url=''
               item.groups.map((item1)=>{
                 item.s_group+=item1.title+' '
+                item.s_url+=item1.url+' '
               })
             })
             this.tableData = data.list

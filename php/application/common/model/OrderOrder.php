@@ -146,6 +146,9 @@ class OrderOrder extends Common
                 }
             }
         }
+        if($pay_status){
+            $map[] = ['status', 'not in', [OrderOrder::STATUS_CANCEL, OrderOrder::STATUS_DELETE]];
+        }
         if($pay_status==1){
             $map[] = ['payed_at', 'eq', 0];
         }

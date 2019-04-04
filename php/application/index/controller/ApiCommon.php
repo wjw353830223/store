@@ -29,17 +29,7 @@ class ApiCommon extends Common
         $sessionId = isset($header['sessionid'])?$header['sessionid']:null;
         $cache = cache('Auth_'.$authKey);
         // 校验sessionid和authKey
-        if (empty($sessionId)||empty($authKey)||empty($cache)) {
-            $controller = $this->request->controller();
-            if (!in_array($controller,$this->open_controller) && $this->check_access($param)) {
-                $token_info = model('Token')->getInfoByToken($param['token']);
-                if (empty($token_info)) {
-                    exit(json_encode(['code'=>102, 'error'=>'没有权限']));
-                }
-                $member = $token_info->member->toArray();
-                $this->member_info = $member;
-            }
-        }else{
+        if(!empty($sessionId) && !empty($authKey)){
             $userInfo = $cache['userInfo'];
             $map['id'] = $userInfo['id'];
             $map['status'] = 1;
@@ -53,6 +43,16 @@ class ApiCommon extends Common
                 'member_id'=>$userInfo->id,
                 'member_mobile'=>$userInfo->mobile
             ];
+        }else{
+            $controller = $this->request->controller();
+            if (!in_array($controller,$this->open_controller) && $this->check_access($param)) {
+                $token_info = model('Token')->getInfoByToken($param['token']);
+                if (empty($token_info)) {
+                    exit(json_encode(['code'=>102, 'error'=>'没有权限']));
+                }
+                $member = $token_info->member->toArray();
+                $this->member_info = $member;
+            }
         }
 
     }
